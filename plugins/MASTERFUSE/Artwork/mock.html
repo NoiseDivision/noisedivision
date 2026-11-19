@@ -1,0 +1,261 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face { font-family: Chakra; font-weight: 600; src: url(node_modules/@fontsource/chakra-petch/files/chakra-petch-latin-600-normal.woff2); }
+@font-face { font-family: Chakra; font-weight: 700; src: url(node_modules/@fontsource/chakra-petch/files/chakra-petch-latin-700-normal.woff2); }
+@font-face { font-family: Chakra; font-weight: 500; src: url(node_modules/@fontsource/chakra-petch/files/chakra-petch-latin-500-normal.woff2); }
+@font-face { font-family: Mono; src: url(node_modules/@fontsource/share-tech-mono/files/share-tech-mono-latin-400-normal.woff2); }
+@font-face { font-family: Mont; font-weight: 600; src: url(node_modules/@fontsource/montserrat/files/montserrat-latin-600-normal.woff2); }
+@font-face { font-family: Mont; font-weight: 500; src: url(node_modules/@fontsource/montserrat/files/montserrat-latin-500-normal.woff2); }
+:root { --black:#111214; --charcoal:#242529; --red:#FF3038; --orange:#FF7138; --silver:#C6C8CC; --steel:#777A82; --green:#3DDC84; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #000; }
+#ui { position: relative; width: 520px; height: 680px; overflow: hidden; font-family: Mont; color: var(--silver);
+      background: radial-gradient(ellipse at 50% 42%, #1a1b1f 0%, #121316 55%, #0c0d0f 100%); }
+#ui.open { height: 840px; }
+svg.board { position: absolute; left: 0; top: 0; }
+.abs { position: absolute; }
+/* title */
+.title { left: 0; width: 520px; top: 46px; text-align: center; font-family: Chakra; font-weight: 700; font-size: 44px; letter-spacing: 9px; padding-left: 9px; color: var(--silver);
+         text-shadow: 0 1px 0 #000, 0 0 18px rgba(0,0,0,.8); }
+.title span { color: var(--red); text-shadow: 0 0 14px rgba(255,48,56,.35); }
+.maker { left: 0; width: 520px; top: 102px; text-align: center; font-family: Chakra; font-weight: 500; font-size: 10px; letter-spacing: 4.5px; color: var(--steel); }
+/* knob */
+.knob { left: 160px; top: 240px; width: 200px; height: 200px; border-radius: 50%;
+        background: repeating-conic-gradient(from 0deg, #2c2e33 0deg 2deg, #17181b 2deg 4deg);
+        box-shadow: 0 18px 30px rgba(0,0,0,.75), 0 0 0 2px #0a0a0c, 0 0 0 3px #3a3c42, inset 0 2px 2px rgba(255,255,255,.12); }
+.cap { position: absolute; left: 16px; top: 16px; width: 168px; height: 168px; border-radius: 50%;
+       background:
+         radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0 56%, rgba(0,0,0,.35) 100%),
+         conic-gradient(from 200deg, #3b3d43, #1d1e22 18%, #4a4c53 32%, #202125 50%, #44464d 66%, #1b1c20 82%, #3b3d43);
+       box-shadow: inset 0 1px 1px rgba(255,255,255,.25), inset 0 -2px 3px rgba(0,0,0,.6), 0 0 0 1px #0b0b0d; }
+.cap::after { content: ""; position: absolute; inset: 0; border-radius: 50%;
+       background: repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,.025) 0 1px, rgba(0,0,0,.03) 1px 2px); }
+.center { position: absolute; left: 66px; top: 66px; width: 36px; height: 36px; border-radius: 50%;
+          background: radial-gradient(circle at 40% 35%, #34363b, #121316 70%); box-shadow: 0 0 0 1px #08080a, inset 0 1px 1px rgba(255,255,255,.12); }
+.pointer { position: absolute; left: 81px; top: 10px; width: 6px; height: 42px; border-radius: 3px; background: linear-gradient(var(--orange), var(--red));
+           box-shadow: 0 0 8px rgba(255,48,56,.9), 0 0 2px #fff inset; transform-origin: 3px 74px; }
+/* readout */
+.readout { left: 206px; top: 500px; width: 108px; height: 36px; background: #070708; border: 1px solid #2d2f34; border-radius: 3px;
+           box-shadow: inset 0 2px 6px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.04); text-align: center; }
+.readout .ghost, .readout .val { position: absolute; left: 0; width: 100%; top: 0px; font-family: Chakra; font-weight: 600; font-size: 26px; letter-spacing: 2px; }
+.readout .ghost { color: rgba(255,48,56,.07); }
+.readout .val { color: var(--red); text-shadow: 0 0 10px rgba(255,48,56,.55); }
+.tag { position: absolute; font-family: Chakra; font-weight: 600; font-size: 8.5px; letter-spacing: 2.5px; color: var(--steel); }
+/* level match */
+.lm { left: 196px; top: 548px; width: 128px; height: 24px; font-family: Chakra; font-weight: 600; font-size: 10px; letter-spacing: 3px; line-height: 24px; text-align: center; padding-left: 3px; color: var(--steel); }
+.lm svg { position: absolute; left: 0; top: 0; }
+.lm.on { color: var(--green); text-shadow: 0 0 8px rgba(61,220,132,.4); }
+.lmborder { position: absolute; }
+/* fuse switch */
+.fuse { left: 198px; top: 584px; width: 124px; height: 36px; }
+.onlabel { left: 0; width: 520px; top: 622px; text-align: center; font-family: Chakra; font-weight: 600; font-size: 10px; letter-spacing: 3px; padding-left: 3px; }
+/* advanced */
+.adv { left: 0; width: 520px; top: 652px; text-align: center; font-family: Chakra; font-weight: 600; font-size: 9px; letter-spacing: 3.5px; color: var(--steel); }
+#ui.open .adv { top: 652px; }
+/* drawer */
+.drawer { left: 0; top: 680px; width: 520px; height: 160px; display: none;
+          background: linear-gradient(#0b0c0e, #141518); border-top: 1px solid #000; box-shadow: inset 0 1px 0 #2a2c31, inset 0 12px 18px rgba(0,0,0,.6); }
+#ui.open .drawer { display: block; }
+.small { position: absolute; width: 58px; height: 58px; border-radius: 50%; background: repeating-conic-gradient(#2c2e33 0deg 3deg, #17181b 3deg 6deg);
+         box-shadow: 0 6px 12px rgba(0,0,0,.7), 0 0 0 1px #0a0a0c, 0 0 0 2px #36383e; }
+.small .c { position: absolute; left: 7px; top: 7px; width: 44px; height: 44px; border-radius: 50%;
+            background: conic-gradient(from 200deg, #3b3d43, #1d1e22 18%, #4a4c53 32%, #202125 50%, #44464d 66%, #1b1c20 82%, #3b3d43); box-shadow: inset 0 1px 1px rgba(255,255,255,.2); }
+.small .p { position: absolute; left: 27px; top: 9px; width: 4px; height: 14px; border-radius: 2px; background: var(--red); box-shadow: 0 0 6px rgba(255,48,56,.9); transform-origin: 2px 20px; }
+.dlabel { position: absolute; width: 150px; text-align: center; font-family: Chakra; font-weight: 600; font-size: 10px; letter-spacing: 3px; color: var(--steel); }
+.dval { position: absolute; width: 150px; text-align: center; font-family: Chakra; font-weight: 600; font-size: 14px; letter-spacing: 1px; color: var(--silver); }
+body.layer-bg .knob, body.layer-bg .readout, body.layer-bg .lm, body.layer-bg .fuse, body.layer-bg .onlabel, body.layer-bg .adv, body.layer-bg .drawer { display: none; }
+body.layer-knob, body.layer-fuse, body.layer-small { background: transparent; }
+body.layer-knob #ui, body.layer-fuse #ui, body.layer-small #ui { background: transparent; }
+body.layer-knob #ui > *:not(.knob) { display: none; }
+body.layer-knob .pointer { display: none; }
+body.layer-fuse #ui > *:not(.fuse) { display: none; }
+body.layer-small #ui > *:not(.drawer) { display: none; }
+body.layer-small .dlabel, body.layer-small .dval, body.layer-small .p, body.layer-small .drawer svg { display: none; }
+body.layer-small .drawer { background: none; box-shadow: none; border: 0; }
+</style></head>
+<body>
+<div id="ui">
+  <svg class="board" id="board" width="520" height="840"></svg>
+  <div class="abs title">MASTER<span>FUSE</span></div>
+  <div class="abs knob"><div class="cap"><div class="center"></div><div class="pointer" id="ptr"></div></div></div>
+  <div class="abs readout"><div class="ghost">888%</div><div class="val" id="val">50%</div></div>
+  <div class="abs lm" id="lm"><span style="position:relative">LEVEL MATCH</span></div>
+  <svg class="abs fuse" id="fuse" width="124" height="36" viewBox="0 0 124 36"></svg>
+  <div class="abs onlabel" id="onl">ON</div>
+  <div class="abs adv" id="adv">ADVANCED <svg width="9" height="6" style="margin-left:6px;vertical-align:1px"><path id="chev" d="M1 1 L4.5 4.5 L8 1" stroke="#777A82" stroke-width="1.4" fill="none"/></svg></div>
+  <div class="abs drawer" id="drawer"></div>
+</div>
+<script>
+const q = new URLSearchParams(location.hash.slice(1));
+const open = q.get('open') === '1', lm = q.get('lm') === '1', on = q.get('on') !== '0', value = +(q.get('v') ?? 50);
+const ui = document.getElementById('ui');
+if (open) ui.classList.add('open');
+if (lm) document.getElementById('lm').classList.add('on');
+{ const l = document.getElementById('lm'); const c = lm ? '#3DDC84' : '#4a4d55';
+  l.insertAdjacentHTML('afterbegin', `<svg width="128" height="24"><path d="M7.5 .5 H127.5 V16.5 L120.5 23.5 H.5 V7.5 Z" fill="rgba(10,10,12,.6)" stroke="${c}" stroke-width="1"/>${lm ? '<path d="M7.5 .5 H127.5 V16.5 L120.5 23.5 H.5 V7.5 Z" fill="rgba(61,220,132,.07)"/>' : ''}</svg>`);
+  l.lastChild.nodeValue; }
+document.getElementById('val').textContent = value + '%';
+document.querySelector('.ghost').textContent = '8'.repeat(String(value).length) + '%';
+const ang = -135 + 270 * value / 100;
+document.getElementById('ptr').style.transform = `rotate(${ang}deg)`;
+const H = open ? 840 : 680;
+const layer = q.get('layer') || '';
+if (layer) document.body.classList.add('layer-' + layer);
+
+// ---------- circuit board background
+const NS = 'http://www.w3.org/2000/svg';
+const svg = document.getElementById('board');
+const el = (n, a, p = svg) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); p.appendChild(e); return e; };
+const defs = el('defs', {});
+defs.innerHTML = `
+ <filter id="glow" filterUnits="userSpaceOnUse" x="0" y="0" width="520" height="840"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+ <linearGradient id="sig" x1="0" x2="1"><stop offset="0" stop-color="#FF3038"/><stop offset="1" stop-color="#FF7138"/></linearGradient>
+ <radialGradient id="vig" cx="50%" cy="42%" r="70%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".65"/></radialGradient>`;
+
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const traceCol = '#202125', padCol = '#2a2c31';
+// fine copper-like traces: random walks on a 10 px grid with 45 degree bends, avoiding the centre
+const keepOut = (x, y) => Math.hypot(x - 260, y - 340) < 150 || (y > 490 && y < 660 && x > 150 && x < 370) || (y < 150 && x > 90 && x < 430) || (y > 480 && x > 120 && x < 400) || (x < 60 && y > 260 && y < 320) || (x < 150 && y > 640);
+const g = el('g', { stroke: traceCol, 'stroke-width': 1.6, fill: 'none', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+for (let t = 0; t < 46; ++t) {
+  let x = Math.round(rnd() * 52) * 10, y = Math.round(rnd() * (H / 10)) * 10;
+  if (keepOut(x, y)) continue;
+  const pts = [[x, y]]; let dir = Math.floor(rnd() * 4) * 2; const len = 4 + Math.floor(rnd() * 9);
+  const D = [[1,0],[1,1],[0,1],[-1,1],[-1,0],[-1,-1],[0,-1],[1,-1]];
+  for (let s = 0; s < len; ++s) {
+    if (rnd() < 0.35) dir = (dir + (rnd() < 0.5 ? 1 : 7)) % 8;
+    const n = 2 + Math.floor(rnd() * 5);
+    const nx = x + D[dir][0] * 10 * n, ny = y + D[dir][1] * 10 * n;
+    if (nx < -10 || nx > 530 || ny < -10 || ny > H + 10 || keepOut(nx, ny)) break;
+    x = nx; y = ny; pts.push([x, y]);
+  }
+  if (pts.length < 2) continue;
+  el('polyline', { points: pts.map(p => p.join(',')).join(' ') }, g);
+  for (const p of [pts[0], pts[pts.length - 1]]) {
+    el('circle', { cx: p[0], cy: p[1], r: 3.2, fill: '#101113', stroke: padCol, 'stroke-width': 1.4 });
+  }
+}
+// silkscreen IC footprints and designators
+const silk = el('g', { stroke: '#2b2d32', 'stroke-width': 1, fill: 'none' });
+const ic = (x, y, w, h, pins, name) => {
+  el('rect', { x, y, width: w, height: h, rx: 2 }, silk);
+  el('circle', { cx: x + 5, cy: y + 5, r: 1.5, fill: '#2b2d32' }, silk);
+  for (let i = 0; i < pins; ++i) {
+    const px = x + 6 + i * (w - 12) / Math.max(1, pins - 1);
+    el('rect', { x: px - 1.5, y: y - 6, width: 3, height: 5, fill: '#25272b', stroke: 'none' }, silk);
+    el('rect', { x: px - 1.5, y: y + h + 1, width: 3, height: 5, fill: '#25272b', stroke: 'none' }, silk);
+  }
+  el('text', { x: x + w / 2, y: y + h / 2 + 3, 'text-anchor': 'middle', fill: '#34363c', stroke: 'none', 'font-family': 'Chakra', 'font-size': 8, 'letter-spacing': 1 }, silk).textContent = name;
+};
+ic(32, 470, 58, 26, 6, 'U3'); ic(430, 180, 58, 26, 6, 'U7'); ic(420, 560, 64, 30, 7, 'MF-1');
+const des = [[70, 170, 'R12'], [452, 330, 'C7'], [60, 610, 'Q2'], [470, 470, 'R4'], [110, 380, 'C3'], [400, 640, 'D1']];
+for (const [x, y, t] of des) el('text', { x, y, fill: '#33353a', 'font-family': 'Chakra', 'font-size': 8, 'letter-spacing': 1 }).textContent = t;
+el('text', { x: 34, y: 666, fill: '#3a3c42', 'font-family': 'Chakra', 'font-size': 8, 'letter-spacing': 2 }).textContent = 'MF-1 · REV 1.0';
+
+// ---------- the signal path: IN -> knob -> OUT, lit red
+const path = 'M 0 300 L 40 300 L 70 270 L 110 270 L 128 288';
+const path2 = 'M 392 288 L 410 270 L 450 270 L 480 300 L 520 300';
+if (layer !== 'bg') for (const d of [path, path2]) {
+  if (on) {
+    el('path', { d, stroke: '#FF3038', 'stroke-width': 7, fill: 'none', opacity: .18, filter: 'url(#soft)' });
+    el('path', { d, stroke: 'url(#sig)', 'stroke-width': 2.2, fill: 'none', 'stroke-linejoin': 'round', filter: 'url(#glow)' });
+  } else el('path', { d, stroke: '#3a3c42', 'stroke-width': 2.2, fill: 'none', 'stroke-linejoin': 'round' });   // bypassed: the path goes dark
+}
+if (layer !== 'bg') el('text', { x: 10, y: 292, fill: on ? '#FF3038' : '#55585f', opacity: .75, 'font-family': 'Chakra', 'font-weight': 600, 'font-size': 8, 'letter-spacing': 2 }).textContent = 'IN';
+if (layer !== 'bg') el('text', { x: 486, y: 292, fill: on ? '#FF7138' : '#55585f', opacity: .75, 'font-family': 'Chakra', 'font-weight': 600, 'font-size': 8, 'letter-spacing': 2 }).textContent = 'OUT';
+
+// ---------- the bezel around the knob: a ring of LED segments that light up to the amount
+const cx = 260, cy = 340;
+el('circle', { cx, cy, r: 140, fill: '#0b0c0e', stroke: '#2e3035', 'stroke-width': 1.2 });
+el('circle', { cx, cy, r: 129, fill: 'none', stroke: '#1d1e22', 'stroke-width': 1 });
+const segs = 31;
+for (let i = 0; i < segs && layer !== 'bg'; ++i) {
+  const t = i / (segs - 1), a = (-135 + 270 * t - 90) * Math.PI / 180;
+  const lit = t <= value / 100 + 1e-6 && on;
+  const dim = t <= value / 100 + 1e-6 && ! on;
+  const r1 = 115, r2 = 134, w = i % 5 === 0 ? 4 : 3;
+  const col = lit ? `rgb(255,${Math.round(48 + (113 - 48) * t)},56)` : dim ? '#4a3033' : '#26282d';
+  el('line', { x1: cx + r1 * Math.cos(a), y1: cy + r1 * Math.sin(a), x2: cx + r2 * Math.cos(a), y2: cy + r2 * Math.sin(a), stroke: col, 'stroke-width': w,
+               'stroke-linecap': 'butt', filter: lit ? 'url(#glow)' : '' });
+}
+// scale numbers
+for (const [p, txt] of [[0, '0'], [0.5, '50'], [1, '100']]) {
+  const a = (-135 + 270 * p - 90) * Math.PI / 180, r = 154;
+  el('text', { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) + 3, 'text-anchor': 'middle', fill: '#5a5d64', 'font-family': 'Chakra', 'font-weight': 600, 'font-size': 9 }).textContent = txt;
+}
+// fuse symbol under the maker line (IEC fuse: a box with the line running through)
+const fy = 112;
+el('line', { x1: 200, y1: fy, x2: 244, y2: fy, stroke: '#3a3c42', 'stroke-width': 1.4 });
+el('rect', { x: 244, y: fy - 6, width: 32, height: 12, fill: '#0e0f11', stroke: '#777A82', 'stroke-width': 1.4 });
+el('line', { x1: 244, y1: fy, x2: 276, y2: fy, stroke: '#FF3038', 'stroke-width': 1.4, filter: 'url(#glow)' });
+el('line', { x1: 276, y1: fy, x2: 320, y2: fy, stroke: '#3a3c42', 'stroke-width': 1.4 });
+for (const x of [200, 320]) el('circle', { cx: x, cy: fy, r: 2.6, fill: '#101113', stroke: '#3a3c42', 'stroke-width': 1.2 });
+
+// small labels around the readout
+const tag = (x, y, t) => { const d = document.createElement('div'); d.className = 'tag'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.textContent = t; ui.appendChild(d); };
+
+
+// screws in the corners
+const screw = (x, y) => {
+  el('circle', { cx: x, cy: y, r: 7, fill: '#1c1d21', stroke: '#0a0a0b', 'stroke-width': 1.5 });
+  el('circle', { cx: x, cy: y, r: 5.6, fill: 'none', stroke: '#33353a', 'stroke-width': 1 });
+  el('line', { x1: x - 4, y1: y - 4, x2: x + 4, y2: y + 4, stroke: '#0b0b0c', 'stroke-width': 1.6 });
+  el('line', { x1: x - 4, y1: y + 4, x2: x + 4, y2: y - 4, stroke: '#0b0b0c', 'stroke-width': 1.6 });
+};
+screw(18, 18); screw(502, 18); screw(18, 662); screw(502, 662);
+el('rect', { x: 0, y: 0, width: 520, height: 680, fill: 'url(#vig)' });
+
+// ---------- the ON switch as a glass cartridge fuse in its holder
+const f = document.getElementById('fuse');
+const fe = (n, a) => el(n, a, f);
+const fdefs = fe('defs', {});
+fdefs.innerHTML = `<linearGradient id="clip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d7d9dd"/><stop offset=".45" stop-color="#8a8d94"/><stop offset="1" stop-color="#4a4c52"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".4" stop-color="#fff" stop-opacity=".04"/><stop offset="1" stop-color="#fff" stop-opacity=".12"/></linearGradient>
+ <filter id="fg" x="-50%" y="-200%" width="200%" height="500%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>`;
+fe('rect', { x: 1, y: 6, width: 122, height: 24, rx: 4, fill: '#0a0a0c', stroke: '#2e3035' });          // holder base
+fe('rect', { x: 26, y: 11, width: 72, height: 14, rx: 2, fill: on ? 'rgba(255,80,40,.10)' : '#0e0f11' });  // glass body
+if (on) {
+  fe('path', { d: 'M 28 18 Q 40 12 50 18 T 74 18 T 96 18', stroke: '#FF7138', 'stroke-width': 1.6, fill: 'none', filter: 'url(#fg)' });
+} else {
+  fe('path', { d: 'M 28 18 Q 36 14 44 18 L 52 20', stroke: '#55585f', 'stroke-width': 1.4, fill: 'none' });
+  fe('path', { d: 'M 72 17 L 80 18 Q 88 22 96 18', stroke: '#55585f', 'stroke-width': 1.4, fill: 'none' });
+}
+fe('rect', { x: 26, y: 11, width: 72, height: 14, rx: 2, fill: 'url(#glass)', stroke: '#5c5f66', 'stroke-width': .8 });
+for (const x of [8, 98]) {                                                                             // metal end caps and clips
+  fe('rect', { x, y: 9, width: 18, height: 18, rx: 2, fill: 'url(#clip)', stroke: '#2a2b2f', 'stroke-width': .8 });
+  fe('line', { x1: x + 6, y1: 9, x2: x + 6, y2: 27, stroke: '#3c3e44', 'stroke-width': .8 });
+  fe('line', { x1: x + 12, y1: 9, x2: x + 12, y2: 27, stroke: '#3c3e44', 'stroke-width': .8 });
+}
+const onl = document.getElementById('onl');
+onl.textContent = on ? 'ON' : 'BYPASS'; onl.style.color = on ? '#FF7138' : '#777A82';
+
+// ---------- drawer
+if (open) {
+  const dr = document.getElementById('drawer');
+  const items = [['INPUT', '0.0 dB', 0.5], ['LIMITER GAIN', '5.0 dB', 0.21], ['OUTPUT', '-3.5 dB', 0.43]];
+  const ds = document.createElementNS(NS, 'svg'); ds.setAttribute('width', 520); ds.setAttribute('height', 160); ds.style.position = 'absolute'; dr.appendChild(ds);
+  const dd = (n, a) => el(n, a, ds);
+  dd('line', { x1: 0, y1: 1, x2: 520, y2: 1, stroke: '#FF3038', 'stroke-width': 1, opacity: .35 });
+  items.forEach(([name, v, t], i) => {
+    const x = 110 + 150 * i;
+    const lab = document.createElement('div'); lab.className = 'dlabel'; lab.style.left = (x - 75) + 'px'; lab.style.top = '16px'; lab.textContent = name; dr.appendChild(lab);
+    // little LED arc
+    for (let k = 0; k < 15; ++k) {
+      const u = k / 14, a = (-135 + 270 * u - 90) * Math.PI / 180, lit = u <= t + 1e-6;
+      dd('line', { x1: x + 34 * Math.cos(a), y1: 70 + 34 * Math.sin(a), x2: x + 40 * Math.cos(a), y2: 70 + 40 * Math.sin(a),
+                   stroke: lit ? `rgb(255,${Math.round(48 + 65 * u)},56)` : '#26282d', 'stroke-width': 2.4, filter: lit ? 'url(#glow)' : '' });
+    }
+    const k = document.createElement('div'); k.className = 'small'; k.style.left = (x - 29) + 'px'; k.style.top = '41px';
+    k.innerHTML = `<div class="c"></div><div class="p" style="transform: rotate(${-135 + 270 * t}deg)"></div>`; dr.appendChild(k);
+    const val = document.createElement('div'); val.className = 'dval'; val.style.left = (x - 75) + 'px'; val.style.top = '118px'; val.textContent = v; dr.appendChild(val);
+  });
+  for (const x of [18, 502]) { const sx = x, sy = 680 + 142;
+    el('circle', { cx: sx, cy: sy, r: 6, fill: '#1c1d21', stroke: '#0a0a0b', 'stroke-width': 1.5 });
+    el('line', { x1: sx - 3.5, y1: sy, x2: sx + 3.5, y2: sy, stroke: '#0b0b0c', 'stroke-width': 1.6 }); }
+  document.getElementById('chev').setAttribute('d', 'M1 5 L4.5 1.5 L8 5');
+}
+document.fonts.ready.then(() => document.body.setAttribute('data-ready', '1'));
+</script>
+</body></html>
