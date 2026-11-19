@@ -31,10 +31,14 @@ for entry in $PLUGINS; do
 
   # install exactly where stated, even if the user has another copy somewhere else
   pkgbuild --analyze --root "$root" "$work/component.plist"
-  count=$(/usr/libexec/PlistBuddy -c "Print" "$work/component.plist" | grep -c "RootRelativeBundlePath" || true)
-  for ((i = 0; i < count; i++)); do
-    /usr/libexec/PlistBuddy -c "Set :$i:BundleIsRelocatable false" "$work/component.plist"
+  # (newer pkgbuild versions leave the key out for some bundles, so delete it if present and add it fresh)
+  i=0
+  while /usr/libexec/PlistBuddy -c "Print :$i" "$work/component.plist" > /dev/null 2>&1; do
+    /usr/libexec/PlistBuddy -c "Delete :$i:BundleIsRelocatable" "$work/component.plist" > /dev/null 2>&1 || true
+    /usr/libexec/PlistBuddy -c "Add :$i:BundleIsRelocatable bool false" "$work/component.plist"
+    i=$((i + 1))
   done
+  echo "$product: $i bundles set to install in place"
 
   cp scripts/mac-postinstall "$work/scripts/postinstall"; chmod +x "$work/scripts/postinstall"
   pkgbuild --root "$root" --install-location / --component-plist "$work/component.plist" \
