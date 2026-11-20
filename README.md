@@ -1,10 +1,10 @@
 # Noise Division
 
 Free audio plugins: **PEAKSLAYER** (soft clipper), **KRUSH** (multiband distortion),
-**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor) and **DARK** (one-knob darkener for drums and bass). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
+**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass) and **SHRAPNEL** (spectral distortion). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
 
 ```
-plugins/            the five JUCE projects (each builds on its own with CMake)
+plugins/            the six JUCE projects (each builds on its own with CMake)
 docs/               the website (GitHub Pages serves this folder)
 scripts/            packaging: Windows .zip and macOS .pkg installers
 .github/workflows/  builds everything on GitHub's Windows and Mac machines
@@ -25,9 +25,10 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    | MASTERFUSE | `MASTERFUSE-Windows.zip` | `MASTERFUSE-macOS.pkg` |
    | SPECTRAKILL | `SPECTRAKILL-Windows.zip` | `SPECTRAKILL-macOS.pkg` |
    | DARK       | `DARK-Windows.zip`       | `DARK-macOS.pkg`       |
+   | SHRAPNEL   | `SHRAPNEL-Windows.zip`   | `SHRAPNEL-macOS.pkg`   |
 
 The website's buttons link to `releases/latest/download/<file>`, so they always point at the
-newest release. Set `GITHUB_REPO` near the bottom of `docs/index.html` once.
+newest release. `GITHUB_REPO`, the donation links and the download file names are at the top of `docs/assets/site.js`.
 
 To try a build without publishing: Actions tab > Build plugins > Run workflow. The files appear
 under **Artifacts** on the run's page.
@@ -45,3 +46,32 @@ step disappears. Signing would be added to `scripts/package-mac.sh` (codesign wi
 cmake -S plugins/KRUSH -B build/KRUSH
 cmake --build build/KRUSH --config Release
 ```
+
+## The website
+
+`docs/` is generated, apart from `docs/assets/site.css` (the look), `docs/assets/site.js` (settings and
+the menu), `docs/img/` and `CNAME`. To change the text, edit `scripts/site/content.py`, then run:
+
+```
+pip install playwright pypdf pillow
+python -m playwright install chromium
+
+python scripts/site/build.py      # all pages and sitemap.xml
+python scripts/site/manuals.py    # the PDF manuals in docs/manuals/
+python scripts/site/og.py         # the share images in docs/img/og/ (only when a screenshot changes)
+```
+
+```
+docs/index.html                  home: all plugins as cards
+docs/plugins/<name>/index.html   one page per plugin
+docs/contact/  docs/donate/      contact and donate pages
+docs/404.html                    shown for any address that doesn't exist
+docs/manuals/<NAME>-User-Manual.pdf
+```
+
+**Adding a plugin:** add a screenshot to `docs/img/`, an entry to `PLUGINS` in `content.py`, its file names to
+`FILES` in `site.js`, and run the three scripts. The menu, home page, footer, sitemap and "more plugins"
+strips pick it up automatically. (The signal-chain graphic on the home page lists six plugins; add a node to
+`trace()` in `build.py` for a seventh.)
+
+To preview locally: `cd docs` then `python -m http.server`, and open http://localhost:8000.
