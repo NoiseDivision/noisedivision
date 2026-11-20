@@ -3,224 +3,142 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Noise Division makes free audio plugins for Windows and macOS: PEAKSLAYER soft clipper, KRUSH multiband distortion and MASTERFUSE one-knob mastering. VST3 and AU.">
+<title>Noise Division | Free VST3 &amp; AU Plugins for Windows and macOS</title>
+<meta name="description" content="Six free audio plugins for producers who push their mixes hard: a soft clipper, a multiband distortion, a one-knob mastering chain, a spectral compressor, a one-knob darkener and a spectral distortion. VST3, AU and standalone for Windows and macOS.">
+<link rel="canonical" href="https://noisedivision.net/">
+<meta name="theme-color" content="#0c0d0f">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Noise Division">
+<meta property="og:title" content="Noise Division | Free VST3 &amp; AU Plugins for Windows and macOS">
+<meta property="og:description" content="Six free audio plugins for producers who push their mixes hard: a soft clipper, a multiband distortion, a one-knob mastering chain, a spectral compressor, a one-knob darkener and a spectral distortion. VST3, AU and standalone for Windows and macOS.">
+<meta property="og:url" content="https://noisedivision.net/">
+<meta property="og:image" content="https://noisedivision.net/img/share.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Noise Division | Free VST3 &amp; AU Plugins for Windows and macOS">
+<meta name="twitter:description" content="Six free audio plugins for producers who push their mixes hard: a soft clipper, a multiband distortion, a one-knob mastering chain, a spectral compressor, a one-knob darkener and a spectral distortion. VST3, AU and standalone for Windows and macOS.">
+<meta name="twitter:image" content="https://noisedivision.net/img/share.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
-<title>Noise Division</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Montserrat:wght@400;500;600&display=swap">
-<style>
-/* Layout: a dark workbench. One glowing signal trace runs through the hero and links the three
-   plugins; each plugin then gets a full-width bench with its real UI beside its spec sheet. */
-:root {
-  --bg: #0c0d0f;          /* deeper than the plugins' Pitch Black, so their panels sit on it */
-  --panel: #111214;       /* Pitch Black */
-  --raised: #18191c;
-  --charcoal: #242529;    /* Industrial Charcoal */
-  --line: #2a2c31;
-  --red: #ff3038;         /* KRUSH Red */
-  --orange: #ff7138;      /* Hot Orange */
-  --amber: #ffa648;       /* the hottest end of MASTERFUSE's heat scale */
-  --silver: #c6c8cc;      /* Metallic Silver */
-  --steel: #777a82;       /* Steel Grey */
-  --text: #e4e5e8;
-  --display: "Chakra Petch", "Bahnschrift", "DIN Alternate", "Arial Narrow", sans-serif;
-  --body: "Montserrat", "Segoe UI", system-ui, sans-serif;
-  --step--1: 0.8125rem;
-  --step-0: 1rem;
-  --step-1: 1.25rem;
-  --step-2: 1.75rem;
-  --step-3: clamp(2rem, 4.2vw, 3.25rem);
-  --step-4: clamp(2.6rem, 7vw, 5.25rem);
-  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
-  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
-  color-scheme: dark;
+<link rel="preload" href="assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css?v=8e0724ef">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://noisedivision.net/#org",
+   "name": "Noise Division",
+   "url": "https://noisedivision.net/",
+   "email": "noisedivision@proton.me",
+   "logo": "https://noisedivision.net/img/share.jpg"
+  },
+  {
+   "@type": "WebSite",
+   "@id": "https://noisedivision.net/#site",
+   "name": "Noise Division",
+   "url": "https://noisedivision.net/",
+   "publisher": {
+    "@id": "https://noisedivision.net/#org"
+   }
+  },
+  {
+   "@type": "ItemList",
+   "name": "Noise Division plugins",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "url": "https://noisedivision.net/plugins/peakslayer/",
+     "name": "PEAKSLAYER"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "url": "https://noisedivision.net/plugins/krush/",
+     "name": "KRUSH"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "url": "https://noisedivision.net/plugins/masterfuse/",
+     "name": "MASTERFUSE"
+    },
+    {
+     "@type": "ListItem",
+     "position": 4,
+     "url": "https://noisedivision.net/plugins/spectrakill/",
+     "name": "SPECTRAKILL"
+    },
+    {
+     "@type": "ListItem",
+     "position": 5,
+     "url": "https://noisedivision.net/plugins/dark/",
+     "name": "DARK"
+    },
+    {
+     "@type": "ListItem",
+     "position": 6,
+     "url": "https://noisedivision.net/plugins/shrapnel/",
+     "name": "SHRAPNEL"
+    }
+   ]
+  }
+ ]
 }
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: var(--step-0); line-height: 1.6; -webkit-font-smoothing: antialiased; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: rgba(12,13,15,.92); }
-a { color: inherit; }
-:focus-visible { outline: 2px solid var(--orange); outline-offset: 3px; border-radius: 2px; }
-.wrap { max-width: 1180px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
-h1, h2, h3 { font-family: var(--display); font-weight: 700; line-height: 1.05; margin: 0; text-wrap: balance; letter-spacing: 0.01em; }
-p { margin: 0; }
-.label { font-family: var(--display); font-weight: 600; font-size: var(--step--1); letter-spacing: 0.18em; text-transform: uppercase; color: var(--steel); }
-
-/* ---------- header */
-header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(12,13,15,.88); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-header.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
-.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-family: var(--display); font-weight: 700; letter-spacing: 0.22em; font-size: 0.95rem; color: var(--silver); white-space: nowrap; }
-.brand svg { flex: none; }
-.brand b { color: var(--red); font-weight: 700; }
-nav.links { display: flex; gap: 22px; font-family: var(--display); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.14em; text-transform: uppercase; }
-nav.links a { text-decoration: none; color: var(--steel); transition: color .15s; }
-nav.links a:hover { color: var(--silver); }
-nav.links a.hot { color: var(--orange); }
-@media (max-width: 640px) { nav.links .hide-s { display: none; } }
-
-/* ---------- hero */
-.hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
-.hero::after { content: ""; position: absolute; inset: auto -10% -40% -10%; height: 70%; background: radial-gradient(ellipse at 50% 100%, rgba(255,80,40,.18), transparent 65%); pointer-events: none; }
-.hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 48px; align-items: center; padding-block: 72px 36px; }
-.hero h1 { font-size: var(--step-4); text-transform: uppercase; letter-spacing: 0.02em; }
-.hero h1 .heat { background: linear-gradient(90deg, var(--red), var(--orange) 70%, var(--amber)); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.hero .lede { margin-top: 22px; max-width: 46ch; color: var(--silver); font-size: var(--step-1); line-height: 1.5; }
-.hero .meta { margin-top: 26px; display: flex; flex-wrap: wrap; gap: 8px; }
-.chip { font-family: var(--display); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--silver); border: 1px solid var(--line); background: var(--panel); padding: 6px 10px; border-radius: 3px; }
-.chip.free { color: var(--orange); border-color: rgba(255,113,56,.45); }
-.ctas { margin-top: 30px; display: flex; flex-wrap: wrap; gap: 12px; }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 22px; border-radius: 3px; font-family: var(--display); font-weight: 700; font-size: 0.95rem; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: background .15s, box-shadow .2s, color .15s, border-color .15s; }
-.btn.primary { background: var(--red); color: #fff; box-shadow: 0 0 0 rgba(255,48,56,0); }
-.btn.primary:hover { background: #ff434a; box-shadow: 0 0 28px rgba(255,80,40,.45); }
-.btn.ghost { background: transparent; color: var(--silver); border-color: #3a3c42; }
-.btn.ghost:hover { border-color: var(--steel); color: #fff; }
-.btn svg { flex: none; }
-.kc { text-transform: none; }
-
-/* stacked screenshots in the hero */
-.stack { position: relative; aspect-ratio: 1.18; max-width: 100%; }
-.stack img { position: absolute; display: block; height: auto; border-radius: 6px; border: 1px solid #2c2e33; box-shadow: 0 30px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(0,0,0,.6); }
-.stack .s-krush { width: 86%; left: 0; top: 0; }
-.stack .s-peak { width: 40%; right: 0; top: 30%; }
-.stack .s-fuse { width: 30%; left: 24%; bottom: 0; }
-
-/* the signal trace that runs under the hero and names the chain */
-.trace { position: relative; z-index: 1; }
-.trace .wrap { padding-block: 0 44px; }
-.trace svg { display: block; width: 100%; height: auto; overflow: visible; }
-.trace .node-label { font-family: var(--display); font-weight: 600; font-size: 12px; letter-spacing: 0.2em; fill: var(--steel); }
-.trace .node-name { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: 0.12em; fill: var(--silver); }
-.trace a:hover .node-name { fill: #fff; }
-.pulse { stroke-dasharray: 18 140; animation: flow 2.6s linear infinite; }
-@keyframes flow { to { stroke-dashoffset: -158; } }
-@media (prefers-reduced-motion: reduce) { .pulse { animation: none; opacity: 0; } }
-@media (max-width: 860px) { .trace { display: none; } }
-
-/* ---------- plugin benches */
-.plugin { border-bottom: 1px solid var(--line); scroll-margin-top: 70px; }
-.plugin .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 56px; align-items: center; padding-block: 88px; }
-.plugin.flip .wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
-.plugin.flip .shot { order: 2; }
-.plugin.tall .wrap { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); }
-.shot { position: relative; }
-.shot img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #2c2e33; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
-.shot::before { content: ""; position: absolute; inset: 8% 6% -6%; background: radial-gradient(ellipse at 50% 60%, rgba(255,70,40,.16), transparent 70%); filter: blur(10px); z-index: -1; }
-.plugin.tall .shot { max-width: 420px; justify-self: center; width: 100%; }
-.info { min-width: 0; display: grid; gap: 22px; }
-.info .kind { color: var(--orange); }
-.info h2 { font-size: var(--step-3); letter-spacing: 0.04em; }
-.info .pitch { color: var(--silver); max-width: 52ch; }
-.features { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.features li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; align-items: baseline; color: var(--text); }
-.features li::before { content: ""; width: 8px; height: 8px; background: var(--red); transform: translateY(-1px); box-shadow: 0 0 8px rgba(255,48,56,.7); }
-.features b { font-family: var(--display); font-weight: 600; letter-spacing: 0.06em; color: #fff; }
-.specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
-.specs div { padding: 12px 14px; border-left: 1px solid var(--line); min-width: 0; }
-.specs div:first-child { border-left: 0; }
-.specs dt { font-family: var(--display); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--steel); }
-.specs dd { margin: 4px 0 0; font-size: 0.9rem; color: var(--silver); font-variant-numeric: tabular-nums; }
-.dl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
-.btn.mac { background: var(--charcoal); border-color: #3a3c42; }
-.btn.mac:hover { background: #2c2e33; border-color: var(--orange); box-shadow: 0 0 24px rgba(255,80,40,.25); }
-.dl-note { font-size: var(--step--1); color: var(--steel); }
-.dl-note[data-state="missing"] { color: var(--orange); }
-@media (max-width: 960px) {
-  .hero .wrap, .plugin .wrap, .plugin.flip .wrap, .plugin.tall .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; }
-  .plugin.flip .shot { order: 0; }
-  .plugin .wrap { padding-block: 64px; }
-}
-@media (max-width: 520px) { .specs { grid-template-columns: repeat(2, minmax(0, 1fr)); } .specs div:nth-child(3) { border-left: 0; } .specs div:nth-child(n+3) { border-top: 1px solid var(--line); } }
-
-/* ---------- install */
-.install .wrap { padding-block: 80px; display: grid; gap: 32px; }
-.install h2 { font-size: var(--step-2); text-transform: uppercase; letter-spacing: 0.08em; }
-.os-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px; }
-.os-col { display: grid; gap: 14px; align-content: start; min-width: 0; }
-.os-title { font-size: var(--step-1); letter-spacing: 0.14em; text-transform: uppercase; color: var(--silver); }
-.steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; counter-reset: step; }
-.steps li { counter-increment: step; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; display: grid; gap: 6px; align-content: start; min-width: 0; }
-.steps li::before { content: "STEP " counter(step); font-family: var(--display); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.2em; color: var(--orange); }
-.steps h3 { font-size: var(--step-1); letter-spacing: 0.04em; }
-.steps p { color: var(--silver); font-size: 0.95rem; }
-code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 0.85em; color: var(--text); background: var(--raised); border: 1px solid var(--line); padding: 1px 6px; border-radius: 3px; overflow-wrap: anywhere; }
-.reqs { color: var(--steel); font-size: var(--step--1); }
-@media (max-width: 860px) { .os-cols { grid-template-columns: minmax(0, 1fr); } }
-
-/* ---------- donate */
-.donate { position: relative; overflow: hidden; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--panel); }
-.donate::before { content: ""; position: absolute; inset: -30% -10% auto; height: 120%; background: radial-gradient(ellipse at 50% 0%, rgba(255,80,40,.16), transparent 60%); pointer-events: none; }
-.donate .wrap { position: relative; padding-block: 88px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
-.donate h2 { font-size: var(--step-3); text-transform: uppercase; }
-.donate p { margin-top: 18px; color: var(--silver); max-width: 48ch; }
-.donate-options { display: grid; gap: 12px; }
-.donate-option { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 16px; padding: 18px 20px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; text-decoration: none; cursor: pointer; transition: border-color .15s, box-shadow .2s; font: inherit; color: inherit; text-align: left; width: 100%; }
-.donate-option:hover { border-color: rgba(255,113,56,.6); box-shadow: 0 0 24px rgba(255,80,40,.18); }
-.donate-option strong { display: block; font-family: var(--display); font-weight: 700; font-size: var(--step-1); letter-spacing: 0.06em; color: #fff; }
-.donate-option span { color: var(--steel); font-size: 0.9rem; }
-.donate-option .go { font-family: var(--display); font-weight: 700; letter-spacing: 0.14em; font-size: 0.8rem; color: var(--orange); white-space: nowrap; }
-/* the two ways to give: the beer is the main one (KRUSH Red into Hot Orange), PayPal sits beside it in steel */
-.donate-option.beer { background: linear-gradient(100deg, #b5121a, var(--red) 55%, var(--orange)); border-color: transparent; box-shadow: 0 0 0 rgba(255,80,40,0); }
-.donate-option.beer:hover { border-color: transparent; box-shadow: 0 0 32px rgba(255,80,40,.45); filter: brightness(1.06); }
-.donate-option.beer strong, .donate-option.beer .go { color: #fff; }
-.donate-option.beer span { color: rgba(255,255,255,.85); }
-.donate-option.beer .emoji { color: initial; }
-.donate-option.paypal { background: var(--charcoal); border-color: #3a3c42; }
-.donate-option.paypal:hover { border-color: var(--orange); box-shadow: 0 0 24px rgba(255,80,40,.25); }
-.donate-msg { min-height: 1.4em; font-size: var(--step--1); color: var(--orange); }
-@media (max-width: 860px) { .donate .wrap { grid-template-columns: minmax(0, 1fr); } }
-
-/* ---------- footer */
-footer .wrap { padding-block: 36px 48px; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; color: var(--steel); font-size: var(--step--1); }
-footer .brand { font-size: 0.8rem; }
-</style>
-<style>body { margin: 0; } img { max-width: 100%; } [hidden] { display: none !important; }</style>
+</script>
 </head>
-<body>
+<body data-page="home">
+<a class="skip" href="#main">Skip to content</a>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="Noise Division home">
-      <svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true"><line x1="0" y1="7" x2="9" y2="7" stroke="#777a82" stroke-width="1.6"/><rect x="9" y="1.5" width="16" height="11" fill="none" stroke="#c6c8cc" stroke-width="1.6"/><line x1="9" y1="7" x2="25" y2="7" stroke="#ff3038" stroke-width="1.8"/><line x1="25" y1="7" x2="34" y2="7" stroke="#777a82" stroke-width="1.6"/></svg>
-      NOISE <b>DIVISION</b>
-    </a>
-    <nav class="links" aria-label="Sections">
-      <a class="hide-s" href="#peakslayer">Peakslayer</a>
-      <a class="hide-s" href="#krush">Krush</a>
-      <a class="hide-s" href="#masterfuse">Masterfuse</a>
-      <a class="hide-s" href="#spectrakill">Spectrakill</a>
-      <a class="hide-s" href="#dark">Dark</a>
-      <a class="hot" href="#donate">Donate</a>
+    <a class="brand" href="./" aria-label="Noise Division home"><svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true"><line x1="0" y1="7" x2="9" y2="7" stroke="#777a82" stroke-width="1.6"/><rect x="9" y="1.5" width="16" height="11" fill="none" stroke="#c6c8cc" stroke-width="1.6"/><line x1="9" y1="7" x2="25" y2="7" stroke="#ff3038" stroke-width="1.8"/><line x1="25" y1="7" x2="34" y2="7" stroke="#777a82" stroke-width="1.6"/></svg> NOISE <b>DIVISION</b></a>
+    <nav class="links" aria-label="Main">
+      <div class="dd">
+        <button class="dd-btn" type="button" aria-expanded="false" aria-controls="dd-plugins">Plugins <svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <div class="dd-panel" id="dd-plugins">
+          <a href="plugins/peakslayer/" style="--c:#ff3038"><span class="n">PEAKSLAYER</span><span class="k">Soft clipper</span></a>
+          <a href="plugins/krush/" style="--c:#ff3038"><span class="n">KRUSH</span><span class="k">Multiband distortion</span></a>
+          <a href="plugins/masterfuse/" style="--c:#ffa648"><span class="n">MASTERFUSE</span><span class="k">One-knob mastering</span></a>
+          <a href="plugins/spectrakill/" style="--c:#e6dcc8"><span class="n">SPECTRAKILL</span><span class="k">Spectral compressor</span></a>
+          <a href="plugins/dark/" style="--c:#c4141e"><span class="n">DARK</span><span class="k">One-knob darkener</span></a>
+          <a href="plugins/shrapnel/" style="--c:#ff7138"><span class="n">SHRAPNEL</span><span class="k">Spectral distortion</span></a>
+          <a class="all" href="#plugins">All plugins <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <a href="contact/">Contact</a>
+      <a class="hot" href="donate/">Donate</a>
     </nav>
   </div>
 </header>
 
-<main id="top">
+<main id="main">
   <section class="hero">
     <div class="wrap">
       <div>
         <p class="label">Audio plugins · Free to download</p>
-        <h1 style="margin-top:14px">Loud tools.<br><span class="heat">Zero price.</span></h1>
-        <p class="lede">Five plugins for producers who push their mixes hard: a soft clipper, a multiband distortion, a one-knob mastering chain, a spectral compressor and a one-knob darkener. Free for Windows and Mac, no account, no catch.</p>
-        <div class="meta">
+        <h1>Loud tools.<br><span class="heat">Zero price.</span></h1>
+        <p class="lede">Six free VST3 and AU plugins for producers who push their mixes hard. For Windows and Mac, no account, no catch.</p>
+        <div class="chips">
           <span class="chip">VST3 · AU · Standalone</span>
           <span class="chip">Windows &amp; <span class="kc">macOS</span></span>
           <span class="chip free">Free</span>
         </div>
         <div class="ctas">
-          <a class="btn primary" href="#peakslayer">Get the plugins</a>
-          <a class="btn ghost" href="#donate">Support the work</a>
+          <a class="btn primary" href="#plugins">Browse the plugins</a>
+          <a class="btn ghost" href="donate/">Support the work</a>
         </div>
       </div>
       <div class="stack" aria-hidden="true">
-        <img class="s-krush" src="img/krush.webp" alt="" width="2000" height="1232">
-        <img class="s-peak" src="img/peakslayer.webp" alt="" width="1520" height="1484">
-        <img class="s-fuse" src="img/masterfuse.webp" alt="" width="1040" height="1360">
+        <img class="s-1" src="img/krush.webp" alt="" width="2000" height="1232">
+        <img class="s-2" src="img/peakslayer.webp" alt="" width="1520" height="1484">
+        <img class="s-3" src="img/masterfuse.webp" alt="" width="1040" height="1360">
       </div>
     </div>
   </section>
 
-  <!-- the signal chain: IN -> PEAKSLAYER -> KRUSH -> MASTERFUSE -> SPECTRAKILL -> DARK -> OUT -->
   <div class="trace" aria-hidden="true">
     <div class="wrap">
       <svg viewBox="0 0 1148 90" preserveAspectRatio="xMidYMid meet">
@@ -228,218 +146,101 @@ footer .brand { font-size: 0.8rem; }
           <linearGradient id="heat" x1="0" x2="1"><stop offset="0" stop-color="#ff3038"/><stop offset=".7" stop-color="#ff7138"/><stop offset="1" stop-color="#ffa648"/></linearGradient>
           <filter id="glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="1200" height="130"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <path id="chain" d="M 0 46 H 50 L 70 26 H 200 L 220 46 H 262 L 282 26 H 384 L 404 46 H 444 L 464 26 H 606 L 626 46 H 668 L 688 26 H 846 L 866 46 H 908 L 928 26 H 1022 L 1042 46 H 1148" fill="none" stroke="url(#heat)" stroke-width="2" filter="url(#glow)"/>
-        <path class="pulse" d="M 0 46 H 50 L 70 26 H 200 L 220 46 H 262 L 282 26 H 384 L 404 46 H 444 L 464 26 H 606 L 626 46 H 668 L 688 26 H 846 L 866 46 H 908 L 928 26 H 1022 L 1042 46 H 1148" fill="none" stroke="#ffe2c8" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
+        <path d="M 0 46 H 40 L 60 26 H 186 L 206 46 H 216 L 236 26 H 334 L 354 46 H 364 L 384 26 H 522 L 542 46 H 552 L 572 26 H 726 L 746 46 H 756 L 776 26 H 866 L 886 46 H 896 L 916 26 H 1044 L 1064 46 H 1148" fill="none" stroke="url(#heat)" stroke-width="2" filter="url(#glow)"/>
+        <path class="pulse" d="M 0 46 H 40 L 60 26 H 186 L 206 46 H 216 L 236 26 H 334 L 354 46 H 364 L 384 26 H 522 L 542 46 H 552 L 572 26 H 726 L 746 46 H 756 L 776 26 H 866 L 886 46 H 896 L 916 26 H 1044 L 1064 46 H 1148" fill="none" stroke="#ffe2c8" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
         <text class="node-label" x="0" y="74">IN</text>
-        <a href="#peakslayer"><rect x="72" y="14" width="126" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="135" y="31" text-anchor="middle">PEAKSLAYER</text></a>
-        <a href="#krush"><rect x="284" y="14" width="98" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="333" y="31" text-anchor="middle">KRUSH</text></a>
-        <a href="#masterfuse"><rect x="466" y="14" width="138" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="535" y="31" text-anchor="middle">MASTERFUSE</text></a>
-        <a href="#spectrakill"><rect x="690" y="14" width="154" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="767" y="31" text-anchor="middle">SPECTRAKILL</text></a>
-        <a href="#dark"><rect x="930" y="14" width="90" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="975" y="31" text-anchor="middle">DARK</text></a>
+        <a href="plugins/peakslayer/"><rect x="62" y="14" width="122" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="123" y="31" text-anchor="middle">PEAKSLAYER</text></a>
+        <a href="plugins/krush/"><rect x="238" y="14" width="94" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="285" y="31" text-anchor="middle">KRUSH</text></a>
+        <a href="plugins/masterfuse/"><rect x="386" y="14" width="134" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="453" y="31" text-anchor="middle">MASTERFUSE</text></a>
+        <a href="plugins/spectrakill/"><rect x="574" y="14" width="150" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="649" y="31" text-anchor="middle">SPECTRAKILL</text></a>
+        <a href="plugins/dark/"><rect x="778" y="14" width="86" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="821" y="31" text-anchor="middle">DARK</text></a>
+        <a href="plugins/shrapnel/"><rect x="918" y="14" width="124" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="980" y="31" text-anchor="middle">SHRAPNEL</text></a>
         <text class="node-label" x="1148" y="74" text-anchor="end">OUT</text>
       </svg>
     </div>
   </div>
 
-  <!-- PEAKSLAYER -->
-  <section class="plugin" id="peakslayer" aria-labelledby="ps-title">
+  <section class="grid-sec" id="plugins" aria-labelledby="pl-title" style="scroll-margin-top:62px">
     <div class="wrap">
-      <figure class="shot" style="margin:0">
-        <img src="img/peakslayer.webp" alt="PEAKSLAYER: a red clipper interface with the CLIP dial at 8, a waveform display with clipped peaks in red, and IN, OUT, RMS and LUFS meters" width="1520" height="1484" loading="lazy">
-      </figure>
-      <div class="info">
-        <p class="label kind">Soft clipper</p>
-        <h2 id="ps-title">PEAKSLAYER</h2>
-        <p class="pitch">Shave the peaks off drums, buses and masters so everything sits louder without pumping. The CLIP dial goes from 0 to 11, and the display shows every sample it cuts in red.</p>
-        <ul class="features">
-          <li><span><b>CLIP 0–11</b> with a SHAPE control from soft to hard knee</span></li>
-          <li><span><b>Clip band:</b> only the frequencies between the two filter handles get clipped</span></li>
-          <li><span><b>HQ mode</b> runs the clipper at 4× the sample rate to keep the top end clean</span></li>
-          <li><span><b>SAFE</b> adds a final hard limit at 0 dB after the output</span></li>
-          <li><span><b>IN, OUT, RMS and LUFS meters</b> plus a live waveform with the clipped parts marked</span></li>
-          <li><span>Dry/wet <b>MIX</b> and five factory presets, from Soft Glue to To Eleven</span></li>
-        </ul>
-        <dl class="specs" style="margin:0">
-          <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
-          <div><dt>System</dt><dd>Windows, macOS</dd></div>
-          <div><dt>Version</dt><dd>1.0.0</dd></div>
-          <div><dt>Price</dt><dd>Free</dd></div>
-        </dl>
-        <div class="dl-row">
-          <a class="btn primary" href="#" data-download="peakslayer" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Peakslayer for Windows</a>
-          <a class="btn primary mac" href="#" data-download="peakslayer" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Peakslayer for <span class="kc">macOS</span></a>
+      <div class="section-head">
+        <div>
+          <p class="label">The plugins</p>
+          <h2 id="pl-title">Pick your weapon</h2>
         </div>
-        <p class="dl-note" data-note="peakslayer">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
+        <p>Each plugin has its own page with the full details, the downloads and a PDF user manual.</p>
+      </div>
+      <div class="cards">
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="img/peakslayer.webp" alt="" width="1520" height="1484" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Soft clipper</p>
+            <h3><a href="plugins/peakslayer/">PEAKSLAYER</a></h3>
+            <p class="desc">Shave the peaks off drums, buses and masters so they sit louder without pumping.</p>
+            <div class="chips"><span class="chip">CLIP 0–11</span><span class="chip">4× HQ</span><span class="chip">LUFS meter</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="img/krush.webp" alt="" width="2000" height="1232" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Multiband distortion</p>
+            <h3><a href="plugins/krush/">KRUSH</a></h3>
+            <p class="desc">Split the sound into up to four bands and distort each one its own way.</p>
+            <div class="chips"><span class="chip">4 bands</span><span class="chip">11 modes</span><span class="chip">Dynamics</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
+        <article class="card" style="--c:#ffa648">
+          <div class="stage"><img src="img/masterfuse.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob mastering</p>
+            <h3><a href="plugins/masterfuse/">MASTERFUSE</a></h3>
+            <p class="desc">A full mastering chain behind one knob: compression, saturation, width, air and a limiter.</p>
+            <div class="chips"><span class="chip">One knob</span><span class="chip">Level match</span><span class="chip">Limiter</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
+        <article class="card" style="--c:#e6dcc8">
+          <div class="stage"><img src="img/spectrakill.webp" alt="" width="2080" height="1400" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral compressor</p>
+            <h3><a href="plugins/spectrakill/">SPECTRAKILL</a></h3>
+            <p class="desc">A compressor for every frequency at once: harsh peaks and resonances pushed down only where they poke out.</p>
+            <div class="chips"><span class="chip">Up &amp; down</span><span class="chip">Sidechain</span><span class="chip">M/S</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
+        <article class="card" style="--c:#c4141e">
+          <div class="stage"><img src="img/dark.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob darkener</p>
+            <h3><a href="plugins/dark/">DARK</a></h3>
+            <p class="desc">One knob that makes drums and bass darker, heavier and warmer, while every hit still lands.</p>
+            <div class="chips"><span class="chip">One knob</span><span class="chip">Zero latency</span><span class="chip">Punch</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
+        <article class="card" style="--c:#ff7138">
+          <div class="stage"><img src="img/shrapnel.webp" alt="" width="2200" height="1440" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral distortion</p>
+            <h3><a href="plugins/shrapnel/">SHRAPNEL</a></h3>
+            <p class="desc">Distortion that works on every frequency on its own: harmonics, crush, smear, scramble and warp.</p>
+            <div class="chips"><span class="chip">6 modes</span><span class="chip">Drive curve</span><span class="chip">No aliasing</span></div><span class="more" aria-hidden="true">Details →</span>
+          </div>
+        </article>
       </div>
     </div>
   </section>
 
-  <!-- KRUSH -->
-  <section class="plugin flip" id="krush" aria-labelledby="kr-title">
+  <section class="facts" aria-label="What you get">
     <div class="wrap">
-      <figure class="shot" style="margin:0">
-        <img src="img/krush.webp" alt="KRUSH: a dark multiband distortion interface with a spectrum split into three bands, gain faders, a transfer curve, a list of distortion modes and output meters" width="2000" height="1232" loading="lazy">
-      </figure>
-      <div class="info">
-        <p class="label kind">Multiband distortion</p>
-        <h2 id="kr-title">KRUSH</h2>
-        <p class="pitch">Split the sound into up to four bands and distort each one its own way: warm the lows, grind the mids, fizz the top. Drag the crossovers right on the spectrum.</p>
-        <ul class="features">
-          <li><span><b>11 modes per band</b>, from Tube and Diode to Sine Shaper, Downsample and the signature Krush curve</span></li>
-          <li><span><b>DRIVE, SHAPE and BIAS</b> per band, with the transfer curve drawn live</span></li>
-          <li><span><b>DYNAMICS</b> brings back the punch that distortion flattens, or smooths the hits out</span></li>
-          <li><span><b>TONE filter</b> with 6, 12, 18, 24 or 48 dB per octave slopes</span></li>
-          <li><span><b>CLIP and LIMIT</b> on the output keep the peaks at −0.1 dB</span></li>
-          <li><span><b>11 factory presets</b> with descriptions, including Clean Tape, Tube Amp and Hip Hop Punch</span></li>
-        </ul>
-        <dl class="specs" style="margin:0">
-          <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
-          <div><dt>System</dt><dd>Windows, macOS</dd></div>
-          <div><dt>Version</dt><dd>1.0.0</dd></div>
-          <div><dt>Price</dt><dd>Free</dd></div>
-        </dl>
-        <div class="dl-row">
-          <a class="btn primary" href="#" data-download="krush" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Krush for Windows</a>
-          <a class="btn primary mac" href="#" data-download="krush" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Krush for <span class="kc">macOS</span></a>
-        </div>
-        <p class="dl-note" data-note="krush">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
-      </div>
+      <div class="f"><h3>Free, for real</h3><p>No account, no licence key, no trial. Use them in commercial and personal music.</p></div>
+      <div class="f"><h3>Windows &amp; <span class="kc">macOS</span></h3><p>VST3 and standalone on Windows; AU, VST3 and standalone on Mac, Apple Silicon and Intel.</p></div>
+      <div class="f"><h3>Full manuals</h3><p>Every plugin comes with a PDF manual covering every control, mode and preset.</p></div>
     </div>
   </section>
 
-  <!-- MASTERFUSE -->
-  <section class="plugin tall" id="masterfuse" aria-labelledby="mf-title">
+  <section class="donate slim" aria-labelledby="do-title">
     <div class="wrap">
-      <figure class="shot" style="margin:0">
-        <img src="img/masterfuse.webp" alt="MASTERFUSE: a dark circuit-board interface with one large knob at 68 percent, a glowing red LED ring, a fuse-shaped on switch and a Level Match button" width="1040" height="1360" loading="lazy">
-      </figure>
-      <div class="info">
-        <p class="label kind">One-knob mastering</p>
-        <h2 id="mf-title">MASTERFUSE</h2>
-        <p class="pitch">A full mastering chain behind one knob. Turn it up and the board heats up with it: three-band compression, saturation, stereo width, air and a limiter, all moving together.</p>
-        <ul class="features">
-          <li><span><b>One AMOUNT knob</b> from untouched to fully mastered</span></li>
-          <li><span><b>Three-band processing</b> with compression, saturation and width on each band, plus an air boost</span></li>
-          <li><span><b>Two-stage limiter</b> with look-ahead for a clean, loud finish</span></li>
-          <li><span><b>LEVEL MATCH</b> plays it back at the original loudness, so you judge the sound, not the volume</span></li>
-          <li><span><b>Advanced drawer</b> with input, limiter gain and output</span></li>
-        </ul>
-        <dl class="specs" style="margin:0">
-          <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
-          <div><dt>System</dt><dd>Windows, macOS</dd></div>
-          <div><dt>Version</dt><dd>1.0.0</dd></div>
-          <div><dt>Price</dt><dd>Free</dd></div>
-        </dl>
-        <div class="dl-row">
-          <a class="btn primary" href="#" data-download="masterfuse" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Masterfuse for Windows</a>
-          <a class="btn primary mac" href="#" data-download="masterfuse" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Masterfuse for <span class="kc">macOS</span></a>
-        </div>
-        <p class="dl-note" data-note="masterfuse">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- SPECTRAKILL -->
-  <section class="plugin flip" id="spectrakill" aria-labelledby="sk-title">
-    <div class="wrap">
-      <figure class="shot" style="margin:0">
-        <img src="img/spectrakill.webp" alt="SPECTRAKILL: a bone-white interface with an X-ray style spectrum display, a red threshold line with a curve point at 3.5 kHz, blood dripping from the top where frequencies are cut, and bone-coloured knobs" width="2080" height="1400" loading="lazy">
-      </figure>
-      <div class="info">
-        <p class="label kind">Spectral compressor</p>
-        <h2 id="sk-title">SPECTRAKILL</h2>
-        <p class="pitch">A compressor for every frequency at once. Harsh peaks, ringing resonances and boomy notes get pushed down only where and when they poke out, and quiet detail can be lifted up. You watch it happen on an X-ray of your sound.</p>
-        <ul class="features">
-          <li><span><b>DOWN and UP:</b> push down what pokes above the threshold and lift what sits below it, frequency by frequency</span></li>
-          <li><span><b>Threshold curve</b> with up to 8 draggable points, plus TILT and SHARPNESS</span></li>
-          <li><span><b>ATTACK and RELEASE</b> from 0.5 ms to 1 second, with a transient guard that keeps hits clean</span></li>
-          <li><span><b>Five quality settings</b>, from 11 ms low latency for drums to ULTRA for full mixes</span></li>
-          <li><span><b>Stereo, L/R and M/S</b> modes and a <b>sidechain</b> input for ducking a bass under the kick</span></li>
-          <li><span><b>12 factory presets</b> with descriptions, including Drum Detail, Harsh Killer and Sidechain Duck</span></li>
-        </ul>
-        <dl class="specs" style="margin:0">
-          <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
-          <div><dt>System</dt><dd>Windows, macOS</dd></div>
-          <div><dt>Version</dt><dd>1.0.0</dd></div>
-          <div><dt>Price</dt><dd>Free</dd></div>
-        </dl>
-        <div class="dl-row">
-          <a class="btn primary" href="#" data-download="spectrakill" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Spectrakill for Windows</a>
-          <a class="btn primary mac" href="#" data-download="spectrakill" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Spectrakill for <span class="kc">macOS</span></a>
-        </div>
-        <p class="dl-note" data-note="spectrakill">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- DARK -->
-  <section class="plugin tall" id="dark" aria-labelledby="dk-title">
-    <div class="wrap">
-      <figure class="shot" style="margin:0">
-        <img src="img/dark.webp" alt="DARK: a near-black interface with a single large knob shaped like a moon in partial eclipse, turning red, a glowing tick ring, dead branches at the edges and a lit candle as the on switch" width="1040" height="1360" loading="lazy">
-      </figure>
-      <div class="info">
-        <p class="label kind">One-knob darkener</p>
-        <h2 id="dk-title">DARK</h2>
-        <p class="pitch">One knob that makes drums and bass darker, heavier and warmer. As you turn it, the moon slides into eclipse and the harsh top end sinks into the dark, while every hit still lands.</p>
-        <ul class="features">
-          <li><span><b>One DARKNESS knob</b> moves a tilt EQ, low-end weight, tape-style saturation and a closing low-pass together</span></li>
-          <li><span><b>PUNCH</b> keeps the attack of every hit bright while tails and cymbals go dark</span></li>
-          <li><span><b>Mono low end:</b> bass below 120 Hz folds to the centre as it darkens, so it stays solid on big systems</span></li>
-          <li><span><b>Zero latency</b>, so it works on live drums and while recording</span></li>
-          <li><span><b>Advanced drawer</b> with punch, mix and output</span></li>
-        </ul>
-        <dl class="specs" style="margin:0">
-          <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
-          <div><dt>System</dt><dd>Windows, macOS</dd></div>
-          <div><dt>Version</dt><dd>1.0.0</dd></div>
-          <div><dt>Price</dt><dd>Free</dd></div>
-        </dl>
-        <div class="dl-row">
-          <a class="btn primary" href="#" data-download="dark" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Dark for Windows</a>
-          <a class="btn primary mac" href="#" data-download="dark" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Dark for <span class="kc">macOS</span></a>
-        </div>
-        <p class="dl-note" data-note="dark">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- install: a real sequence, so the steps are numbered -->
-  <section class="install" id="install" aria-labelledby="in-title">
-    <div class="wrap">
-      <div>
-        <p class="label">Installing</p>
-        <h2 id="in-title" style="margin-top:10px">Up and running in a minute</h2>
-      </div>
-      <div class="os-cols">
-        <div class="os-col">
-          <h3 class="os-title">Windows</h3>
-          <ol class="steps">
-            <li><h3>Unzip</h3><p>Open the downloaded .zip. Inside is the plugin (<code>.vst3</code>) and a standalone app.</p></li>
-            <li><h3>Copy the .vst3</h3><p>Move it to <code>C:\Program Files\Common Files\VST3</code>, where every DAW looks for VST3 plugins.</p></li>
-            <li><h3>Rescan</h3><p>In FL Studio: Options, Manage plugins, Find installed plugins. They show up under Noise Division.</p></li>
-          </ol>
-          <p class="reqs">Windows 10 or 11, 64-bit.</p>
-        </div>
-        <div class="os-col">
-          <h3 class="os-title"><span class="kc">macOS</span></h3>
-          <ol class="steps">
-            <li><h3>Open the installer</h3><p>Double-click the .pkg. It installs the Audio Unit, the VST3 and the standalone app.</p></li>
-            <li><h3>If macOS blocks it</h3><p>Open System Settings, Privacy &amp; Security, scroll down and click <b>Open Anyway</b>. This shows once, because the plugins aren't from the App Store.</p></li>
-            <li><h3>Open your DAW</h3><p>Logic and GarageBand find the AU on their next start. Ableton, FL Studio and Reaper use the VST3.</p></li>
-          </ol>
-          <p class="reqs">macOS 10.13 or newer, Apple Silicon or Intel.</p>
-        </div>
-      </div>
-      <p class="reqs">Every plugin resizes from 60% to 200%: drag the bottom-right corner.</p>
-    </div>
-  </section>
-
-  <section class="donate" id="donate" aria-labelledby="do-title">
-    <div class="wrap">
-      <div>
+      <div class="txt">
         <p class="label" style="color:var(--orange)">Support</p>
-        <h2 id="do-title" style="margin-top:12px">Keep the plugins free</h2>
+        <h2 id="do-title">Keep the plugins free</h2>
         <p>Everything here is free and stays free. If a plugin made it into your tracks and you want to say thanks, a donation pays for the time that goes into new plugins and updates.</p>
       </div>
       <div>
@@ -455,56 +256,32 @@ footer .brand { font-size: 0.8rem; }
 
 <footer>
   <div class="wrap">
-    <a class="brand" href="#top">NOISE <b>DIVISION</b></a>
-    <span>© 2026 Noise Division · PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL and DARK are free to use in commercial and personal music.</span>
+    <div class="about">
+      <a class="brand" href="./">NOISE <b>DIVISION</b></a>
+      <p>Free VST3 and AU plugins for Windows and macOS. Free to use in commercial and personal music.</p>
+      <p>© 2026 Noise Division</p>
+    </div>
+    <div>
+      <h2>Plugins</h2>
+      <ul>
+        <li><a href="plugins/peakslayer/">PEAKSLAYER</a></li>
+        <li><a href="plugins/krush/">KRUSH</a></li>
+        <li><a href="plugins/masterfuse/">MASTERFUSE</a></li>
+        <li><a href="plugins/spectrakill/">SPECTRAKILL</a></li>
+        <li><a href="plugins/dark/">DARK</a></li>
+        <li><a href="plugins/shrapnel/">SHRAPNEL</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Noise Division</h2>
+      <ul>
+        <li><a href="contact/">Contact</a></li>
+        <li><a href="donate/">Donate</a></li>
+        <li><a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a></li>
+      </ul>
+    </div>
   </div>
 </footer>
-
-<script>
-// ------------------------------------------------------------------
-// Settings. GITHUB_REPO is your GitHub "name/repository", for example
-// "noisedivision/noise-division". The download buttons then point at the
-// files the build attaches to the newest GitHub Release.
-// Donation links: paste the full address; leave "" to hide nothing but
-// show a "not set up yet" note when clicked.
-// ------------------------------------------------------------------
-const GITHUB_REPO = "NoiseDivision/noisedivision";
-const DONATE = {
-  bmc: "https://buymeacoffee.com/noisedivision",
-  paypal: "https://www.paypal.com/ncp/payment/PBA2MTR9843BS",
-};
-
-const FILES = {
-  peakslayer: { win: "PEAKSLAYER-Windows.zip", mac: "PEAKSLAYER-macOS.pkg" },
-  krush:      { win: "KRUSH-Windows.zip",      mac: "KRUSH-macOS.pkg" },
-  masterfuse: { win: "MASTERFUSE-Windows.zip", mac: "MASTERFUSE-macOS.pkg" },
-  spectrakill:{ win: "SPECTRAKILL-Windows.zip", mac: "SPECTRAKILL-macOS.pkg" },
-  dark:       { win: "DARK-Windows.zip",       mac: "DARK-macOS.pkg" },
-};
-
-for (const a of document.querySelectorAll("[data-download]")) {
-  const key = a.dataset.download, file = FILES[key][a.dataset.os];
-  if (GITHUB_REPO) {
-    a.href = `https://github.com/${GITHUB_REPO}/releases/latest/download/${file}`;
-    continue;
-  }
-  a.addEventListener("click", (e) => {
-    e.preventDefault();
-    const note = document.querySelector(`[data-note="${key}"]`);
-    note.dataset.state = "missing";
-    note.textContent = "The downloads aren't up yet. Check back soon.";
-  });
-}
-
-const msg = document.getElementById("donate-msg");
-for (const a of document.querySelectorAll("[data-donate]")) {
-  const url = DONATE[a.dataset.donate];
-  if (url) { a.href = url; a.target = "_blank"; a.rel = "noopener"; continue; }
-  a.addEventListener("click", (e) => {
-    e.preventDefault();
-    msg.textContent = a.querySelector("strong").textContent + " isn't set up yet. Thanks for wanting to help!";
-  });
-}
-</script>
+<script src="assets/site.js?v=e06ae050" defer></script>
 </body>
 </html>
