@@ -97,3 +97,139 @@ if (document.body.dataset.page === "home") {
   if (FILES[h]) location.replace(`plugins/${h}/`);
   else if (h === "donate") location.replace("donate/");
 }
+
+// ---- before / after player (plugin pages)
+// Both versions play in sync; the switch crossfades between them in 15 ms, so you hear the
+// difference at the same point in the music. Audio loads only when you press play.
+for (const ab of document.querySelectorAll(".ab")) {
+  const data = JSON.parse(ab.querySelector(".ab-data").textContent);
+  const playBtn = ab.querySelector(".ab-play"), wave = ab.querySelector(".ab-wave"), canvas = wave.querySelector("canvas");
+  const tabs = [...ab.querySelectorAll("[data-clip]")], sides = [...ab.querySelectorAll("[data-side]")].filter((b) => b.tagName === "BUTTON");
+  const settingEl = ab.querySelector(".ab-setting"), levelEl = ab.querySelector(".ab-level"), matchBox = ab.querySelector(".ab-match input");
+  const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#ff3038";
+  let ctx = null, gB = null, gA = null, srcs = [], buffers = {}, clip = data.clips[0], side = "after";
+  let playing = false, startAt = 0, offset = 0, raf = 0, token = 0;
+
+  const url = (which, id) => `${data.base}${which}/${id}.mp3`;
+  const duration = () => (buffers[url("before", clip.id)] || {}).duration || 0;
+  const pos = () => { const d = duration(); if (!d) return 0; const t = playing ? offset + ctx.currentTime - startAt : offset; return ((t % d) + d) % d; };
+  const afterGain = () => (data.keepLevel && matchBox && matchBox.checked ? Math.pow(10, -clip.louder / 20) : 1);
+
+  function levelText() {
+    if (!data.keepLevel) return "";
+    if (matchBox && matchBox.checked) return `After turned down ${Math.abs(clip.louder).toFixed(1)} dB to match`;
+    const v = clip.louder;
+    return Math.abs(v) < 0.3 ? "Same loudness" : `After is ${Math.abs(v).toFixed(1)} dB ${v > 0 ? "louder" : "quieter"}`;
+  }
+  function showClip() {
+    settingEl.textContent = clip.setting;
+    levelEl.textContent = levelText();
+    tabs.forEach((t) => t.setAttribute("aria-selected", String(t.dataset.clip === clip.id)));
+    draw();
+  }
+  function applyGains(fade = 0.015) {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    for (const [g, v] of [[gB, side === "before" ? 1 : 0], [gA, side === "after" ? afterGain() : 0]]) {
+      g.gain.cancelScheduledValues(t); g.gain.setValueAtTime(g.gain.value, t); g.gain.linearRampToValueAtTime(v, t + fade);
+    }
+  }
+  function setSide(s) {
+    side = s; ab.dataset.side = s;
+    sides.forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.side === s)));
+    applyGains(); draw();
+  }
+  async function load(id) {
+    const need = [url("before", id), url(data.plugin, id)].filter((u) => !buffers[u]);
+    await Promise.all(need.map(async (u) => {
+      const r = await fetch(u); if (!r.ok) throw new Error(u);
+      buffers[u] = await ctx.decodeAudioData(await r.arrayBuffer());
+    }));
+  }
+  function stopSources() { srcs.forEach((s) => { try { s.stop(); } catch {} s.disconnect(); }); srcs = []; }
+  function startSources(at) {
+    stopSources();
+    const t = ctx.currentTime + 0.03;
+    for (const [which, g] of [["before", gB], [data.plugin, gA]]) {
+      const s = ctx.createBufferSource(); s.buffer = buffers[url(which, clip.id)]; s.loop = true;
+      s.connect(g); s.start(t, at); srcs.push(s);
+    }
+    startAt = t; offset = at;
+  }
+  async function play() {
+    if (!ctx) {
+      try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch {}   // iPhone: play even with the ring switch on silent
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      gB = ctx.createGain(); gA = ctx.createGain(); gB.connect(ctx.destination); gA.connect(ctx.destination);
+      gB.gain.value = 0; gA.gain.value = 0;
+    }
+    await ctx.resume();
+    const my = ++token;
+    ab.classList.add("loading");
+    try { await load(clip.id); } catch { ab.classList.remove("loading"); levelEl.innerHTML = '<span class="ab-err">Couldn\'t load the audio.</span>'; return; }
+    ab.classList.remove("loading");
+    if (my !== token) return;
+    // stop any other player on the page
+    document.querySelectorAll(".ab.playing").forEach((o) => o !== ab && o.querySelector(".ab-play").click());
+    startSources(pos());
+    playing = true; ab.classList.add("playing"); playBtn.setAttribute("aria-label", "Pause");
+    applyGains(0.01); tick();
+  }
+  function pause() {
+    if (!playing) return;
+    offset = pos(); playing = false; token++;
+    applyGains(0.01); gB.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.02); gA.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.02);
+    setTimeout(() => { if (!playing) stopSources(); }, 40);
+    ab.classList.remove("playing"); playBtn.setAttribute("aria-label", "Play");
+    cancelAnimationFrame(raf); draw();
+  }
+  function tick() { draw(); if (playing) raf = requestAnimationFrame(tick); }
+
+  function draw() {
+    const dpr = window.devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (!w) return;
+    if (canvas.width !== Math.round(w * dpr)) { canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); }
+    const g = canvas.getContext("2d"); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    const d = duration(), p = d ? pos() / d : 0, mid = h / 2;
+    const top = Math.max(1, ...clip.wb, ...clip.wa);      // fill the height with the louder of the two
+    const bars = (src, color, alpha, played) => {
+      const n = Math.min(src.length, Math.floor(w / 3)), bw = w / n, vals = [];
+      for (let i = 0; i < n; i++) {                           // fewer, wider bars on a narrow screen
+        let m = 0; for (let j = Math.floor(i * src.length / n); j < Math.floor((i + 1) * src.length / n); j++) m = Math.max(m, src[j]);
+        vals.push(m);
+      }
+      for (let i = 0; i < n; i++) {
+        const x = i * bw, a = (played && x / w < p) ? 1 : alpha, v = Math.max(1, (vals[i] / top) * (h / 2 - 6));
+        g.globalAlpha = a; g.fillStyle = color; g.fillRect(x + 0.5, mid - v, Math.max(1, bw - 1.5), v * 2);
+      }
+      g.globalAlpha = 1;
+    };
+    const after = side === "after";
+    bars(after ? clip.wb : clip.wa, "#5a5d65", 0.35, false);                 // the other version, faint, behind
+    bars(after ? clip.wa : clip.wb, after ? accent : "#c6c8cc", 0.45, true);  // the one you hear
+    if (d) { g.fillStyle = "#fff"; g.fillRect(Math.round(p * w), 0, 2, h); }
+    wave.setAttribute("aria-valuenow", String(Math.round(p * 100)));
+  }
+
+  playBtn.addEventListener("click", () => (playing ? pause() : play()));
+  sides.forEach((b) => b.addEventListener("click", () => setSide(b.dataset.side)));
+  tabs.forEach((t) => t.addEventListener("click", async () => {
+    if (t.dataset.clip === clip.id) return;
+    const was = playing; if (was) pause();
+    clip = data.clips.find((c) => c.id === t.dataset.clip); offset = 0; showClip();
+    if (was) play();
+  }));
+  if (matchBox) matchBox.addEventListener("change", () => { levelEl.textContent = levelText(); applyGains(0.03); });
+  const seek = (frac) => { const d = duration(); offset = Math.min(Math.max(frac, 0), 0.999) * (d || 0); if (playing) startSources(offset); draw(); };
+  wave.addEventListener("click", (e) => { const r = wave.getBoundingClientRect(); if (duration()) seek((e.clientX - r.left) / r.width); else play(); });
+  wave.addEventListener("keydown", (e) => {
+    const d = duration(); if (!d) return;
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { seek(pos() / d + (e.key === "ArrowRight" ? 0.05 : -0.05)); e.preventDefault(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest("input, textarea, select") || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === "b" || e.key === "B") setSide(side === "after" ? "before" : "after");
+  });
+  window.addEventListener("resize", draw);
+  showClip();
+}
