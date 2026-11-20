@@ -174,9 +174,10 @@ nav.links > a.hot:hover { color: var(--amber); }
 .crumbs li + li::before { content: "/"; margin-right: 8px; color: var(--line-2); }
 .crumbs a { text-decoration: none; }
 .crumbs a:hover { color: var(--silver); }
-.p-hero .info { display: grid; gap: 22px; min-width: 0; }
+.p-hero .info { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; min-width: 0; container-type: inline-size; }
 .p-hero .kind { color: var(--accent); }
-.p-hero h1 { font-size: var(--step-4); letter-spacing: 0.04em; }
+/* long names (SPECTRAKILL, MASTERFUSE) shrink to fit the text column instead of running under the screenshot */
+.p-hero h1 { font-size: min(var(--step-4), 14cqi); letter-spacing: 0.04em; overflow-wrap: anywhere; }
 .p-hero .pitch { color: var(--silver); font-size: var(--step-1); line-height: 1.5; max-width: 48ch; }
 .dl-note { font-size: var(--step--1); color: var(--steel); }
 .dl-note[data-state="missing"] { color: var(--orange); }
@@ -351,3 +352,7 @@ footer .wrap > div { min-width: 0; }
   .p-hero .wrap { padding-block: 28px 56px; }
   .sec > .wrap { padding-block: 56px; }
 }
+
+/* narrow phones: the quality table wraps instead of widening the page */
+.sec > .wrap { grid-template-columns: minmax(0, 1fr); }
+@media (max-width: 480px) { .qtable td:first-child, .qtable td:nth-child(2) { white-space: normal; } .qtable th, .qtable td { padding-right: 10px; } }
