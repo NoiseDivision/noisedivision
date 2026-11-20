@@ -1,4 +1,4 @@
-# Builds all five plugins for Windows and macOS.
+# Builds all six plugins for Windows and macOS.
 #
 #   - Run it by hand: Actions tab -> "Build plugins" -> Run workflow.
 #     The finished files appear at the bottom of the run's page under "Artifacts".
@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for p in KRUSH PeakSlayer MASTERFUSE SPECTRAKILL DARK; do
+          for p in KRUSH PeakSlayer MASTERFUSE SPECTRAKILL DARK SHRAPNEL; do
             echo "::group::$p"
             cmake -S "plugins/$p" -B "build/$p" -DCMAKE_BUILD_TYPE=Release
             cmake --build "build/$p" --config Release --parallel 4
@@ -83,5 +83,5 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" \
               --title "Noise Division plugins ${GITHUB_REF_NAME}" \
-              --notes "Free downloads of PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL and DARK. Windows: unzip and copy the .vst3 to C:\\Program Files\\Common Files\\VST3. macOS: open the .pkg installer (AU, VST3 and the standalone app)."
+              --notes "Free downloads of PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL, DARK and SHRAPNEL. Windows: unzip and copy the .vst3 to C:\\Program Files\\Common Files\\VST3. macOS: open the .pkg installer (AU, VST3 and the standalone app)."
           fi
