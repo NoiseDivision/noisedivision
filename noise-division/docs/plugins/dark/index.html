@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DARK: Free One-knob darkener VST3 &amp; AU Plugin | Noise Division</title>
+<meta name="description" content="Free one-knob darkener VST3 and AU plugin for Windows and macOS. Makes drums and bass darker, heavier and warmer with tilt EQ, weight, saturation and a closing low-pass, plus punch control. Zero latency.">
+<link rel="canonical" href="https://noisedivision.net/plugins/dark/">
+<meta name="theme-color" content="#0c0d0f">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Noise Division">
+<meta property="og:title" content="DARK: Free One-knob darkener VST3 &amp; AU Plugin | Noise Division">
+<meta property="og:description" content="Free one-knob darkener VST3 and AU plugin for Windows and macOS. Makes drums and bass darker, heavier and warmer with tilt EQ, weight, saturation and a closing low-pass, plus punch control. Zero latency.">
+<meta property="og:url" content="https://noisedivision.net/plugins/dark/">
+<meta property="og:image" content="https://noisedivision.net/img/og/dark.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DARK: Free One-knob darkener VST3 &amp; AU Plugin | Noise Division">
+<meta name="twitter:description" content="Free one-knob darkener VST3 and AU plugin for Windows and macOS. Makes drums and bass darker, heavier and warmer with tilt EQ, weight, saturation and a closing low-pass, plus punch control. Zero latency.">
+<meta name="twitter:image" content="https://noisedivision.net/img/og/dark.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preload" href="../../assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/site.css?v=8e0724ef">
+<style>:root { --accent: #c4141e; }</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://noisedivision.net/#org",
+   "name": "Noise Division",
+   "url": "https://noisedivision.net/",
+   "email": "noisedivision@proton.me",
+   "logo": "https://noisedivision.net/img/share.jpg"
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "DARK",
+   "url": "https://noisedivision.net/plugins/dark/",
+   "description": "Free one-knob darkener VST3 and AU plugin for Windows and macOS. Makes drums and bass darker, heavier and warmer with tilt EQ, weight, saturation and a closing low-pass, plus punch control. Zero latency.",
+   "applicationCategory": "MultimediaApplication",
+   "applicationSubCategory": "Audio plugin (One-knob darkener)",
+   "operatingSystem": "Windows, macOS",
+   "softwareVersion": "1.0.0",
+   "image": "https://noisedivision.net/img/dark.webp",
+   "author": {
+    "@id": "https://noisedivision.net/#org"
+   },
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+   },
+   "@id": "https://noisedivision.net/plugins/dark/#app",
+   "downloadUrl": "https://noisedivision.net/plugins/dark/",
+   "softwareHelp": {
+    "@type": "CreativeWork",
+    "url": "https://noisedivision.net/manuals/DARK-User-Manual.pdf"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Noise Division",
+     "item": "https://noisedivision.net/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Plugins",
+     "item": "https://noisedivision.net/#plugins"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "DARK",
+     "item": "https://noisedivision.net/plugins/dark/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body data-page="dark">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../../" aria-label="Noise Division home"><svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true"><line x1="0" y1="7" x2="9" y2="7" stroke="#777a82" stroke-width="1.6"/><rect x="9" y="1.5" width="16" height="11" fill="none" stroke="#c6c8cc" stroke-width="1.6"/><line x1="9" y1="7" x2="25" y2="7" stroke="#ff3038" stroke-width="1.8"/><line x1="25" y1="7" x2="34" y2="7" stroke="#777a82" stroke-width="1.6"/></svg> NOISE <b>DIVISION</b></a>
+    <nav class="links" aria-label="Main">
+      <div class="dd">
+        <button class="dd-btn" type="button" aria-expanded="false" aria-controls="dd-plugins" data-current>Plugins <svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <div class="dd-panel" id="dd-plugins">
+          <a href="../../plugins/peakslayer/" style="--c:#ff3038"><span class="n">PEAKSLAYER</span><span class="k">Soft clipper</span></a>
+          <a href="../../plugins/krush/" style="--c:#ff3038"><span class="n">KRUSH</span><span class="k">Multiband distortion</span></a>
+          <a href="../../plugins/masterfuse/" style="--c:#ffa648"><span class="n">MASTERFUSE</span><span class="k">One-knob mastering</span></a>
+          <a href="../../plugins/spectrakill/" style="--c:#e6dcc8"><span class="n">SPECTRAKILL</span><span class="k">Spectral compressor</span></a>
+          <a href="../../plugins/dark/" style="--c:#c4141e" aria-current="page"><span class="n">DARK</span><span class="k">One-knob darkener</span></a>
+          <a href="../../plugins/shrapnel/" style="--c:#ff7138"><span class="n">SHRAPNEL</span><span class="k">Spectral distortion</span></a>
+          <a class="all" href="../../#plugins">All plugins <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <a href="../../contact/">Contact</a>
+      <a class="hot" href="../../donate/">Donate</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="p-hero tall" aria-labelledby="p-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">Home</a></li><li><a href="../../#plugins">Plugins</a></li><li aria-current="page">DARK</li></ol></nav>
+      <div class="info">
+        <p class="label kind">One-knob darkener</p>
+        <h1 id="p-title">DARK</h1>
+        <p class="pitch">One knob that makes drums and bass darker, heavier and warmer. As you turn it, the moon slides into eclipse and the harsh top end sinks into the dark, while every hit still lands.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#" data-download="dark" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Dark for Windows</a>
+          <a class="btn mac" href="#" data-download="dark" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Dark for <span class="kc">macOS</span></a>
+        </div>
+        <p class="dl-note" data-note="dark">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
+        <a class="manual-link" href="../../manuals/DARK-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> User manual (PDF)</a>
+      </div>
+      <figure class="shot"><img src="../../img/dark.webp" alt="DARK: a near-black interface with a single large knob shaped like a moon in partial eclipse, turning red, a glowing tick ring, dead branches at the edges and a lit candle as the on switch" width="1040" height="1360" fetchpriority="high"></figure>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="On this page">
+    <div class="wrap">
+      <a href="#overview">Overview</a>
+      <a href="#how">How it works</a>
+      <a href="#start">Quick start</a>
+      <a href="#controls">Controls</a>
+      <a href="#tips">Tips</a>
+      <a href="#install">Install</a>
+      <a href="#help">Help</a>
+    </div>
+  </nav>
+
+  <section class="sec" id="overview" aria-labelledby="ov-title">
+    <div class="wrap">
+      <p class="label">Overview</p>
+      <h2 id="ov-title">What it does</h2>
+      <div class="two">
+        <div class="prose">
+            <p>DARK is a one-knob darkener for drums and bass. Turning the DARKNESS knob moves several processes together: a tilt EQ that tips the highs down and the lows up, added low-end weight, tape-style saturation, and a low-pass filter that closes as you go further.</p>
+            <p>Darkening usually kills the attack of drums. DARK's PUNCH control opens the filter for a moment on every hit, so the transients stay bright and the tails, cymbals and room sink into the dark. It has zero latency, so it works while recording and on live drums.</p>
+        </div>
+        <div style="display:grid;gap:28px;align-content:start">
+          <ul class="features">
+            <li><span><b>One DARKNESS knob</b> moves a tilt EQ, low-end weight, tape-style saturation and a closing low-pass together</span></li>
+            <li><span><b>PUNCH</b> keeps the attack of every hit bright while tails and cymbals go dark</span></li>
+            <li><span><b>Mono low end:</b> bass below 120 Hz folds to the centre as it darkens, so it stays solid on big systems</span></li>
+            <li><span><b>Zero latency</b>, so it works on live drums and while recording</span></li>
+            <li><span><b>Advanced drawer</b> with punch, mix and output</span></li>
+          </ul>
+          <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Drum loops and breaks that are too bright</span><span class="chip">Bass, 808s and reese basses</span><span class="chip">Dark, heavy genres: drill, trap, techno, DnB</span><span class="chip">Taming harsh samples</span></div></div>
+        </div>
+      </div>
+      <dl class="specs">
+        <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
+        <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
+        <div><dt>Latency</dt><dd>Zero</dd></div>
+        <div><dt>Version · Price</dt><dd>1.0.0 · Free</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <p class="label">Under the hood</p>
+      <h2 id="how-title">How it works</h2>
+      <p class="lead">Everything below moves together when you turn the knob, in this order.</p>
+      <ol class="chain">
+        <li><h3>Tilt EQ</h3><p>Tips the spectrum: highs down, lows up, by up to 7 dB at full DARKNESS.</p></li>
+        <li><h3>Low shelf</h3><p>Adds weight to the low end as DARKNESS goes up.</p></li>
+        <li><h3>Saturation</h3><p>Tape-style, slightly asymmetric saturation adds warmth and density, with anti-aliasing built in.</p></li>
+        <li><h3>Low-pass</h3><p>A resonant low-pass that closes from 20 kHz down to about 2.2 kHz at full DARKNESS; PUNCH opens it on every hit.</p></li>
+        <li><h3>Mono bass</h3><p>Below 120 Hz the sides fold into the centre as it darkens.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="start" aria-labelledby="qs-title">
+    <div class="wrap">
+      <p class="label">Quick start</p>
+      <h2 id="qs-title">Up and running</h2>
+      <ol class="steps">
+          <li><span>Put DARK on a drum loop, drum bus or bass.</span></li>
+          <li><span>Turn <b>DARKNESS</b> up. Low settings tilt and warm; past halfway it adds weight and closes the top.</span></li>
+          <li><span>Open <b>ADVANCED</b> and set <b>PUNCH</b>: higher keeps the hits brighter.</span></li>
+          <li><span>Use <b>OUTPUT</b> to make up any level it lost, and the candle to compare on and off.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="controls" aria-labelledby="ct-title">
+    <div class="wrap">
+      <p class="label">Reference</p>
+      <h2 id="ct-title">Every control</h2>
+      <div class="ctls">
+          <div class="ctl-group"><h3>Main</h3>
+            <div class="ctl"><span class="n">DARKNESS</span><span class="r">0 – 100% · default 50%</span><p class="d">How dark the sound gets. Low settings tilt the highs down and add warmth; higher settings add weight and saturation and close the top; near 100% it sounds like it is coming through a wall. Double-click to return to 50%.</p></div>
+            <div class="ctl"><span class="n">Candle (ON / BYPASS)</span><span class="r">On / Off</span><p class="d">Light or snuff the candle: switches DARK on or off to compare with the untouched sound.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Advanced drawer</h3>
+            <div class="ctl"><span class="n">PUNCH</span><span class="r">0 – 100% · default 60%</span><p class="d">Lets the hits through. The top opens for a moment on every attack (by up to 2.5 octaves), so drums keep their snap while the tails go dark. 0% darkens everything evenly.</p></div>
+            <div class="ctl"><span class="n">MIX</span><span class="r">0 – 100% · default 100%</span><p class="d">Blends the untouched sound back in.</p></div>
+            <div class="ctl"><span class="n">OUTPUT</span><span class="r">−12 – +12 dB · default 0</span><p class="d">Final level. Darker can sound a little quieter; turn this up to make up for it.</p></div>
+          </div>
+      </div>
+      <p class="note">Every plugin window scales from 60% to 200%: drag the bottom-right corner. Double-click a knob to return it to its default.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="tips" aria-labelledby="tp-title">
+    <div class="wrap">
+      <p class="label">Tips</p>
+      <h2 id="tp-title">Getting the most out of it</h2>
+      <ul class="tips">
+        <li>On a drum loop, try DARKNESS 40–60% with PUNCH around 70%: the kick and snare stay sharp while the hats and room move back.</li>
+        <li>On an 808 or reese bass, high DARKNESS with PUNCH at 0% gives a heavy, rounded tone that sits under everything.</li>
+        <li>Use MIX around 50% for parallel darkening: weight and warmth without losing the original top.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" id="install" aria-labelledby="in-title">
+    <div class="wrap">
+      <p class="label">Install</p>
+      <h2 id="in-title">Up and running in a minute</h2>
+      <div class="os-cols">
+        <div class="os-col">
+          <h3 class="os-title">Windows</h3>
+          <ol class="steps">
+            <li><h3>Unzip</h3><p>Open the downloaded <code>.zip</code>. Inside is the plugin (<code>.vst3</code>) and a standalone app.</p></li>
+            <li><h3>Copy the .vst3</h3><p>Move the <code>.vst3</code> to <code>C:\Program Files\Common Files\VST3</code>. Every Windows DAW looks there.</p></li>
+            <li><h3>Rescan</h3><p>Let your DAW scan for new plugins. The plugin shows up under <b>Noise Division</b>.</p></li>
+          </ol>
+          <p class="reqs">Windows 10 or 11, 64-bit. VST3 host or the standalone app.</p>
+        </div>
+        <div class="os-col">
+          <h3 class="os-title"><span class="kc">macOS</span></h3>
+          <ol class="steps">
+            <li><h3>Open the installer</h3><p>Double-click the <code>.pkg</code>. It installs the Audio Unit, the VST3 and the standalone app.</p></li>
+            <li><h3>If macOS blocks it</h3><p>Open System Settings, Privacy &amp; Security, scroll down and click <b>Open Anyway</b>. This shows once, because the installers aren't from the App Store.</p></li>
+            <li><h3>Open your DAW</h3><p>Logic and GarageBand find the AU on their next start. Ableton Live, FL Studio, Reaper, Bitwig and Studio One use the VST3.</p></li>
+          </ol>
+          <p class="reqs">macOS 10.13 or newer, Apple Silicon or Intel. AU or VST3 host, or the standalone app.</p>
+        </div>
+      </div>
+      <div class="manual-box">
+        <div class="ico" aria-hidden="true">PDF</div>
+        <div><h3>DARK user manual</h3><p>Installation, every control, tips and troubleshooting in one PDF to keep next to your DAW.</p></div>
+        <a class="btn ghost" href="../../manuals/DARK-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> Download PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="help" aria-labelledby="hp-title">
+    <div class="wrap">
+      <p class="label">Help</p>
+      <h2 id="hp-title">Troubleshooting</h2>
+      <div class="faq">
+      <details><summary>It sounds quieter</summary><p>Removing highs lowers perceived loudness. Raise OUTPUT in the advanced drawer.</p></details>
+      <details><summary>The plugin doesn't show up</summary><p>Check the <code>.vst3</code> is in <code>C:\Program Files\Common Files\VST3</code> (Windows) and rescan. On a Mac, run the installer again and restart the DAW.</p></details>
+      <details><summary>No name, maker or category in FL Studio</summary><p>Rescan with <b>Verify plugins</b> ticked in the plugin manager.</p></details>
+      <details><summary>macOS says the installer can't be opened</summary><p>System Settings, Privacy &amp; Security, <b>Open Anyway</b>. The installers aren't signed with an Apple developer certificate yet.</p></details>
+      <details><summary>Windows SmartScreen warns about the app</summary><p>Click <b>More info</b>, then <b>Run anyway</b>. This only concerns the standalone app.</p></details>
+      <details><summary>The window is too big or too small</summary><p>Drag the bottom-right corner. Every plugin scales from 60% to 200% and remembers the size.</p></details>
+      <details><summary>Something else is wrong</summary><p>E-mail <a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a> with the plugin name, version, your DAW and your operating system.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec others" aria-labelledby="ot-title">
+    <div class="wrap">
+      <p class="label">More from Noise Division</p>
+      <h2 id="ot-title">The rest of the arsenal</h2>
+      <div class="cards">
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/peakslayer.webp" alt="" width="1520" height="1484" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Soft clipper</p>
+            <h3><a href="../../plugins/peakslayer/">PEAKSLAYER</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/krush.webp" alt="" width="2000" height="1232" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Multiband distortion</p>
+            <h3><a href="../../plugins/krush/">KRUSH</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ffa648">
+          <div class="stage"><img src="../../img/masterfuse.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob mastering</p>
+            <h3><a href="../../plugins/masterfuse/">MASTERFUSE</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#e6dcc8">
+          <div class="stage"><img src="../../img/spectrakill.webp" alt="" width="2080" height="1400" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral compressor</p>
+            <h3><a href="../../plugins/spectrakill/">SPECTRAKILL</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff7138">
+          <div class="stage"><img src="../../img/shrapnel.webp" alt="" width="2200" height="1440" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral distortion</p>
+            <h3><a href="../../plugins/shrapnel/">SHRAPNEL</a></h3>
+            
+            
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="donate slim" aria-labelledby="do-title">
+    <div class="wrap">
+      <div class="txt">
+        <p class="label" style="color:var(--orange)">Support</p>
+        <h2 id="do-title">Keep the plugins free</h2>
+        <p>Everything here is free and stays free. If a plugin made it into your tracks and you want to say thanks, a donation pays for the time that goes into new plugins and updates.</p>
+      </div>
+      <div>
+        <div class="donate-options">
+          <a class="donate-option beer" href="#" data-donate="bmc"><span><strong>Buy me a beer <span class="emoji" aria-hidden="true">🍺</span></strong><span>On Buy Me a Coffee: one beer, a round, or monthly</span></span><span class="go">Cheers →</span></a>
+          <a class="donate-option paypal" href="#" data-donate="paypal"><span><strong>PayPal</strong><span>Send any amount directly</span></span><span class="go">Donate →</span></a>
+        </div>
+        <p class="donate-msg" id="donate-msg" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="about">
+      <a class="brand" href="../../">NOISE <b>DIVISION</b></a>
+      <p>Free VST3 and AU plugins for Windows and macOS. Free to use in commercial and personal music.</p>
+      <p>© 2026 Noise Division</p>
+    </div>
+    <div>
+      <h2>Plugins</h2>
+      <ul>
+        <li><a href="../../plugins/peakslayer/">PEAKSLAYER</a></li>
+        <li><a href="../../plugins/krush/">KRUSH</a></li>
+        <li><a href="../../plugins/masterfuse/">MASTERFUSE</a></li>
+        <li><a href="../../plugins/spectrakill/">SPECTRAKILL</a></li>
+        <li><a href="../../plugins/dark/">DARK</a></li>
+        <li><a href="../../plugins/shrapnel/">SHRAPNEL</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Noise Division</h2>
+      <ul>
+        <li><a href="../../contact/">Contact</a></li>
+        <li><a href="../../donate/">Donate</a></li>
+        <li><a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="../../assets/site.js?v=e06ae050" defer></script>
+</body>
+</html>
