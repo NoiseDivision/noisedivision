@@ -14,7 +14,8 @@ sleep 3
 for entry in $PLUGINS; do
   IFS=: read -r target product code <<< "$entry"
   echo "::group::auval $product"
-  if auval -v aufx "$code" "$AU_MANUFACTURER"; then echo "$product: AU validation PASSED"; else echo "::warning::$product: AU validation FAILED"; failed=1; fi
+  type=aufx; [[ " $AU_MUSIC_EFFECTS " == *" $product "* ]] && type=aumf
+  if auval -v "$type" "$code" "$AU_MANUFACTURER"; then echo "$product: AU validation PASSED"; else echo "::warning::$product: AU validation FAILED"; failed=1; fi
   echo "::endgroup::"
 done
 exit $failed

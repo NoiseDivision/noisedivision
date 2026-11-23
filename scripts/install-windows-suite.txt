@@ -1,0 +1,18 @@
+Noise Division plugin suite - free
+
+Every Noise Division plugin, each in its own folder.
+
+INSTALL THE PLUGINS (VST3)
+1. Open each plugin's folder and copy its ".vst3" folder to:
+       C:\Program Files\Common Files\VST3
+   (Or copy just the ones you want.)
+2. Open your DAW and scan for new plugins.
+   FL Studio: Options > Manage plugins > Find installed plugins.
+   They are listed under the vendor "Noise Division".
+
+STANDALONE APPS
+Each folder also has the plugin as a standalone .exe that runs without a DAW.
+Put them anywhere you like.
+
+Manuals: https://noisedivision.net
+Needs Windows 10 or 11, 64-bit.

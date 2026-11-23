@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Makes <PRODUCT>-macOS.pkg for each plugin. The installer puts:
+# Makes <PRODUCT>-macOS.pkg for each plugin, and NoiseDivision-Suite-macOS.pkg with all of them
+# (Customize in the installer lets you leave some out). The installers put:
 #   the Audio Unit  in /Library/Audio/Plug-Ins/Components   (Logic, GarageBand, ...)
 #   the VST3        in /Library/Audio/Plug-Ins/VST3         (Ableton, FL Studio, Reaper, ...)
 #   the standalone  in /Applications
@@ -51,3 +52,27 @@ for entry in $PLUGINS; do
   productbuild --distribution "$work/distribution.xml" --package-path "$work/packages" "dist/$product-macOS.pkg"
   echo "made dist/$product-macOS.pkg"
 done
+
+# the full suite: one installer holding every plugin's package, each a choice that is on by default
+mkdir -p stage/suite/packages
+lines=""; choices=""; refs=""
+for entry in $PLUGINS; do
+  IFS=: read -r target product code <<< "$entry"
+  id="com.noisedivision.$(echo "$product" | tr '[:upper:]' '[:lower:]')"
+  cp "stage/$product/packages/$product.pkg" stage/suite/packages/
+  lines="$lines    <line choice=\"$id.choice\"/>\n"
+  choices="$choices  <choice id=\"$id.choice\" title=\"$product\" description=\"$product: Audio Unit, VST3 and the standalone app.\"><pkg-ref id=\"$id\"/></choice>\n"
+  refs="$refs  <pkg-ref id=\"$id\" version=\"$version\" onConclusion=\"none\">$product.pkg</pkg-ref>\n"
+done
+printf '%b' "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+<installer-gui-script minSpecVersion=\"2\">
+  <title>Noise Division plugin suite</title>
+  <options customize=\"allow\" require-scripts=\"false\" hostArchitectures=\"arm64,x86_64\"/>
+  <domains enable_anywhere=\"false\" enable_currentUserHome=\"false\" enable_localSystem=\"true\"/>
+  <choices-outline>
+$lines  </choices-outline>
+$choices$refs</installer-gui-script>
+" > stage/suite/distribution.xml
+productbuild --distribution stage/suite/distribution.xml --package-path stage/suite/packages \
+             "dist/NoiseDivision-Suite-macOS.pkg"
+echo "made dist/NoiseDivision-Suite-macOS.pkg"

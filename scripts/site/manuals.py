@@ -30,9 +30,16 @@ for _f in (DOCS / "img").glob("*.webp"):
     _im.thumbnail((1700, 1700), Image.LANCZOS)
     _im.save(_TMP / (_f.stem + ".jpg"), quality=86, optimize=True)
 IMG = _TMP.as_uri()
+MANUAL_IMG = (DOCS / "img" / "manual").as_uri()     # annotated screenshots made for the manuals
+
+
+def key_list(items):
+    """The numbered key under an annotated screenshot (numbers match the markers on the image)."""
+    li = "".join(f"<li><span>{i + 1}</span><b>{esc(n)}</b> {esc(d)}</li>" for i, (n, d) in enumerate(items))
+    return f"<ol class='key{' two' if len(items) > 8 else ''}'>{li}</ol>"
 
 # light-page versions of the accents (the bone and pale colours vanish on white paper)
-PRINT_ACCENT = {"spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c"}
+PRINT_ACCENT = {"recoil": "#e2561e", "spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c"}
 
 FONT_CSS = f"""
 @font-face {{ font-family: "Chakra Petch"; src: url("{FONTS}/chakra-petch-semibold.woff2"); font-weight: 600; }}
@@ -98,12 +105,23 @@ def body_html(p):
     quick = "".join(f"<li>{t}</li>" for t in p["quick"])
     secs.append(("Quick start", f"<ol class='steps'>{quick}</ol>"))
 
-    help_line = " Turn on the <b>?</b> button to get a pop-up explanation when you hover any control." if p["slug"] in ("krush", "spectrakill", "shrapnel") else " Hover a control to see a short explanation."
-    secs.append(("The interface", f"""<figure><img src="{IMG}/{jpg(p)}" class="ui {p['shape']}"></figure>
+    help_line = " Turn on the <b>?</b> button to get a pop-up explanation when you hover any control." if p["slug"] in ("krush", "spectrakill", "shrapnel", "recoil") else " Hover a control to see a short explanation."
+    if p.get("overview"):
+        ov_img, ov_items = p["overview"]
+        shot = f"<figure class='annot'><img src='{MANUAL_IMG}/{ov_img}'></figure>{key_list(ov_items)}"
+    else:
+        shot = f"<figure><img src=\"{IMG}/{jpg(p)}\" class=\"ui {p['shape']}\"></figure>"
+    secs.append(("The interface", f"""{shot}
 <ul><li><b>Resize:</b> drag the bottom-right corner. The window scales from 60% to 200% and remembers its size.</li>
 <li><b>Reset:</b> double-click a knob to return it to its default value.</li>
 <li><b>Help:</b>{help_line}</li>
 <li><b>Automation:</b> every control can be automated from your DAW.</li></ul>"""))
+
+    if p.get("visuals"):
+        v = ""
+        for title, img, lead, items in p["visuals"]:
+            v += f"<div class='vis'><h3>{esc(title)}</h3><p>{esc(lead)}</p><figure class='annot'><img src='{MANUAL_IMG}/{img}'></figure></div>{key_list(items)}"
+        secs.append(("Reading the display", "<p>The numbers on each picture match the list under it.</p>" + v))
 
     if p.get("chain"):
         ch = "".join(f"<tr><th>{esc(a)}</th><td>{esc(b)}</td></tr>" for a, b in p["chain"])
@@ -125,7 +143,7 @@ def body_html(p):
 
     if p.get("sidechain"):
         sc = "".join(f"<li>{t}</li>" for t in p["sidechain"])
-        secs.append(("Sidechain", f"<p>Classic sidechain compression turns the whole bass down on every kick. SPECTRAKILL only turns down the frequencies the kick is actually using, at the moment it uses them.</p><ol class='steps'>{sc}</ol>"))
+        secs.append(("Sidechain", f"<p>{p.get('sidechain_lead', 'Classic sidechain compression turns the whole bass down on every kick. SPECTRAKILL only turns down the frequencies the kick is actually using, at the moment it uses them.')}</p><ol class='steps'>{sc}</ol>"))
 
     if p.get("presets"):
         r = "".join(f"<tr><th>{esc(n)}</th><td>{esc(d)}</td></tr>" for n, d in p["presets"])
@@ -153,7 +171,7 @@ def body_html(p):
 <p class="muted">{p['name']} is free to use in commercial and personal music. It is provided as is, without warranty of any kind. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units, macOS and Logic Pro are trademarks of Apple Inc. All other product names are trademarks of their respective owners.</p>"""))
 
     toc = "".join(f"<li><span>{i + 1:02d}</span>{esc(t)}</li>" for i, (t, _) in enumerate(secs))
-    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation") else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
+    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation", "Reading the display") or (t == "The interface" and p.get("overview")) else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{FONT_CSS}
 @page {{ size: A4; margin: 18mm 17mm 20mm; }}
 body {{ margin: 0; font-family: Montserrat, sans-serif; font-size: 9.6pt; line-height: 1.55; color: #1b1c1f; }}
@@ -189,6 +207,14 @@ ol.steps li::before {{ content: counter(s); position: absolute; left: 0; top: -.
 ul.tips {{ list-style: none; padding: 0; }}
 ul.tips li {{ border-left: .8mm solid {acc}; padding: 1mm 0 1mm 4mm; margin-bottom: 3mm; }}
 figure {{ margin: 0 0 5mm; text-align: center; }}
+figure.annot {{ margin: 0 0 3mm; }}
+figure.annot img {{ width: 100%; border-radius: 1.5mm; display: block; }}
+.vis {{ break-inside: avoid; margin-top: 6mm; }}
+ol.key {{ list-style: none; padding: 0; margin: 0 0 4mm; }}
+ol.key.two {{ columns: 2; column-gap: 8mm; }}
+ol.key li {{ position: relative; padding-left: 8mm; margin-bottom: 1.8mm; break-inside: avoid; font-size: 9pt; line-height: 1.45; }}
+ol.key li span {{ position: absolute; left: 0; top: .1mm; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: #ff7a3d; color: #111214; font-family: "Chakra Petch"; font-weight: 700; font-size: 8pt; display: flex; align-items: center; justify-content: center; }}
+ol.key li b {{ font-family: "Chakra Petch"; font-weight: 700; letter-spacing: .04em; margin-right: 1mm; }}
 img.ui {{ max-width: 100%; border-radius: 1.5mm; }}
 img.ui.tall {{ max-height: 128mm; }}
 img.ui.square {{ max-height: 120mm; }}

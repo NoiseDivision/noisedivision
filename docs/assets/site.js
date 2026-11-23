@@ -15,6 +15,9 @@ const FILES = {
   spectrakill: { win: "SPECTRAKILL-Windows.zip", mac: "SPECTRAKILL-macOS.pkg" },
   dark:        { win: "DARK-Windows.zip",        mac: "DARK-macOS.pkg" },
   shrapnel:    { win: "SHRAPNEL-Windows.zip",    mac: "SHRAPNEL-macOS.pkg" },
+  recoil:      { win: "RECOIL-Windows.zip",      mac: "RECOIL-macOS.pkg" },
+  // every plugin in one download
+  suite:       { win: "NoiseDivision-Suite-Windows.zip", mac: "NoiseDivision-Suite-macOS.pkg" },
 };
 
 // accept "name/repo" or a pasted address like "https://github.com/name/repo/"
@@ -94,7 +97,7 @@ if (toc && "IntersectionObserver" in window) {
 // ---- old one-page links (noisedivision.net/#krush) open the plugin's own page
 if (document.body.dataset.page === "home") {
   const h = location.hash.slice(1).toLowerCase();
-  if (FILES[h]) location.replace(`plugins/${h}/`);
+  if (FILES[h] && h !== "suite") location.replace(`plugins/${h}/`);
   else if (h === "donate") location.replace("donate/");
 }
 

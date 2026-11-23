@@ -399,3 +399,17 @@ kbd { font-family: var(--display); font-weight: 700; font-size: 0.8em; border: 1
   .ab-hint { display: none; }
 }
 @media (hover: none) { .ab-hint { display: none; } }
+
+/* full suite download (home page #suite) and the link to it on plugin pages */
+.suite { padding: 64px 0; border-top: 1px solid var(--line); background: radial-gradient(ellipse at 85% 50%, rgba(255,80,40,.10), transparent 60%), var(--panel); }
+.suite .wrap { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 40px; align-items: center; }
+.suite h2 { margin: 8px 0 12px; }
+.suite .txt p { max-width: 560px; }
+.suite-list { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.suite-list a { display: inline-block; padding: 6px 12px; border: 1px solid var(--line-2); border-radius: 3px; font-family: var(--display); font-weight: 600; font-size: 0.8rem; letter-spacing: 0.12em; color: #fff; text-decoration: none; }
+.suite-list a:hover { border-color: var(--orange); }
+.suite-dl .ctas { justify-content: flex-start; }
+.suite-dl .dl-note { margin-top: 12px; }
+.suite-link { display: inline-block; margin-top: 14px; font-family: var(--display); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.1em; color: var(--orange); text-decoration: none; }
+.suite-link:hover { text-decoration: underline; }
+@media (max-width: 860px) { .suite .wrap { grid-template-columns: 1fr; gap: 24px; } .suite { padding: 48px 0; } }

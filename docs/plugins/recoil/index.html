@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>RECOIL: Free Sidechain ducking VST3 &amp; AU Plugin | Noise Division</title>
+<meta name="description" content="RECOIL, the sidechain weapon: a free zero-latency ducking VST3 and AU plugin for Windows and macOS. Sync, MIDI, audio or song-map triggers, 20 ducking shapes and a shape editor, fits itself to the kick, and can map your whole drum bus to duck exactly on every kick and snare.">
+<link rel="canonical" href="https://noisedivision.net/plugins/recoil/">
+<meta name="theme-color" content="#0c0d0f">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Noise Division">
+<meta property="og:title" content="RECOIL: Free Sidechain ducking VST3 &amp; AU Plugin | Noise Division">
+<meta property="og:description" content="RECOIL, the sidechain weapon: a free zero-latency ducking VST3 and AU plugin for Windows and macOS. Sync, MIDI, audio or song-map triggers, 20 ducking shapes and a shape editor, fits itself to the kick, and can map your whole drum bus to duck exactly on every kick and snare.">
+<meta property="og:url" content="https://noisedivision.net/plugins/recoil/">
+<meta property="og:image" content="https://noisedivision.net/img/og/recoil.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="RECOIL: Free Sidechain ducking VST3 &amp; AU Plugin | Noise Division">
+<meta name="twitter:description" content="RECOIL, the sidechain weapon: a free zero-latency ducking VST3 and AU plugin for Windows and macOS. Sync, MIDI, audio or song-map triggers, 20 ducking shapes and a shape editor, fits itself to the kick, and can map your whole drum bus to duck exactly on every kick and snare.">
+<meta name="twitter:image" content="https://noisedivision.net/img/og/recoil.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preload" href="../../assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/site.css?v=6272cf05">
+<style>:root { --accent: #ff7a3d; --on-accent: #0c0d0f; }</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://noisedivision.net/#org",
+   "name": "Noise Division",
+   "url": "https://noisedivision.net/",
+   "email": "noisedivision@proton.me",
+   "logo": "https://noisedivision.net/img/share.jpg"
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "RECOIL",
+   "url": "https://noisedivision.net/plugins/recoil/",
+   "description": "RECOIL, the sidechain weapon: a free zero-latency ducking VST3 and AU plugin for Windows and macOS. Sync, MIDI, audio or song-map triggers, 20 ducking shapes and a shape editor, fits itself to the kick, and can map your whole drum bus to duck exactly on every kick and snare.",
+   "applicationCategory": "MultimediaApplication",
+   "applicationSubCategory": "Audio plugin (Sidechain ducking)",
+   "operatingSystem": "Windows, macOS",
+   "softwareVersion": "1.0.0",
+   "image": "https://noisedivision.net/img/recoil.webp",
+   "author": {
+    "@id": "https://noisedivision.net/#org"
+   },
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+   },
+   "@id": "https://noisedivision.net/plugins/recoil/#app",
+   "downloadUrl": "https://noisedivision.net/plugins/recoil/",
+   "softwareHelp": {
+    "@type": "CreativeWork",
+    "url": "https://noisedivision.net/manuals/RECOIL-User-Manual.pdf"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Noise Division",
+     "item": "https://noisedivision.net/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Plugins",
+     "item": "https://noisedivision.net/#plugins"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "RECOIL",
+     "item": "https://noisedivision.net/plugins/recoil/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body data-page="recoil">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../../" aria-label="Noise Division home"><svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true"><line x1="0" y1="7" x2="9" y2="7" stroke="#777a82" stroke-width="1.6"/><rect x="9" y="1.5" width="16" height="11" fill="none" stroke="#c6c8cc" stroke-width="1.6"/><line x1="9" y1="7" x2="25" y2="7" stroke="#ff3038" stroke-width="1.8"/><line x1="25" y1="7" x2="34" y2="7" stroke="#777a82" stroke-width="1.6"/></svg> NOISE <b>DIVISION</b></a>
+    <nav class="links" aria-label="Main">
+      <div class="dd">
+        <button class="dd-btn" type="button" aria-expanded="false" aria-controls="dd-plugins" data-current>Plugins <svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <div class="dd-panel" id="dd-plugins">
+          <a href="../../plugins/recoil/" style="--c:#ff7a3d" aria-current="page"><span class="n">RECOIL</span><span class="k">Sidechain ducking</span></a>
+          <a href="../../plugins/peakslayer/" style="--c:#ff3038"><span class="n">PEAKSLAYER</span><span class="k">Soft clipper</span></a>
+          <a href="../../plugins/krush/" style="--c:#ff3038"><span class="n">KRUSH</span><span class="k">Multiband distortion</span></a>
+          <a href="../../plugins/masterfuse/" style="--c:#ffa648"><span class="n">MASTERFUSE</span><span class="k">One-knob mastering</span></a>
+          <a href="../../plugins/spectrakill/" style="--c:#e6dcc8"><span class="n">SPECTRAKILL</span><span class="k">Spectral compressor</span></a>
+          <a href="../../plugins/dark/" style="--c:#c4141e"><span class="n">DARK</span><span class="k">One-knob darkener</span></a>
+          <a href="../../plugins/shrapnel/" style="--c:#ff7138"><span class="n">SHRAPNEL</span><span class="k">Spectral distortion</span></a>
+          <a class="all" href="../../#plugins">All plugins <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <a href="../../contact/">Contact</a>
+      <a class="hot" href="../../donate/">Donate</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="p-hero wide" aria-labelledby="p-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">Home</a></li><li><a href="../../#plugins">Plugins</a></li><li aria-current="page">RECOIL</li></ol></nav>
+      <div class="info">
+        <p class="label kind">Precision sidechain</p>
+        <h1 id="p-title">RECOIL</h1>
+        <p class="pitch">The sidechain weapon. Put it on the bass, send it the kick, and it ducks clean, tight and on time, with zero latency. It fits the duck to your kick, learns the groove so the bass is already down when the kick lands, and can even read your whole drum bus ahead of time, so every kick and snare gets its own duck.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#" data-download="recoil" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Recoil for Windows</a>
+          <a class="btn mac" href="#" data-download="recoil" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Recoil for <span class="kc">macOS</span></a>
+        </div>
+        <p class="dl-note" data-note="recoil">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
+        <a class="manual-link" href="../../manuals/RECOIL-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> User manual (PDF)</a>
+        <a class="suite-link" href="../../#suite">Want them all? Get the full suite of 7 <span aria-hidden="true">→</span></a>
+      </div>
+      <figure class="shot"><img src="../../img/recoil.webp" alt="RECOIL: a gunmetal interface with a waveform display showing a bass ducked under each kick, the removed part hatched in orange, the Punch-Through shape drawn on top, a 4 by 4 grid of shape tiles, and SHAPE, BAND, PHASE and OUTPUT panels" width="2200" height="1440" fetchpriority="high"></figure>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="On this page">
+    <div class="wrap">
+      <a href="#listen">Listen</a>
+      <a href="#overview">Overview</a>
+      <a href="#start">Quick start</a>
+      <a href="#controls">Controls</a>
+      <a href="#sidechain">Sidechain</a>
+      <a href="#presets">Presets</a>
+      <a href="#tips">Tips</a>
+      <a href="#install">Install</a>
+      <a href="#help">Help</a>
+    </div>
+  </nav>
+
+
+  <section class="sec listen" id="listen" aria-labelledby="ls-title">
+    <div class="wrap">
+      <p class="label">Hear it</p>
+      <h2 id="ls-title">Before and after</h2>
+      <p class="lead">Bounced from a real session. Mix: a whole song, with RECOIL on the bass bus. AUDIO is the Default preset with the kick on its sidechain; MAP is the Drum Bus Map preset with the drum bus and the bass bus bounced and loaded, so every kick and snare gets its own duck. 808: a kick and an 808, with the 808 Tail preset (BAND on FULL) and with Kick -> 808 and the Punch-Through Long shape. Tick Match loudness to compare at equal volume.</p>
+      <div class="ab" data-side="after">
+        <div class="ab-tabs" role="tablist" aria-label="Sample"><button type="button" role="tab" aria-selected="true" data-clip="rcmix">Mix · AUDIO</button><button type="button" role="tab" aria-selected="false" data-clip="rcmap">Mix · MAP</button><button type="button" role="tab" aria-selected="false" data-clip="rc808tail">808 · Tail</button><button type="button" role="tab" aria-selected="false" data-clip="rc808punch">808 · Punch</button></div>
+        <div class="ab-main">
+          <button class="ab-play" type="button" aria-label="Play"><svg class="i-play" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M2 1.5v17L17 10z" fill="currentColor"/></svg><svg class="i-pause" width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h4v16H2zM10 1h4v16h-4z" fill="currentColor"/></svg></button>
+          <div class="ab-wave" role="slider" tabindex="0" aria-label="Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><canvas></canvas></div>
+          <div class="ab-switch" role="group" aria-label="Before or after">
+            <button type="button" data-side="before" aria-pressed="false">Before</button>
+            <button type="button" data-side="after" aria-pressed="true">After</button>
+          </div>
+        </div>
+        <div class="ab-foot">
+          <span class="ab-setting">AUDIO trigger · Preset: Default (load it, send the kick)</span>
+          <span class="ab-level"></span>
+          <label class="ab-match"><input type="checkbox"> Match loudness</label>
+          <span class="ab-hint">Press <kbd>B</kbd> to flip</span>
+        </div>
+        <script type="application/json" class="ab-data">{"plugin":"recoil","base":"../../audio/","keepLevel":true,"clips":[{"id":"rcmix","label":"Mix \u00b7 AUDIO","setting":"AUDIO trigger \u00b7 Preset: Default (load it, send the kick)","louder":0.1,"wb":[24,24,24,24,24,24,24,24,24,24,24,24,24,24,21,24,24,24,24,22,24,24,24,24,24,24,24,24,24,18,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,22],"wa":[24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,19,24,24,24,24,24,24,24,24,24,24,24,24,24,24,23,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24]},{"id":"rcmap","label":"Mix \u00b7 MAP","setting":"MAP trigger \u00b7 Preset: Drum Bus Map with the bass bus (PER BASS)","louder":0.1,"wb":[24,24,24,24,24,24,24,24,24,24,24,24,24,24,21,24,24,24,24,22,24,24,24,24,24,24,24,24,24,18,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,22],"wa":[24,24,24,24,24,24,24,24,24,24,24,24,24,24,23,24,24,24,24,22,24,24,24,24,24,24,24,24,24,23,24,24,24,24,22,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24,24]},{"id":"rc808tail","label":"808 \u00b7 Tail","setting":"Preset: 808 Tail \u00b7 BAND FULL","louder":0.2,"wb":[35,35,35,35,33,33,29,35,27,24,24,23,23,22,22,35,23,21,21,20,20,19,33,23,18,18,19,17,17,21,35,35,22,17,15,15,15,27,20,15,15,18,15,15,15,26,18,15,15,15,15,15,25,21,15,15,19,15,15,18,23,17,14,13,12,11,11,24,20,9,9,10,7,7,6,35,35,24,25,29,27,27,35,31,27,26,28,26,25,34,35,35,31,28,25,25,25,35,35,28,27,31,27,27,29,35,30,29,26,26,26,25,32,32,24,24,27,23,23,22,35,35,34,35,33,35,27,35,28,24,23,25,23,22,22,34,26,22,21,20,20,19,33,26,19,18,21,18,17,26,35,35,21,16,15,15,15,25,21,15,15,18,15,15,15,35,35,29,21,21,15,15,27,22,16,15,15,15,15,18,23,15,14,13,15,14,12,35,31,11,8,10,8,6,6,35,35,27,24,16,4,3,16,9,3,2,4,1,1,14,35,26,9,5,7,5,3,19,6,1,0,4,0,0,10,20,4,2,1,1,1,0,18,9,2,1,4,1,0,3],"wa":[35,35,27,31,30,28,27,34,30,26,25,25,24,24,23,30,23,22,22,21,21,20,29,25,19,19,20,19,18,30,35,33,20,17,17,16,16,25,19,16,15,17,16,15,19,26,18,16,16,16,16,16,29,21,16,16,18,16,16,16,30,18,15,14,13,12,12,28,21,11,9,11,8,7,7,35,35,28,23,23,28,28,35,30,27,27,29,26,26,29,35,35,32,27,27,26,26,35,35,29,28,29,28,28,31,35,30,29,28,27,27,26,35,29,25,24,26,24,23,23,35,35,27,32,30,34,28,34,31,26,25,25,24,23,25,32,25,22,22,21,21,20,35,26,19,19,20,18,18,26,35,35,23,18,16,16,16,32,20,16,15,18,15,15,15,35,35,27,25,13,15,15,28,26,17,15,17,15,15,19,24,16,14,15,15,14,13,35,35,11,9,11,8,7,6,35,35,26,25,19,5,3,15,10,3,2,4,2,1,14,35,25,9,4,7,5,3,19,6,1,0,4,0,0,10,20,4,2,1,1,1,0,18,9,2,1,4,1,0,3]},{"id":"rc808punch","label":"808 \u00b7 Punch","setting":"Preset: Kick -> 808 \u00b7 shape Punch-Through Long","louder":0.3,"wb":[35,35,35,35,33,33,29,35,27,24,24,23,23,22,22,35,23,21,21,20,20,19,33,23,18,18,19,17,17,21,35,35,22,17,15,15,15,27,20,15,15,18,15,15,15,26,18,15,15,15,15,15,25,21,15,15,19,15,15,18,23,17,14,13,12,11,11,24,20,9,9,10,7,7,6,35,35,24,25,29,27,27,35,31,27,26,28,26,25,34,35,35,31,28,25,25,25,35,35,28,27,31,27,27,29,35,30,29,26,26,26,25,32,32,24,24,27,23,23,22,35,35,34,35,33,35,27,35,28,24,23,25,23,22,22,34,26,22,21,20,20,19,33,26,19,18,21,18,17,26,35,35,21,16,15,15,15,25,21,15,15,18,15,15,15,35,35,29,21,21,15,15,27,22,16,15,15,15,15,18,23,15,14,13,15,14,12,35,31,11,8,10,8,6,6,35,35,27,24,16,4,3,16,9,3,2,4,1,1,14,35,26,9,5,7,5,3,19,6,1,0,4,0,0,10,20,4,2,1,1,1,0,18,9,2,1,4,1,0,3],"wa":[35,35,32,29,29,33,29,35,28,25,24,24,24,23,23,35,24,22,22,21,20,20,34,23,19,19,20,18,18,22,35,35,23,18,16,16,16,28,20,16,16,19,16,15,16,27,18,16,16,16,16,16,26,22,16,16,19,16,16,19,23,18,14,13,13,12,11,25,20,10,9,11,8,7,7,35,35,28,22,28,27,27,35,31,27,26,28,26,25,34,35,35,31,28,25,25,25,35,35,28,27,31,27,27,29,35,30,29,26,26,26,25,32,32,24,24,27,23,23,22,35,35,30,35,33,35,28,35,29,25,24,26,24,23,23,34,27,23,21,21,21,20,34,26,19,19,22,18,18,26,35,35,21,17,16,16,15,25,22,16,15,19,15,15,15,35,35,26,24,20,15,15,28,22,16,16,16,16,15,19,24,16,14,13,15,14,13,35,31,11,9,10,8,7,6,35,35,26,25,17,4,3,16,9,3,2,4,1,1,14,35,26,9,5,7,5,3,19,6,1,0,4,0,0,10,20,4,2,1,1,1,0,18,9,2,1,4,1,0,3]}]}</script>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="overview" aria-labelledby="ov-title">
+    <div class="wrap">
+      <p class="label">Overview</p>
+      <h2 id="ov-title">What it does</h2>
+      <div class="two">
+        <div class="prose">
+            <p>RECOIL turns a track down in a shape you choose every time something triggers it: a kick on its sidechain input, a MIDI note, the beat of the song, or a map of your drum bus. The shape is drawn right over the waveform, so you see the bass go down under each kick and come back up.</p>
+            <p>It is built to sound clean at any depth: every drop is a smooth fade, so the bass never clicks, the audio passes untouched between hits, and there is zero latency. In AUDIO mode it listens to the kick's low end, sizes the shape to each kick (FIT LENGTH) and learns the groove to start each duck a few milliseconds early (GROOVE LOCK).</p>
+            <p>The default setting is meant to be right for most kicks: load RECOIL, send it the kick, press play.</p>
+            <p>MAP mode goes one step further: drop a bounce of the song's drum bus on RECOIL and it finds every kick, snare, rim and hat, how loud each one is and how long it rings. The bass then ducks exactly on each hit, with its own depth and shape for kicks and snares, and ghost notes handled their own way. Add a bounce of the bass bus and every duck follows the bass that is really playing.</p>
+        </div>
+        <div style="display:grid;gap:28px;align-content:start">
+          <ul class="features">
+            <li><span><b>Four triggers:</b> SYNC to the song, MIDI notes, AUDIO on the sidechain input, or MAP</span></li>
+            <li><span><b>MAP:</b> ducks exactly on every kick and snare of your bounced drum bus; add the bass bus and each duck follows the bass under it</span></li>
+            <li><span><b>20 shapes</b> (16 familiar, 4 made for RECOIL) plus your own, drawn and edited on the display</span></li>
+            <li><span><b>FIT LENGTH</b> sizes the duck to each kick, <b>GROOVE LOCK</b> starts it early, <b>DYNAMIC</b> ducks softer hits less</span></li>
+            <li><span><b>BAND</b> ducks only part of the spectrum, with a separate amount for the rest</span></li>
+            <li><span><b>Clean:</b> click-free at full depth, untouched between hits, 0 ms latency, 16 presets</span></li>
+          </ul>
+          <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Kick and 808 or bass</span><span class="chip">Four-on-the-floor pumping</span><span class="chip">Pads and chords that breathe with the beat</span><span class="chip">Trance gates and chopped sixteenths</span><span class="chip">Vocals over synths</span><span class="chip">Room for the snare&#x27;s crack</span></div></div>
+        </div>
+      </div>
+      <dl class="specs">
+        <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
+        <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
+        <div><dt>Latency</dt><dd>Zero</dd></div>
+        <div><dt>Version · Price</dt><dd>1.0.0 · Free</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="start" aria-labelledby="qs-title">
+    <div class="wrap">
+      <p class="label">Quick start</p>
+      <h2 id="qs-title">Up and running</h2>
+      <ol class="steps">
+          <li><span>Put RECOIL on the bass (or whatever should make room).</span></li>
+          <li><span>Send the kick to RECOIL's <b>sidechain input</b> (see Sidechain below). The INPUT meter in the trigger strip moves when it arrives.</span></li>
+          <li><span>Press play. The default setting already fits the duck to the kick: watch the display, where the hatched orange part is what RECOIL takes out of the bass under each kick.</span></li>
+          <li><span>To change the feel, click another tile in <b>SHAPES</b>, or drag the orange dB tab on the display to set how deep it ducks.</span></li>
+          <li><span>No sidechain? Switch TRIGGER to <b>SYNC</b> for ducking in time with the song, or <b>MIDI</b> to trigger it from a MIDI track.</span></li>
+          <li><span>Want the bass to make room for the kicks <i>and</i> the snares? Bounce the drum bus from bar 1, drop the file on RECOIL and it switches to <b>MAP</b> (see Song map below). Switching to MAP opens BAND up to 500 Hz, so the snares' range ducks too. Send the drum bus to RECOIL's sidechain input as well: ALIGN and the snare views need it.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="controls" aria-labelledby="ct-title">
+    <div class="wrap">
+      <p class="label">Reference</p>
+      <h2 id="ct-title">Every control</h2>
+      <div class="ctls">
+          <div class="ctl-group"><h3>Trigger</h3>
+            <div class="ctl"><span class="n">TRIGGER</span><span class="r">SYNC · MIDI · AUDIO · MAP · default AUDIO</span><p class="d">What starts the shape: the song's beat, MIDI notes, the sidechain input, or the map of your drum bus. On a mode's starting preset (Default, Pump 1/4, MIDI Duck, Drum Bus Map), picking another mode loads that mode's starting preset.</p></div>
+            <div class="ctl"><span class="n">THRESHOLD</span><span class="r">−60 – 0 dB · default −40 dB</span><p class="d">AUDIO: the level a hit has to reach. Hits must also come within 20 dB of the recent kicks.</p></div>
+            <div class="ctl"><span class="n">LISTEN</span><span class="r">KICK LOWS · FULL</span><p class="d">AUDIO: listen below 150 Hz, or to the whole trigger.</p></div>
+            <div class="ctl"><span class="n">DYNAMIC</span><span class="r">0 – 100% · default 50%</span><p class="d">AUDIO and MIDI: how much softer hits duck less. 0% ducks every hit fully.</p></div>
+            <div class="ctl"><span class="n">FIT LENGTH</span><span class="r">On / Off · default On</span><p class="d">AUDIO: sets LENGTH from how long each kick's low end rings (the median of the last 4 kicks).</p></div>
+            <div class="ctl"><span class="n">GROOVE LOCK</span><span class="r">On / Off · default On</span><p class="d">AUDIO: with the song playing, learns the kick pattern within the bar and starts each duck a few ms before a learned kick. If that kick doesn't come, it lets go.</p></div>
+            <div class="ctl"><span class="n">RATE</span><span class="r">1/1 – 1/32 · default 1/4</span><p class="d">SYNC: how long one cycle is.</p></div>
+            <div class="ctl"><span class="n">STRAIGHT · DOT · TRIP</span><span class="r">default STRAIGHT</span><p class="d">SYNC: note value type.</p></div>
+            <div class="ctl"><span class="n">OFFSET</span><span class="r">−50 – +50% · default 0%</span><p class="d">SYNC: moves the cycle earlier or later.</p></div>
+            <div class="ctl"><span class="n">SWING</span><span class="r">0 – 100% · default 0%</span><p class="d">SYNC: delays every second cycle by up to a third of a cycle.</p></div>
+            <div class="ctl"><span class="n">AUTO OFFSET</span><span class="r">On / Off</span><p class="d">SYNC: lines the cycle up with the kicks on the sidechain input.</p></div>
+            <div class="ctl"><span class="n">NOTE</span><span class="r">Any · C−2 – G8</span><p class="d">MIDI: which note starts the shape.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Song map</h3>
+            <div class="ctl"><span class="n">DRUMS</span><span class="r">WAV · AIFF · FLAC · OGG · MP3</span><p class="d">The drum bus of the whole song, bounced from bar 1. Or drop the file on RECOIL.</p></div>
+            <div class="ctl"><span class="n">BASS</span><span class="r">WAV · AIFF · FLAC · OGG · MP3 · optional</span><p class="d">The bass bus, bounced from bar 1 with RECOIL bypassed. Lets each duck follow the bass under it.</p></div>
+            <div class="ctl"><span class="n">AUTO · PER BASS</span><span class="r">default PER BASS</span><p class="d">With a bass bounce: one shape per kind of bass, or computed ducks.</p></div>
+            <div class="ctl"><span class="n">CLEARANCE</span><span class="r">0 – 24 dB · default 6 dB</span><p class="d">AUTO: how far each kick and snare should stand above the bass.</p></div>
+            <div class="ctl"><span class="n">RECOVERY</span><span class="r">10 – 400 ms · default 60 ms</span><p class="d">AUTO: the fastest the bass comes back up (20 dB).</p></div>
+            <div class="ctl"><span class="n">SUB · PLUCK · MID · NOTE</span><span class="r">SHAPES panel · defaults PUNCH-THROUGH · SNAP · SMOOTH · HOLD</span><p class="d">PER BASS: the shape for kicks over each kind of bass. Snares use SNARE.</p></div>
+            <div class="ctl"><span class="n">KICK</span><span class="r">0 – 100% · default 100%</span><p class="d">How deep the kicks duck.</p></div>
+            <div class="ctl"><span class="n">SNARE</span><span class="r">0 – 100% · default 50%</span><p class="d">How deep snares and claps duck.</p></div>
+            <div class="ctl"><span class="n">RIM</span><span class="r">0 – 100% · default 0%</span><p class="d">How deep rimshots and sticks duck.</p></div>
+            <div class="ctl"><span class="n">GHOSTS</span><span class="r">IGNORE · SCALE · FULL · default IGNORE</span><p class="d">What ghost notes do. The Drum Bus Map preset uses SCALE.</p></div>
+            <div class="ctl"><span class="n">GHOSTS BELOW</span><span class="r">6 – 30 dB · default 12 dB</span><p class="d">How much quieter than the main hits a ghost note is.</p></div>
+            <div class="ctl"><span class="n">OFFSET</span><span class="r">−50 – +50 ms · default 0 ms</span><p class="d">Moves the whole map. Presets leave it alone, as it belongs to the song.</p></div>
+            <div class="ctl"><span class="n">ALIGN</span><span class="r"></span><p class="d">Sets OFFSET from the kicks on the sidechain input (optional; needs the drum bus or the kick there).</p></div>
+            <div class="ctl"><span class="n">KICK · SNARE shape</span><span class="r">SHAPES panel · default PUNCH-THROUGH · QUICK</span><p class="d">Kicks and snares each have their own shape (rims use the snare's). Pick KICK or SNARE at the top of the SHAPES panel, then choose or edit that shape.</p></div>
+            <div class="ctl"><span class="n">Hits</span><span class="r">click in the MAP view</span><p class="d">Switch single hits off or on.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Shape</h3>
+            <div class="ctl"><span class="n">DEPTH</span><span class="r">0 – −∞ dB · default −∞</span><p class="d">How far the level goes down at the bottom of the shape. All the way is silence.</p></div>
+            <div class="ctl"><span class="n">LENGTH</span><span class="r">20 – 2000 ms · default 250 ms</span><p class="d">AUDIO, MIDI and MAP: how long one cycle of the shape lasts. With FIT LENGTH on, it follows the kick (in MAP: each hit's own length, PER HIT). In SYNC the RATE sets it.</p></div>
+            <div class="ctl"><span class="n">CURVE</span><span class="r">−100 – +100% · default 0%</span><p class="d">Bends the whole shape: right comes back sooner, left stays down longer.</p></div>
+            <div class="ctl"><span class="n">ATTACK</span><span class="r">0 – 10 ms · default 4 ms</span><p class="d">How long the drop takes. In SYNC and MAP it starts this much before the hit, so the bass is already down when it lands. 4 ms is click-free on any bass; under 2 ms can click.</p></div>
+            <div class="ctl"><span class="n">Shape tiles</span><span class="r">FACTORY · RECOIL · USER</span><p class="d">Click a tile to use that shape. Right-click one of your own to delete it. + saves the current shape.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Band</h3>
+            <div class="ctl"><span class="n">FULL · SPLIT</span><span class="r">default SPLIT</span><p class="d">FULL ducks the whole signal; SPLIT ducks only the band. Both leave the audio untouched between hits.</p></div>
+            <div class="ctl"><span class="n">Band handles</span><span class="r">20 Hz – 16 kHz · default 20 – 180 Hz</span><p class="d">Drag the two handles (or the edges on the SPECTRUM view) to pick the band.</p></div>
+            <div class="ctl"><span class="n">EDGE</span><span class="r">SOFT · HARD</span><p class="d">SOFT fades over about an octave with the least phase shift; HARD is steeper (24 dB/oct).</p></div>
+            <div class="ctl"><span class="n">INSIDE</span><span class="r">0 – 100% · default 100%</span><p class="d">How much of the duck the band gets.</p></div>
+            <div class="ctl"><span class="n">ABOVE</span><span class="r">0 – 100% · default 0%</span><p class="d">How much of the duck the rest of the spectrum gets. 0% (the default, in every preset) leaves it untouched.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Phase</h3>
+            <div class="ctl"><span class="n">AUTO · MANUAL · OFF</span><span class="r">default OFF · AUDIO and MAP</span><p class="d">Off in SYNC and MIDI, where no kick reaches RECOIL. AUTO turns the bass's phase so its low end lines up with the kick where they overlap; it learns over a few hits, then locks, and only moves while the bass is ducked. MANUAL: set it with ROTATE. OFF: the phase is left alone.</p></div>
+            <div class="ctl"><span class="n">ROTATE</span><span class="r">−180° – +180°</span><p class="d">MANUAL: how far the bass's phase is turned. 0° is the original. In AUTO it shows the turn RECOIL picked.</p></div>
+            <div class="ctl"><span class="n">POLARITY</span><span class="r">On / Off</span><p class="d">Flips the bass upside down (the same as 180°).</p></div>
+            <div class="ctl"><span class="n">RELEARN</span><span class="r"></span><p class="d">AUTO: forget the learned turn and listen again, after you change the kick or the bass.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Output</h3>
+            <div class="ctl"><span class="n">MIX</span><span class="r">0 – 100% · default 100%</span><p class="d">How much of the ducking you hear: 50% ducks half as deep.</p></div>
+            <div class="ctl"><span class="n">GAIN</span><span class="r">−24 – +12 dB · default 0 dB</span><p class="d">Output level.</p></div>
+            <div class="ctl"><span class="n">AVG DUCK</span><span class="r"></span><p class="d">How much level the ducking takes on average, if you want to make it up with GAIN.</p></div>
+            <div class="ctl"><span class="n">Meters</span><span class="r">SC · OUT</span><p class="d">The sidechain input level and the output level.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Shapes</h3>
+            <div class="ctl"><span class="n">Punch-Through</span><span class="r">FACTORY</span><p class="d">Eases into the duck over the first few ms instead of slamming, so the hit keeps its punch. The everyday choice.</p></div>
+            <div class="ctl"><span class="n">Hold</span><span class="r">FACTORY</span><p class="d">Fully down for a moment, then a smooth return.</p></div>
+            <div class="ctl"><span class="n">Tight</span><span class="r">FACTORY</span><p class="d">Holds a little longer and snaps back quickly.</p></div>
+            <div class="ctl"><span class="n">Smooth</span><span class="r">FACTORY</span><p class="d">A soft dip and an even return. Gentle on sustained sounds.</p></div>
+            <div class="ctl"><span class="n">Punch-Through Long</span><span class="r">FACTORY</span><p class="d">Punch-Through with a longer return, for slower tempos and long kicks.</p></div>
+            <div class="ctl"><span class="n">Hold Long</span><span class="r">FACTORY</span><p class="d">A longer hold and a long return: the classic pump.</p></div>
+            <div class="ctl"><span class="n">Snap</span><span class="r">FACTORY</span><p class="d">Stays down, then snaps back hard.</p></div>
+            <div class="ctl"><span class="n">Quick</span><span class="r">FACTORY</span><p class="d">A short, fast duck for busy patterns.</p></div>
+            <div class="ctl"><span class="n">Swell Gate</span><span class="r">FACTORY</span><p class="d">Silent on the hit, swells in, cuts before the next one.</p></div>
+            <div class="ctl"><span class="n">Cut</span><span class="r">FACTORY</span><p class="d">Plays the start of each cycle, then cuts.</p></div>
+            <div class="ctl"><span class="n">Late Dip</span><span class="r">FACTORY</span><p class="d">Untouched on the hit, dips late in the cycle.</p></div>
+            <div class="ctl"><span class="n">Spike</span><span class="r">FACTORY</span><p class="d">Builds up to a peak late in the cycle.</p></div>
+            <div class="ctl"><span class="n">Pulse</span><span class="r">FACTORY</span><p class="d">A gate that opens halfway through the cycle.</p></div>
+            <div class="ctl"><span class="n">Fade Out</span><span class="r">FACTORY</span><p class="d">Fades away over the cycle.</p></div>
+            <div class="ctl"><span class="n">Drop & Rise</span><span class="r">FACTORY</span><p class="d">Drops away, then rises back into the next hit.</p></div>
+            <div class="ctl"><span class="n">Double</span><span class="r">FACTORY</span><p class="d">A short blip, then a long rise: two pumps per cycle.</p></div>
+            <div class="ctl"><span class="n">Blackout</span><span class="r">RECOIL</span><p class="d">Total silence for the kick's body, then a fast smooth return. Pair it with FIT LENGTH.</p></div>
+            <div class="ctl"><span class="n">808 Tail</span><span class="r">RECOIL</span><p class="d">Clears the transient fully, holds the 808 low through the kick's body, then lets it bloom.</p></div>
+            <div class="ctl"><span class="n">Recoil</span><span class="r">RECOIL</span><p class="d">Comes back slightly above the original level, then settles: the bass hits back after each kick.</p></div>
+            <div class="ctl"><span class="n">Click Gap</span><span class="r">RECOIL</span><p class="d">A very short duck that only clears room for the kick's click. For vocals and top end.</p></div>
+          </div>
+      </div>
+      <p class="note">Every plugin window scales from 60% to 200%: drag the bottom-right corner. Double-click a knob to return it to its default.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="sidechain" aria-labelledby="sc-title">
+    <div class="wrap">
+      <p class="label">Sidechain</p>
+      <h2 id="sc-title">Route the trigger</h2>
+      <p class="lead">In AUDIO mode RECOIL listens to the trigger on its sidechain input. Here is how to get the kick there in the common DAWs. (SYNC needs no sidechain and MIDI needs a MIDI track routed to RECOIL. MAP ducks from the map alone, but send it the whole drum bus the same way: ALIGN and the snare views in SPECTRUM and WAVE need it.)</p>
+      <ol class="steps">
+          <li><span>Put RECOIL on the bass track (or whatever should make room). The default setting is a good start.</span></li>
+          <li><span>Send the kick to RECOIL's sidechain input. <b>FL Studio:</b> select the kick's mixer track, right-click the send arrow on the bass's mixer track and choose <b>Sidechain to this track</b>, then in RECOIL's wrapper settings set the sidechain input to that send. <b>Ableton Live:</b> open the sidechain section of RECOIL's device and pick the kick track. <b>Logic Pro:</b> pick the kick in the Side Chain menu at the top of the plugin window. <b>Reaper:</b> make RECOIL 4 channels and send the kick to channels 3/4.</span></li>
+          <li><span>Play the song. The INPUT meter moves and the status turns from “no input” to “learning”, then “locked”. If the display says SEND THE KICK TO RECOIL'S SIDECHAIN INPUT, nothing is arriving yet.</span></li>
+          <li><span><b>MAP mode:</b> send the whole drum bus (the one you bounced) to RECOIL's sidechain input the same way, instead of only the kick. The map does the ducking either way; the drum bus on the sidechain lets ALIGN line the map up with the song, and lets the SPECTRUM view (dashed kick and snare curves) and the WAVE view (SNARE, RIM, GHOST) show the drums themselves.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="presets" aria-labelledby="pr-title">
+    <div class="wrap">
+      <p class="label">Presets</p>
+      <h2 id="pr-title">16 factory presets</h2>
+      <ul class="presets">
+        <li><span class="n">Default</span><span class="d">Slap it on, send the kick: fits itself to most kicks</span></li>
+        <li><span class="n">Kick -&gt; 808</span><span class="d">Low end cleared for every kick, length fitted to the kick</span></li>
+        <li><span class="n">Kick -&gt; Bass</span><span class="d">A firm duck under the kick, the bass&#x27;s top stays</span></li>
+        <li><span class="n">BLACKOUT</span><span class="d">Total silence behind every kick, then straight back</span></li>
+        <li><span class="n">808 Tail</span><span class="d">Clears the hit, keeps the 808 under the kick&#x27;s body, phase-aligned</span></li>
+        <li><span class="n">Recoil Bounce</span><span class="d">The bass hits back right after each kick</span></li>
+        <li><span class="n">Dynamic Kick</span><span class="d">Ghost kicks and fills duck less than the main hits</span></li>
+        <li><span class="n">Gentle Glue</span><span class="d">Just enough room for the kick, barely noticeable</span></li>
+        <li><span class="n">Pump 1/4</span><span class="d">The classic four-on-the-floor pump, no sidechain needed</span></li>
+        <li><span class="n">Pump 1/8</span><span class="d">Faster pumping on the eighths</span></li>
+        <li><span class="n">Gate 1/16</span><span class="d">Chopped sixteenths for pads and chords</span></li>
+        <li><span class="n">Swell 1/2</span><span class="d">Pads that swell in between the hits</span></li>
+        <li><span class="n">Drum Bus Map</span><span class="d">Load your bounced drum bus (and the bass bus: a shape per kind of bass): kicks duck fully, snares half, ghost notes a little; BAND reaches 500 Hz for the snares</span></li>
+        <li><span class="n">MIDI Duck</span><span class="d">Triggered by MIDI notes; velocity sets how deep</span></li>
+        <li><span class="n">Vocal Space</span><span class="d">Mids give way to the vocal&#x27;s consonants, highs and lows untouched</span></li>
+        <li><span class="n">Snare Click Gap</span><span class="d">A short gap in the mids for the snare&#x27;s crack</span></li>
+      </ul>
+      <p class="note">Click SAVE to store your own. They are kept in <code>%APPDATA%\RECOIL\Presets</code> on Windows and <code>~/Library/Application Support/RECOIL/Presets</code> on a Mac, so you can back them up or share them.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="tips" aria-labelledby="tp-title">
+    <div class="wrap">
+      <p class="label">Tips</p>
+      <h2 id="tp-title">Getting the most out of it</h2>
+      <ul class="tips">
+        <li>Watch the hatched orange in the WAVE view: it should cover the bass under the kick's body and stop where the kick fades. If it stops too early, try a longer shape (Punch-Through Long, Hold Long); too late, a shorter one (Tight, Quick).</li>
+        <li>FIT LENGTH works best on kicks with a clear decay. On very long 808 kicks, turn it off and set LENGTH by dragging the brass tab.</li>
+        <li>SPLIT (the default) clears only the bass's low end for the kick and leaves the rest untouched, so the bass stays audible on small speakers. Turn ABOVE up to let the rest dip a little too; for a full pump, switch BAND to FULL.</li>
+        <li>GROOVE LOCK needs the song playing in time. On loops it locks within a couple of bars; on fills it simply reacts, still within about 2 ms.</li>
+        <li>PHASE helps when the kick's tail and the bass play the same note and overlap (shapes like 808 Tail, or a shallow DEPTH). If the kick is tuned to a different note or the bassline moves a lot, no single turn fits every note: leave PHASE off.</li>
+        <li>Made a shape you like? SAVE SHAPE puts it in your USER bank, where every project can use it.</li>
+        <li>MAP: bounce only the drums (the drum bus, or kick and snare together), from the very start of the song, at the project's tempo. Change the drums later? Bounce again and LOAD the new file.</li>
+        <li>MAP: a fill or a flam you don't want ducked? Click it in the MAP view to switch it off.</li>
+        <li>MAP: the snare only needs a quick dip so the bass comes straight back. Pick SNARE in the SHAPES panel and try Quick, Snap or Click Gap; keep Punch-Through or Hold on KICK.</li>
+        <li>The WAVE view shows the kick's note and the bass's note above the phase lane. If they are a semitone or two apart, re-tune the kick sample to the bass's key: they stop beating against each other, and the phase stays put.</li>
+        <li>Several basses on one bus? Load the bass bus too. PER BASS gives each kind of bass its own shape; AUTO works out every duck for you (ducks too deep: lower CLEARANCE; the bass pumps: raise RECOVERY).</li>
+        <li>MAP: send the drum bus to RECOIL's sidechain input too. The ducking doesn't need it, but ALIGN, the dashed kick and snare curves in SPECTRUM and the snare, rim and ghost views in WAVE do.</li>
+        <li>MIDI can't start the drop before the note (zero latency). If the kick feels soft, move the MIDI notes 3 to 4 ms earlier, or use SYNC or MAP, which start the drop early by themselves.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" id="install" aria-labelledby="in-title">
+    <div class="wrap">
+      <p class="label">Install</p>
+      <h2 id="in-title">Up and running in a minute</h2>
+      <div class="os-cols">
+        <div class="os-col">
+          <h3 class="os-title">Windows</h3>
+          <ol class="steps">
+            <li><h3>Unzip</h3><p>Open the downloaded <code>.zip</code>. Inside is the plugin (<code>.vst3</code>) and a standalone app.</p></li>
+            <li><h3>Copy the .vst3</h3><p>Move the <code>.vst3</code> to <code>C:\Program Files\Common Files\VST3</code>. Every Windows DAW looks there.</p></li>
+            <li><h3>Rescan</h3><p>Let your DAW scan for new plugins. The plugin shows up under <b>Noise Division</b>.</p></li>
+          </ol>
+          <p class="reqs">Windows 10 or 11, 64-bit. VST3 host or the standalone app.</p>
+        </div>
+        <div class="os-col">
+          <h3 class="os-title"><span class="kc">macOS</span></h3>
+          <ol class="steps">
+            <li><h3>Open the installer</h3><p>Double-click the <code>.pkg</code>. It installs the Audio Unit, the VST3 and the standalone app.</p></li>
+            <li><h3>If macOS blocks it</h3><p>Open System Settings, Privacy &amp; Security, scroll down and click <b>Open Anyway</b>. This shows once, because the installers aren't from the App Store.</p></li>
+            <li><h3>Open your DAW</h3><p>Logic and GarageBand find the AU on their next start. Ableton Live, FL Studio, Reaper, Bitwig and Studio One use the VST3.</p></li>
+          </ol>
+          <p class="reqs">macOS 10.13 or newer, Apple Silicon or Intel. AU or VST3 host, or the standalone app.</p>
+        </div>
+      </div>
+      <div class="manual-box">
+        <div class="ico" aria-hidden="true">PDF</div>
+        <div><h3>RECOIL user manual</h3><p>Installation, every control, presets, tips and troubleshooting in one PDF to keep next to your DAW.</p></div>
+        <a class="btn ghost" href="../../manuals/RECOIL-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> Download PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="help" aria-labelledby="hp-title">
+    <div class="wrap">
+      <p class="label">Help</p>
+      <h2 id="hp-title">Troubleshooting</h2>
+      <div class="faq">
+      <details><summary>Nothing is ducked</summary><p>AUDIO: the trigger isn't arriving. The INPUT meter stays still and the status says “no input”. Check the sidechain routing in your DAW. SYNC only runs while the song plays. MIDI needs a MIDI track routed to RECOIL.</p></details>
+      <details><summary>Hats or the snare set it off</summary><p>Keep LISTEN on KICK LOWS and raise THRESHOLD a little.</p></details>
+      <details><summary>A click when the duck starts</summary><p>Raise ATTACK. 4 ms (the default) is clean on any bass; under 2 ms can click. Projects saved with an older RECOIL keep their old ATTACK.</p></details>
+      <details><summary>The duck comes back too early or too late</summary><p>Turn FIT LENGTH off and drag the brass LENGTH tab, or pick a shorter or longer shape.</p></details>
+      <details><summary>PHASE stays on LEARNING, or MATCH is near 0</summary><p>AUTO needs the kick and the bass overlapping, ideally on the same note. With a kick tuned differently or a moving bassline there is no single best turn: leave PHASE off.</p></details>
+      <details><summary>The bass sounds slightly different between kicks</summary><p>SPLIT and FULL both leave the audio untouched between hits. With PHASE on, the band split shifts the phase a little around its edges: turn PHASE off, or use FULL.</p></details>
+      <details><summary>MAP ducks in the wrong places</summary><p>The bounce must start at bar 1 (time 0) of the song. Small differences: send the kick to the sidechain too and click ALIGN, or set OFFSET. A different arrangement since the bounce: bounce again.</p></details>
+      <details><summary>MAP ducks for a bass that isn't there</summary><p>The bass bounce no longer matches the song (the bass part changed), or it was bounced with RECOIL on. Bounce the bass bus again with RECOIL bypassed and load it with BASS.</p></details>
+      <details><summary>ALIGN does nothing, or WAVE says SEND THE DRUM BUS TO RECOIL'S SIDECHAIN</summary><p>ALIGN, the kick check, the dashed curves in SPECTRUM and the snare, rim and ghost views in WAVE read the drum bus on the sidechain input. Route the drum bus to RECOIL's sidechain as in AUDIO mode (see Sidechain).</p></details>
+      <details><summary>MAP doesn't duck at all</summary><p>MAP only runs while the song plays. Check that a map is loaded (the MAP view shows the hits) and that KICK and SNARE are above 0%.</p></details>
+      <details><summary>Logic lists RECOIL under MIDI-controlled effects</summary><p>That's because it can take MIDI notes as its trigger. It works the same as an audio effect.</p></details>
+      <details><summary>The plugin doesn't show up</summary><p>Check the <code>.vst3</code> is in <code>C:\Program Files\Common Files\VST3</code> (Windows) and rescan. On a Mac, run the installer again and restart the DAW.</p></details>
+      <details><summary>No name, maker or category in FL Studio</summary><p>Rescan with <b>Verify plugins</b> ticked in the plugin manager.</p></details>
+      <details><summary>macOS says the installer can't be opened</summary><p>System Settings, Privacy &amp; Security, <b>Open Anyway</b>. The installers aren't signed with an Apple developer certificate yet.</p></details>
+      <details><summary>Windows SmartScreen warns about the app</summary><p>Click <b>More info</b>, then <b>Run anyway</b>. This only concerns the standalone app.</p></details>
+      <details><summary>The window is too big or too small</summary><p>Drag the bottom-right corner. Every plugin scales from 60% to 200% and remembers the size.</p></details>
+      <details><summary>Something else is wrong</summary><p>E-mail <a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a> with the plugin name, version, your DAW and your operating system.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec others" aria-labelledby="ot-title">
+    <div class="wrap">
+      <p class="label">More from Noise Division</p>
+      <h2 id="ot-title">The rest of the arsenal</h2>
+      <div class="cards">
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/peakslayer.webp" alt="" width="1520" height="1484" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Soft clipper</p>
+            <h3><a href="../../plugins/peakslayer/">PEAKSLAYER</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/krush.webp" alt="" width="2000" height="1232" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Multiband distortion</p>
+            <h3><a href="../../plugins/krush/">KRUSH</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ffa648">
+          <div class="stage"><img src="../../img/masterfuse.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob mastering</p>
+            <h3><a href="../../plugins/masterfuse/">MASTERFUSE</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#e6dcc8">
+          <div class="stage"><img src="../../img/spectrakill.webp" alt="" width="2080" height="1400" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral compressor</p>
+            <h3><a href="../../plugins/spectrakill/">SPECTRAKILL</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#c4141e">
+          <div class="stage"><img src="../../img/dark.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob darkener</p>
+            <h3><a href="../../plugins/dark/">DARK</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff7138">
+          <div class="stage"><img src="../../img/shrapnel.webp" alt="" width="2200" height="1440" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral distortion</p>
+            <h3><a href="../../plugins/shrapnel/">SHRAPNEL</a></h3>
+            
+            
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="donate slim" aria-labelledby="do-title">
+    <div class="wrap">
+      <div class="txt">
+        <p class="label" style="color:var(--orange)">Support</p>
+        <h2 id="do-title">Keep the plugins free</h2>
+        <p>Everything here is free and stays free. If a plugin made it into your tracks and you want to say thanks, a donation pays for the time that goes into new plugins and updates.</p>
+      </div>
+      <div>
+        <div class="donate-options">
+          <a class="donate-option beer" href="#" data-donate="bmc"><span><strong>Buy me a beer <span class="emoji" aria-hidden="true">🍺</span></strong><span>On Buy Me a Coffee: one beer, a round, or monthly</span></span><span class="go">Cheers →</span></a>
+          <a class="donate-option paypal" href="#" data-donate="paypal"><span><strong>PayPal</strong><span>Send any amount directly</span></span><span class="go">Donate →</span></a>
+        </div>
+        <p class="donate-msg" id="donate-msg" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="about">
+      <a class="brand" href="../../">NOISE <b>DIVISION</b></a>
+      <p>Free VST3 and AU plugins for Windows and macOS. Free to use in commercial and personal music.</p>
+      <p>© 2026 Noise Division</p>
+    </div>
+    <div>
+      <h2>Plugins</h2>
+      <ul>
+        <li><a href="../../plugins/recoil/">RECOIL</a></li>
+        <li><a href="../../plugins/peakslayer/">PEAKSLAYER</a></li>
+        <li><a href="../../plugins/krush/">KRUSH</a></li>
+        <li><a href="../../plugins/masterfuse/">MASTERFUSE</a></li>
+        <li><a href="../../plugins/spectrakill/">SPECTRAKILL</a></li>
+        <li><a href="../../plugins/dark/">DARK</a></li>
+        <li><a href="../../plugins/shrapnel/">SHRAPNEL</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Noise Division</h2>
+      <ul>
+        <li><a href="../../contact/">Contact</a></li>
+        <li><a href="../../donate/">Donate</a></li>
+        <li><a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="../../assets/site.js?v=b825572b" defer></script>
+</body>
+</html>

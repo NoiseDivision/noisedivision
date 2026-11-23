@@ -16,6 +16,10 @@ import pathlib
 
 from content import (SITE, PLUGINS, INSTALL_WIN, INSTALL_MAC, REQUIREMENTS, DAW_RESCAN, TROUBLE_COMMON)
 
+# before/after audio, written by tools/render/demos.py (pages build without it, just with no player)
+_demos_file = pathlib.Path(__file__).resolve().parent / "demos.json"
+DEMOS = json.loads(_demos_file.read_text()) if _demos_file.exists() else {"clips": [], "plugins": {}}
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DOCS = ROOT / "docs"
 URL = SITE["url"].rstrip("/")
@@ -57,7 +61,11 @@ def head(R, *, title, desc, path, image, image_w=1200, image_h=630, ld=None, og_
     ld_html = ""
     if ld:
         ld_html = '<script type="application/ld+json">\n' + json.dumps(ld, indent=1, ensure_ascii=False) + "\n</script>\n"
-    style = f'<style>:root {{ --accent: {accent}; }}</style>\n' if accent else ""
+    style = ""
+    if accent:
+        r, g, b = (int(accent[i:i + 2], 16) / 255 for i in (1, 3, 5))
+        on = "#0c0d0f" if 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.45 else "#ffffff"   # text on an accent background
+        style = f'<style>:root {{ --accent: {accent}; --on-accent: {on}; }}</style>\n'
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -157,6 +165,28 @@ def download_buttons(p):
 DL_NOTE = "Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel"
 
 
+def suite_block(R, words):
+    """The full suite: every plugin in one download (home page, #suite)."""
+    names = "".join(f'<li><a href="{R}plugins/{p["slug"]}/">{p["name"]}</a></li>' for p in PLUGINS)
+    return f"""<section class="suite" id="suite" aria-labelledby="su-title" style="scroll-margin-top:62px">
+    <div class="wrap">
+      <div class="txt">
+        <p class="label" style="color:var(--orange)">The full suite</p>
+        <h2 id="su-title">All {words.lower()} in one download</h2>
+        <p>Every Noise Division plugin at once. On Windows, one .zip with a folder per plugin. On <span class="kc">macOS</span>, one installer; click Customize in it to leave any plugin out.</p>
+        <ul class="suite-list" aria-label="Included">{names}</ul>
+      </div>
+      <div class="suite-dl">
+        <div class="ctas">
+          <a class="btn primary" href="#" data-download="suite" data-os="win">{ICON_WIN} Suite for Windows</a>
+          <a class="btn mac" href="#" data-download="suite" data-os="mac">{ICON_MAC} Suite for <span class="kc">macOS</span></a>
+        </div>
+        <p class="dl-note" data-note="suite">Free · Windows: VST3 and the apps · macOS: AU, VST3 and the apps, Apple Silicon and Intel</p>
+      </div>
+    </div>
+  </section>"""
+
+
 def donate_block(R, slim=False, heading="h2"):
     return f"""<section class="donate{' slim' if slim else ''}" aria-labelledby="do-title">
     <div class="wrap">
@@ -184,7 +214,7 @@ def card(R, p, small=False):
     return f"""<article class="card" style="--c:{p['accent']}">
           <div class="stage"><img src="{R}img/{p['img']}" alt="" width="{p['w']}" height="{p['h']}" loading="lazy" decoding="async"></div>
           <div class="body">
-            <p class="label kind">{esc(p['kind'])}</p>
+            <p class="label kind">{esc(p.get('tagline', p['kind']))}</p>
             <{h}><a href="{R}plugins/{p['slug']}/">{p['name']}</a></{h}>
             {desc}
             {tags}
@@ -230,9 +260,15 @@ def write(path, text):
 
 # ------------------------------------------------------------------ home
 def trace(R):
-    # the signal chain under the hero: IN -> six plugins -> OUT, each node links to its page
-    nodes = [("peakslayer", 62, 122), ("krush", 238, 94), ("masterfuse", 386, 134), ("spectrakill", 574, 150), ("dark", 778, 86), ("shrapnel", 918, 124)]
-    path = "M 0 46 H 40 L 60 26 H 186 L 206 46 H 216 L 236 26 H 334 L 354 46 H 364 L 384 26 H 522 L 542 46 H 552 L 572 26 H 726 L 746 46 H 756 L 776 26 H 866 L 886 46 H 896 L 916 26 H 1044 L 1064 46 H 1148"
+    # the signal chain under the hero: IN -> the plugins (sidechain first) -> OUT, each node links to its page
+    # (plugin, x, width) along the chain; the path dips between the boxes
+    nodes = [("recoil", 50, 96), ("peakslayer", 180, 118), ("krush", 332, 88), ("masterfuse", 454, 128), ("spectrakill", 616, 144), ("dark", 794, 76), ("shrapnel", 904, 118)]
+    path = f"M 0 46 H {nodes[0][1] - 22}"
+    for i, (_, x, w) in enumerate(nodes):
+        gap = (nodes[i + 1][1] - (x + w)) if i + 1 < len(nodes) else 60
+        d = min(20, gap / 2 - 3)                      # slope width: down after this box, up before the next
+        path += f" L {x - 2} 26 H {x + w + 2} L {x + w + 2 + d:g} 46"
+        path += f" H {(nodes[i + 1][1] - 2 - min(20, gap / 2 - 3)) if i + 1 < len(nodes) else 1148:g}"
     names = {p["slug"]: p["name"] for p in PLUGINS}
     links = "\n".join(
         f'        <a href="{R}plugins/{s}/"><rect x="{x}" y="14" width="{w}" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="{x + w / 2:g}" y="31" text-anchor="middle">{names[s]}</text></a>'
@@ -287,7 +323,7 @@ def build_home():
         </div>
         <div class="ctas">
           <a class="btn primary" href="#plugins">Browse the plugins</a>
-          <a class="btn ghost" href="donate/">Support the work</a>
+          <a class="btn ghost" href="#suite">Download all {n}</a>
         </div>
       </div>
       <div class="stack" aria-hidden="true">
@@ -315,6 +351,8 @@ def build_home():
     </div>
   </section>
 
+  {suite_block(R, words)}
+
   <section class="facts" aria-label="What you get">
     <div class="wrap">
       <div class="f"><h3>Free, for real</h3><p>No account, no licence key, no trial. Use them in commercial and personal music.</p></div>
@@ -339,10 +377,64 @@ def ctl_rows(rows):
     return "\n            ".join(out)
 
 
+ICON_PLAY = '<svg class="i-play" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M2 1.5v17L17 10z" fill="currentColor"/></svg><svg class="i-pause" width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h4v16H2zM10 1h4v16h-4z" fill="currentColor"/></svg>'
+
+
+def listen_section(R, p, demo):
+    if not demo:
+        return ""
+    clips = [c for c in DEMOS["clips"] if c["id"] in demo["clips"]]
+    tabs = "".join(
+        f'<button type="button" role="tab" aria-selected="{"true" if i == 0 else "false"}" data-clip="{c["id"]}">{esc(c["label"])}</button>'
+        for i, c in enumerate(clips))
+    data = {"plugin": p["slug"], "base": f"{R}audio/", "keepLevel": demo["keepLevel"],
+            "clips": [dict(id=c["id"], label=c["label"], **demo["clips"][c["id"]]) for c in clips]}
+    first = demo["clips"][clips[0]["id"]]
+    match = ""
+    if demo["keepLevel"]:
+        match = '<label class="ab-match"><input type="checkbox"> Match loudness</label>'
+    lead = ("Bounced from a real session. Mix: a whole song, with RECOIL on the bass bus. AUDIO is the Default preset with the kick on its sidechain; "
+            "MAP is the Drum Bus Map preset with the drum bus and the bass bus bounced and loaded, so every kick and snare gets its own duck. "
+            "808: a kick and an 808, with the 808 Tail preset (BAND on FULL) and with Kick -> 808 and the Punch-Through Long shape. "
+            "Tick Match loudness to compare at equal volume."
+            if p["slug"] == "recoil" else
+            "Same clips on every plugin page. The level change is real here, since loudness is what it's for; tick Match loudness to compare at equal volume."
+            if demo["keepLevel"] else
+            "Same clips on every plugin page. Before and after play at the same loudness, so you hear the character, not a volume jump.")
+    return f"""
+  <section class="sec listen" id="listen" aria-labelledby="ls-title">
+    <div class="wrap">
+      <p class="label">Hear it</p>
+      <h2 id="ls-title">Before and after</h2>
+      <p class="lead">{lead}</p>
+      <div class="ab" data-side="after">
+        <div class="ab-tabs" role="tablist" aria-label="Sample">{tabs}</div>
+        <div class="ab-main">
+          <button class="ab-play" type="button" aria-label="Play">{ICON_PLAY}</button>
+          <div class="ab-wave" role="slider" tabindex="0" aria-label="Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><canvas></canvas></div>
+          <div class="ab-switch" role="group" aria-label="Before or after">
+            <button type="button" data-side="before" aria-pressed="false">Before</button>
+            <button type="button" data-side="after" aria-pressed="true">After</button>
+          </div>
+        </div>
+        <div class="ab-foot">
+          <span class="ab-setting">{esc(first["setting"])}</span>
+          <span class="ab-level"></span>
+          {match}
+          <span class="ab-hint">Press <kbd>B</kbd> to flip</span>
+        </div>
+        <script type="application/json" class="ab-data">{json.dumps(data, separators=(",", ":"))}</script>
+      </div>
+    </div>
+  </section>
+"""
+
+
 def build_plugin(p):
     R = "../../"
     s = p["slug"]
-    sections = [("overview", "Overview")]
+    demo = DEMOS["plugins"].get(p["slug"])
+    sections = ([("listen", "Listen")] if demo else []) + [("overview", "Overview")]
     if p.get("chain"): sections.append(("how", "How it works"))
     sections.append(("start", "Quick start"))
     sections.append(("controls", "Controls"))
@@ -378,12 +470,13 @@ def build_plugin(p):
     <div class="wrap">
       <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="{R}">Home</a></li><li><a href="{R}#plugins">Plugins</a></li><li aria-current="page">{p['name']}</li></ol></nav>
       <div class="info">
-        <p class="label kind">{esc(p['kind'])}</p>
+        <p class="label kind">{esc(p.get('tagline', p['kind']))}</p>
         <h1 id="p-title">{p['name']}</h1>
         <p class="pitch">{p['pitch']}</p>
         {download_buttons(p)}
         <p class="dl-note" data-note="{s}">{DL_NOTE}</p>
         <a class="manual-link" href="{R}manuals/{manual_file(p)}">{ICON_PDF} User manual (PDF)</a>
+        <a class="suite-link" href="{R}#suite">Want them all? Get the full suite of {len(PLUGINS)} <span aria-hidden="true">→</span></a>
       </div>
       <figure class="shot"><img src="{R}img/{p['img']}" alt="{esc(p['alt'])}" width="{p['w']}" height="{p['h']}" fetchpriority="high"></figure>
     </div>
@@ -395,6 +488,7 @@ def build_plugin(p):
     </div>
   </nav>
 
+{listen_section(R, p, demo)}
   <section class="sec" id="overview" aria-labelledby="ov-title">
     <div class="wrap">
       <p class="label">Overview</p>
@@ -487,8 +581,8 @@ def build_plugin(p):
   <section class="sec" id="sidechain" aria-labelledby="sc-title">
     <div class="wrap">
       <p class="label">Sidechain</p>
-      <h2 id="sc-title">Duck by frequency</h2>
-      <p class="lead">Classic sidechain turns the whole bass down on every kick. SPECTRAKILL only turns down the frequencies the kick is actually using.</p>
+      <h2 id="sc-title">{"Route the trigger" if s == "recoil" else "Duck by frequency"}</h2>
+      <p class="lead">{p.get("sidechain_lead", "Classic sidechain turns the whole bass down on every kick. SPECTRAKILL only turns down the frequencies the kick is actually using.")}</p>
       <ol class="steps">
           {sc}
       </ol>
