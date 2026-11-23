@@ -393,9 +393,9 @@ def listen_section(R, p, demo):
     match = ""
     if demo["keepLevel"]:
         match = '<label class="ab-match"><input type="checkbox"> Match loudness</label>'
-    lead = ("Bounced from a real session. Mix: a whole song, with RECOIL on the bass bus. AUDIO is the Default preset with the kick on its sidechain; "
+    lead = ("Bounced from a real session. 808: a kick and an 808, with Kick -> 808 and the Punch-Through Long shape, and with the 808 Tail preset (BAND on FULL). "
+            "Mix: a whole song, with RECOIL on the bass bus. AUDIO is the Default preset with the kick on its sidechain; "
             "MAP is the Drum Bus Map preset with the drum bus and the bass bus bounced and loaded, so every kick and snare gets its own duck. "
-            "808: a kick and an 808, with the 808 Tail preset (BAND on FULL) and with Kick -> 808 and the Punch-Through Long shape. "
             "Tick Match loudness to compare at equal volume."
             if p["slug"] == "recoil" else
             "Same clips on every plugin page. The level change is real here, since loudness is what it's for; tick Match loudness to compare at equal volume."

@@ -29,14 +29,14 @@ from demos import DOCS, REPO, TARGET_LUFS, PEAK_LIMIT_DB, lufs, peaks, mp3   # n
 
 # id: (tab label, setting shown in the player, before file, after file)
 CLIPS = {
+    "rc808punch": ("808 · Punch", "Preset: Kick -> 808 · shape Punch-Through Long",
+                   "Kick_808_before", "Kick_808__Kickto808_punch_through_long"),
+    "rc808tail": ("808 · Tail", "Preset: 808 Tail · BAND FULL",
+                  "Kick_808_before", "Kick_808__808_tail_full_band"),
     "rcmix": ("Mix · AUDIO", "AUDIO trigger · Preset: Default (load it, send the kick)",
               "Mix_before_sidechain", "Mix_audio_default"),
     "rcmap": ("Mix · MAP", "MAP trigger · Preset: Drum Bus Map with the bass bus (PER BASS)",
               "Mix_before_sidechain", "Mix_MAP_Per_Bass_Default"),
-    "rc808tail": ("808 · Tail", "Preset: 808 Tail · BAND FULL",
-                  "Kick_808_before", "Kick_808__808_tail_full_band"),
-    "rc808punch": ("808 · Punch", "Preset: Kick -> 808 · shape Punch-Through Long",
-                   "Kick_808_before", "Kick_808__Kickto808_punch_through_long"),
 }
 
 
