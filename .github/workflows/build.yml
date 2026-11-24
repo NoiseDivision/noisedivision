@@ -79,7 +79,7 @@ jobs:
           - name: Windows
             os: windows-latest
           - name: macOS
-            os: macos-latest
+            os: macos-15-intel   # Intel Macs: a separate queue from the often-full Apple Silicon one. The plugins are built for both either way (CMAKE_OSX_ARCHITECTURES).
     runs-on: ${{ matrix.os }}
     # a macOS build from scratch compiles twice (Intel and Apple Silicon) and can take over an hour
     timeout-minutes: 120
@@ -167,7 +167,7 @@ jobs:
           - name: Windows
             os: windows-latest
           - name: macOS
-            os: macos-latest
+            os: macos-15-intel   # Intel Macs: a separate queue from the often-full Apple Silicon one. The plugins are built for both either way (CMAKE_OSX_ARCHITECTURES).
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     steps:
