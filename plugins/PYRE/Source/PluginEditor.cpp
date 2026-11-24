@@ -629,21 +629,23 @@ void PyreContent::paint (juce::Graphics& g)
 //==============================================================================
 PyreEditor::PyreEditor (PyreProcessor& p) : AudioProcessorEditor (p), content (p, lnf)
 {
+    // the size it had last time (saved with the project). Read it before setting the limits: they resize the window,
+    // and resized() would overwrite it with the minimum. ("uiSize": 1.0.0 saved that minimum as "uiWidth", so it's ignored.)
+    const int w = juce::jlimit (PyreContent::kW * 6 / 10, PyreContent::kW * 2, (int) p.apvts.state.getProperty ("uiSize", PyreContent::kW));
     setLookAndFeel (&lnf);
     addAndMakeVisible (content);
     setResizable (true, true);
     getConstrainer()->setFixedAspectRatio ((double) PyreContent::kW / PyreContent::kH);
     setResizeLimits (PyreContent::kW * 6 / 10, PyreContent::kH * 6 / 10, PyreContent::kW * 2, PyreContent::kH * 2);
-    // the size it had last time (saved with the project)
-    const int w = juce::jlimit (PyreContent::kW * 6 / 10, PyreContent::kW * 2, (int) p.apvts.state.getProperty ("uiWidth", PyreContent::kW));
     setSize (w, juce::roundToInt ((double) w * PyreContent::kH / PyreContent::kW));
+    ready = true;
 }
 
 PyreEditor::~PyreEditor() { setLookAndFeel (nullptr); }
 
 void PyreEditor::resized()
 {
-    if (auto* pp = dynamic_cast<PyreProcessor*> (&processor)) pp->apvts.state.setProperty ("uiWidth", getWidth(), nullptr);
+    if (ready) if (auto* pp = dynamic_cast<PyreProcessor*> (&processor)) pp->apvts.state.setProperty ("uiSize", getWidth(), nullptr);
     const float s = (float) getWidth() / (float) PyreContent::kW;
     content.setTransform (juce::AffineTransform::scale (s));
     content.setBounds (0, 0, PyreContent::kW, PyreContent::kH);

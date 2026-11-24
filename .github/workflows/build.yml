@@ -1,22 +1,127 @@
 # Builds all the plugins for Windows and macOS, one download per plugin plus the full suite.
 #
-#   - Run it by hand: Actions tab -> "Build plugins" -> Run workflow.
-#     The finished files appear at the bottom of the run's page under "Artifacts".
-#   - Publish a release: push a version tag (for example v1.0.1). The files are then
+#   - Publish a release: push a version tag (for example v1.1.0). The files are then
 #     attached to a GitHub Release, which is where the website's download buttons point.
+#   - Run it by hand: Actions tab -> "Build plugins" -> Run workflow. The finished files
+#     appear at the bottom of the run's page under "Artifacts". Tick "Rebuild every plugin"
+#     to ignore the saved builds.
+#
+# Only the plugins that changed are compiled. Each plugin's finished build is saved (GitHub's
+# cache), keyed by a fingerprint of its own folder (plugins/<NAME>/) and this file. A plugin whose
+# files haven't changed since its last build reuses that build; one that changed (or is new) is
+# compiled again. Every release still contains every plugin and both suites, so the website's
+# download links keep working.
+#
+# GitHub only shares saved builds from the main branch with tag runs, so pushes to main that touch
+# a plugin also run this (build only, no release): by the time you tag, the changed plugins are
+# already built and the release run mostly reuses them. Saved builds unused for 7 days are dropped;
+# then that plugin simply compiles again.
+#
+# Adding a plugin: add it to the "plugin" list below and to scripts/plugins.sh.
 name: Build plugins
 
 on:
   push:
     tags: ["v*"]
+    branches: [main, master]
+    paths:
+      - "plugins/**"
+      - "scripts/*.sh"
+      - ".github/workflows/build.yml"
   workflow_dispatch:
+    inputs:
+      rebuild_all:
+        description: "Rebuild every plugin (ignore the saved builds)"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
 jobs:
+  # ---- tags only, first: keep the download links working while the plugins build.
+  # The site links to the newest ("latest") release. A release published on github.com before the
+  # files are ready would be the latest one with nothing in it, so every download would fail until
+  # the build ends. If that's the case, "latest" goes back to the previous release for now.
+  keep-links:
+    name: Keep the download links working
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Point "latest" at the previous release while this one has no files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          repo="$GITHUB_REPOSITORY"; tag="$GITHUB_REF_NAME"
+          if ! gh release view "$tag" --repo "$repo" > /dev/null 2>&1; then
+            echo "No release for $tag yet: nothing to do (the release is created with its files at the end)."; exit 0
+          fi
+          files=$(gh release view "$tag" --repo "$repo" --json assets --jq '.assets | length')
+          if [ "$files" -gt 0 ]; then echo "$tag already has its files."; exit 0; fi
+          prev=$(gh release list --repo "$repo" --exclude-drafts --exclude-pre-releases --limit 20 --json tagName --jq ".[].tagName" | grep -vx "$tag" | head -1 || true)
+          if [ -z "$prev" ]; then echo "No earlier release to fall back on."; exit 0; fi
+          gh release edit "$prev" --repo "$repo" --latest
+          echo "::notice::Downloads point at $prev until $tag has its files."
+
+  # ---- one job per plugin and system: reuse the saved build, or compile it
   build:
-    name: ${{ matrix.name }}
+    name: ${{ matrix.plugin }} (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: [KRUSH, PeakSlayer, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL, PYRE]
+        name: [Windows, macOS]
+        include:
+          - name: Windows
+            os: windows-latest
+          - name: macOS
+            os: macos-latest
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Reuse the saved build if this plugin hasn't changed
+        id: saved
+        if: ${{ !inputs.rebuild_all }}
+        uses: actions/cache@v4
+        with:
+          path: art/${{ matrix.plugin }}.tar.gz
+          key: build-${{ runner.os }}-${{ matrix.plugin }}-${{ hashFiles(format('plugins/{0}/**', matrix.plugin), '.github/workflows/build.yml') }}
+
+      - name: Build ${{ matrix.plugin }}
+        if: steps.saved.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          p="${{ matrix.plugin }}"
+          cmake -S "plugins/$p" -B "build/$p" -DCMAKE_BUILD_TYPE=Release
+          cmake --build "build/$p" --config Release --parallel 4
+          mkdir -p art
+          # a tarball keeps the macOS bundles' symlinks and permissions intact
+          tar -czf "art/$p.tar.gz" -C "build/$p/${p}_artefacts" Release
+
+      - name: Note whether it was reused
+        shell: bash
+        run: |
+          if [ "${{ steps.saved.outputs.cache-hit }}" = "true" ]; then
+            echo "::notice::${{ matrix.plugin }} (${{ matrix.name }}): unchanged, reused the saved build"
+          else
+            echo "::notice::${{ matrix.plugin }} (${{ matrix.name }}): compiled"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.name }}-${{ matrix.plugin }}
+          path: art/${{ matrix.plugin }}.tar.gz
+          if-no-files-found: error
+          retention-days: 3
+
+  # ---- per system: put every plugin's build back in place and make the downloads
+  package:
+    name: Package (${{ matrix.name }})
+    needs: build
     strategy:
       fail-fast: false
       matrix:
@@ -26,19 +131,25 @@ jobs:
           - name: macOS
             os: macos-latest
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 90
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build the plugins
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: build-${{ matrix.name }}-*
+          path: art
+          merge-multiple: true
+
+      - name: Unpack the builds
         shell: bash
         run: |
           set -euo pipefail
-          for p in KRUSH PeakSlayer MASTERFUSE SPECTRAKILL DARK SHRAPNEL RECOIL PYRE; do
-            echo "::group::$p"
-            cmake -S "plugins/$p" -B "build/$p" -DCMAKE_BUILD_TYPE=Release
-            cmake --build "build/$p" --config Release --parallel 4
-            echo "::endgroup::"
+          source scripts/plugins.sh
+          for entry in $PLUGINS; do
+            IFS=: read -r target product code <<< "$entry"
+            mkdir -p "build/$target/${target}_artefacts"
+            tar -xzf "art/$target.tar.gz" -C "build/$target/${target}_artefacts"
           done
 
       - name: Package for Windows (.zip)
@@ -61,14 +172,16 @@ jobs:
           path: dist/*
           if-no-files-found: error
 
+  # ---- tags only: the GitHub Release
   release:
     name: Publish the release
-    needs: build
+    needs: package
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: plugins-*
           path: dist
           merge-multiple: true
 
@@ -80,8 +193,9 @@ jobs:
           ls -l dist
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+            gh release edit "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --latest
           else
-            gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" \
+            gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --latest \
               --title "Noise Division plugins ${GITHUB_REF_NAME}" \
               --notes "Free downloads of PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL and PYRE, one by one or all together (NoiseDivision-Suite). Windows: unzip and copy the .vst3 to C:\\Program Files\\Common Files\\VST3. macOS: open the .pkg installer (AU, VST3 and the standalone app)."
           fi

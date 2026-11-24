@@ -16,6 +16,9 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
 2. Create a tag named `v` + the version, e.g. `v1.0.1`, and push it
    (GitHub Desktop: Repository > Create tag... then Push origin;
    or on github.com: Releases > Draft a new release > choose a new tag > Publish).
+   Pushing just the tag is best: the release is then created at the end of the build, with all its files,
+   so the website's download links never point at an empty release. If you publish the release on
+   github.com first, the workflow points "latest" back at the previous release until the files are in.
 3. The **Build plugins** workflow builds Windows and macOS, then attaches these files to that release:
 
    | Plugin     | Windows                  | macOS                  |
@@ -33,6 +36,12 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    The suite holds every plugin: on Windows one folder per plugin, on macOS one installer where
    Customize lets people untick any plugin. To add a plugin, add it to `scripts/plugins.sh` and the
    workflow's build list; both suites pick it up automatically.
+
+   Only the plugins that changed are compiled: each plugin's build is saved and reused until something
+   in its `plugins/<NAME>/` folder (or the workflow) changes. Every release still has every plugin and
+   both suites. Pushing plugin changes to main builds them right away (no release), so the tag run
+   later mostly reuses them. To force a full rebuild: Actions > Build plugins > Run workflow, tick
+   **Rebuild every plugin**.
 
 The website's buttons link to `releases/latest/download/<file>`, so they always point at the
 newest release. `GITHUB_REPO`, the donation links and the download file names are at the top of `docs/assets/site.js`.

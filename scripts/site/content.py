@@ -846,7 +846,7 @@ PLUGINS = [
 # ---------------------------------------------------------------------------------------------
 {
     "slug": "pyre", "name": "PYRE", "title": "Pyre", "kind": "Harmonic loudness for leads", "tagline": "Harmonic loudness",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "accent": "#ff6a1a",
     "img": "pyre.webp", "w": 1840, "h": 1240, "shape": "wide",
     "alt": "PYRE: a brushed steel interface with the logo cut by a molten seam, a sunken firebox where a lead's harmonics burn as orange and yellow flames over a grey ash line, a dashed line showing the slope HEAT aims for, embers rising, and forged steel knobs for IGNITE, HEAT, TILT and BURN with molten seams",

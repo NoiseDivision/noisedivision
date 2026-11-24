@@ -72,4 +72,5 @@ public:
 private:
     PyreLookAndFeel lnf;
     PyreContent content;
+    bool ready = false;   // don't remember the size until the window has its real one
 };
