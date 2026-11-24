@@ -81,7 +81,8 @@ jobs:
           - name: macOS
             os: macos-latest
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 60
+    # a macOS build from scratch compiles twice (Intel and Apple Silicon) and can take over an hour
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
 
