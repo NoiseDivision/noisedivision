@@ -141,10 +141,12 @@ jobs:
               > /dev/null 2>&1 || sleep 5
           mkdir -p upload && cp "art/$p.tar.gz" "upload/$key.tar.gz"
           gh release upload build-cache "upload/$key.tar.gz" --clobber --repo "$repo"
-          # drop this plugin's older saved builds for this system
-          gh release view build-cache --repo "$repo" --json assets --jq '.assets[].name' |
-            grep "^$p-$RUNNER_OS-" | grep -vx "$key.tar.gz" |
-            while read -r old; do gh release delete-asset build-cache "$old" --repo "$repo" --yes || true; done
+          # drop this plugin's older saved builds for this system (finding none is fine: "|| true",
+          # since grep finding nothing counts as a failure under pipefail)
+          old=$(gh release view build-cache --repo "$repo" --json assets --jq '.assets[].name' |
+                  grep "^$p-$RUNNER_OS-" | grep -vx "$key.tar.gz" || true)
+          for f in $old; do gh release delete-asset build-cache "$f" --repo "$repo" --yes || true; done
+          echo "saved $key.tar.gz"
 
       - uses: actions/upload-artifact@v4
         with:
