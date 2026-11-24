@@ -1,10 +1,10 @@
 # Noise Division
 
 Free audio plugins: **PEAKSLAYER** (soft clipper), **KRUSH** (multiband distortion),
-**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map) and **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
+**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map), **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling) and **FLATLINE** (clean loudness: a clipper, an upward compressor and a lookahead limiter for the master, with LEARN to hit a LUFS target). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
 
 ```
-plugins/            the eight JUCE projects (each builds on its own with CMake)
+plugins/            the nine JUCE projects (each builds on its own with CMake)
 docs/               the website (GitHub Pages serves this folder)
 scripts/            packaging: Windows .zip and macOS .pkg installers
 .github/workflows/  builds everything on GitHub's Windows and Mac machines
@@ -31,6 +31,7 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    | SHRAPNEL   | `SHRAPNEL-Windows.zip`   | `SHRAPNEL-macOS.pkg`   |
    | RECOIL     | `RECOIL-Windows.zip`     | `RECOIL-macOS.pkg`     |
    | PYRE       | `PYRE-Windows.zip`       | `PYRE-macOS.pkg`       |
+   | FLATLINE   | `FLATLINE-Windows.zip`   | `FLATLINE-macOS.pkg`   |
    | Full suite | `NoiseDivision-Suite-Windows.zip` | `NoiseDivision-Suite-macOS.pkg` |
 
    The suite holds every plugin: on Windows one folder per plugin, on macOS one installer where

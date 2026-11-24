@@ -17,6 +17,7 @@ const FILES = {
   shrapnel:    { win: "SHRAPNEL-Windows.zip",    mac: "SHRAPNEL-macOS.pkg" },
   recoil:      { win: "RECOIL-Windows.zip",      mac: "RECOIL-macOS.pkg" },
   pyre:        { win: "PYRE-Windows.zip",        mac: "PYRE-macOS.pkg" },
+  flatline:    { win: "FLATLINE-Windows.zip",    mac: "FLATLINE-macOS.pkg" },
   // every plugin in one download
   suite:       { win: "NoiseDivision-Suite-Windows.zip", mac: "NoiseDivision-Suite-macOS.pkg" },
 };

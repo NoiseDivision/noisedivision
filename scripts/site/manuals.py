@@ -39,7 +39,7 @@ def key_list(items):
     return f"<ol class='key{' two' if len(items) > 8 else ''}'>{li}</ol>"
 
 # light-page versions of the accents (the bone and pale colours vanish on white paper)
-PRINT_ACCENT = {"recoil": "#e2561e", "spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c"}
+PRINT_ACCENT = {"flatline": "#14995a", "recoil": "#e2561e", "spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c"}
 
 FONT_CSS = f"""
 @font-face {{ font-family: "Chakra Petch"; src: url("{FONTS}/chakra-petch-semibold.woff2"); font-weight: 600; }}
@@ -104,8 +104,11 @@ def body_html(p):
 
     quick = "".join(f"<li>{t}</li>" for t in p["quick"])
     secs.append(("Quick start", f"<ol class='steps'>{quick}</ol>"))
+    if p.get("workflow"):
+        wf = "".join(f"<li>{t}</li>" for t in p["workflow"])
+        secs.append((p.get("workflow_title", "Workflow"), f"<p>{p.get('workflow_lead', '')}</p><ol class='steps'>{wf}</ol>"))
 
-    help_line = " Turn on the <b>?</b> button to get a pop-up explanation when you hover any control." if p["slug"] in ("krush", "spectrakill", "shrapnel", "recoil") else " Hover a control to see a short explanation."
+    help_line = " Turn on the <b>?</b> button to get a pop-up explanation when you hover any control." if p["slug"] in ("krush", "spectrakill", "shrapnel", "recoil", "pyre", "flatline") else " Hover a control to see a short explanation."
     if p.get("overview"):
         ov_img, ov_items = p["overview"]
         shot = f"<figure class='annot'><img src='{MANUAL_IMG}/{ov_img}'></figure>{key_list(ov_items)}"
@@ -125,7 +128,7 @@ def body_html(p):
 
     if p.get("chain"):
         ch = "".join(f"<tr><th>{esc(a)}</th><td>{esc(b)}</td></tr>" for a, b in p["chain"])
-        secs.append(("How it works", f"<p>Everything below moves together when you turn the main knob, in this order.</p><table class='kv num'>{ch}</table>"))
+        secs.append(("How it works", f"<p>{p.get('chain_lead', 'Everything below moves together when you turn the main knob, in this order.')}</p><table class='kv num'>{ch}</table>"))
 
     ctl = ""
     for g, rows in p["controls"]:
@@ -139,13 +142,20 @@ def body_html(p):
     if p.get("modes"):
         word = "SHAPE" if p["slug"] == "krush" else "CHARACTER"
         r = "".join(f"<tr><th>{esc(n)}</th><td class='rng'>{esc(c)}</td><td>{esc(d)}</td></tr>" for n, c, d in p["modes"])
-        secs.append(("Modes", f"<p>{word} changes its job with the mode; its label in the plugin shows what it does.</p><table class='ctl'><thead><tr><th>Mode</th><th>{word.title()}</th><th>Sound</th></tr></thead><tbody>{r}</tbody></table>"))
+        if p.get("modes_title"):
+            secs.append(("Styles", f"<p>{esc(p['modes_lead'])}</p><table class='ctl'><thead><tr><th>Style</th><th>{esc(p['modes_word'])}</th><th>Sound</th></tr></thead><tbody>{r}</tbody></table>"))
+        else:
+            secs.append(("Modes", f"<p>{word} changes its job with the mode; its label in the plugin shows what it does.</p><table class='ctl'><thead><tr><th>Mode</th><th>{word.title()}</th><th>Sound</th></tr></thead><tbody>{r}</tbody></table>"))
 
     if p.get("sidechain"):
         sc = "".join(f"<li>{t}</li>" for t in p["sidechain"])
         secs.append(("Sidechain", f"<p>{p.get('sidechain_lead', 'Classic sidechain compression turns the whole bass down on every kick. SPECTRAKILL only turns down the frequencies the kick is actually using, at the moment it uses them.')}</p><ol class='steps'>{sc}</ol>"))
 
-    if p.get("presets"):
+    if p.get("presets") and not p.get("preset_dir"):
+        r = "".join(f"<tr><th>{esc(n)}</th><td>{esc(d)}</td></tr>" for n, d in p["presets"])
+        secs.append(("Presets", f"""<p>Pick a preset from the list at the top of the window, or step through them with the arrows. Each preset has a short description in the list.</p>
+<table class="kv">{r}</table><p>{esc(p.get('presets_note', ''))}</p>"""))
+    elif p.get("presets"):
         r = "".join(f"<tr><th>{esc(n)}</th><td>{esc(d)}</td></tr>" for n, d in p["presets"])
         d = p["preset_dir"]
         secs.append(("Presets", f"""<p>Pick a preset from the list at the top of the window, or step through them with the arrows. Each preset has a short description in the list.</p>
@@ -171,7 +181,7 @@ def body_html(p):
 <p class="muted">{p['name']} is free to use in commercial and personal music. It is provided as is, without warranty of any kind. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units, macOS and Logic Pro are trademarks of Apple Inc. All other product names are trademarks of their respective owners.</p>"""))
 
     toc = "".join(f"<li><span>{i + 1:02d}</span>{esc(t)}</li>" for i, (t, _) in enumerate(secs))
-    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation", "Reading the display") or (t == "The interface" and p.get("overview")) else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
+    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation", "Reading the display") or (t == "The interface" and p.get("overview")) else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works", "Styles") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{FONT_CSS}
 @page {{ size: A4; margin: 18mm 17mm 20mm; }}
 body {{ margin: 0; font-family: Montserrat, sans-serif; font-size: 9.6pt; line-height: 1.55; color: #1b1c1f; }}
@@ -213,7 +223,7 @@ figure.annot img {{ width: 100%; border-radius: 1.5mm; display: block; }}
 ol.key {{ list-style: none; padding: 0; margin: 0 0 4mm; }}
 ol.key.two {{ columns: 2; column-gap: 8mm; }}
 ol.key li {{ position: relative; padding-left: 8mm; margin-bottom: 1.8mm; break-inside: avoid; font-size: 9pt; line-height: 1.45; }}
-ol.key li span {{ position: absolute; left: 0; top: .1mm; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: #ff7a3d; color: #111214; font-family: "Chakra Petch"; font-weight: 700; font-size: 8pt; display: flex; align-items: center; justify-content: center; }}
+ol.key li span {{ position: absolute; left: 0; top: .1mm; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: {"#46f08f" if p["slug"] == "flatline" else "#ff7a3d"}; color: #111214; font-family: "Chakra Petch"; font-weight: 700; font-size: 8pt; display: flex; align-items: center; justify-content: center; }}
 ol.key li b {{ font-family: "Chakra Petch"; font-weight: 700; letter-spacing: .04em; margin-right: 1mm; }}
 img.ui {{ max-width: 100%; border-radius: 1.5mm; }}
 img.ui.tall {{ max-height: 128mm; }}

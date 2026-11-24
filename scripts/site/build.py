@@ -260,31 +260,35 @@ def write(path, text):
 
 # ------------------------------------------------------------------ home
 def trace(R):
-    # the signal chain under the hero: IN -> the plugins (sidechain first) -> OUT, each node links to its page
+    # the signal chain under the hero: IN -> the plugins in the order you'd chain them in a DAW -> OUT, each node links to its page
     # (plugin, x, width) along the chain; the path dips between the boxes
-    nodes = [("recoil", 50, 96), ("pyre", 174, 76), ("peakslayer", 278, 118), ("krush", 424, 88), ("masterfuse", 540, 128), ("spectrakill", 696, 144), ("dark", 868, 76), ("shrapnel", 972, 118)]
+    W = {"pyre": 76, "krush": 88, "shrapnel": 118, "dark": 76, "recoil": 96, "spectrakill": 144, "peakslayer": 118, "masterfuse": 128, "flatline": 104}
+    nodes, x = [], 50
+    for p in PLUGINS:                                  # the site order is the chain order
+        nodes.append((p["slug"], x, W.get(p["slug"], 100))); x += W.get(p["slug"], 100) + 28
+    end = x - 28 + 58                                  # OUT, right after the last box
     path = f"M 0 46 H {nodes[0][1] - 22}"
     for i, (_, x, w) in enumerate(nodes):
         gap = (nodes[i + 1][1] - (x + w)) if i + 1 < len(nodes) else 60
         d = min(20, gap / 2 - 3)                      # slope width: down after this box, up before the next
         path += f" L {x - 2} 26 H {x + w + 2} L {x + w + 2 + d:g} 46"
-        path += f" H {(nodes[i + 1][1] - 2 - min(20, gap / 2 - 3)) if i + 1 < len(nodes) else 1148:g}"
+        path += f" H {(nodes[i + 1][1] - 2 - min(20, gap / 2 - 3)) if i + 1 < len(nodes) else end:g}"
     names = {p["slug"]: p["name"] for p in PLUGINS}
     links = "\n".join(
         f'        <a href="{R}plugins/{s}/"><rect x="{x}" y="14" width="{w}" height="24" fill="#111214" stroke="#3a3c42"/><text class="node-name" x="{x + w / 2:g}" y="31" text-anchor="middle">{names[s]}</text></a>'
         for s, x, w in nodes)
     return f"""<div class="trace" aria-hidden="true">
     <div class="wrap">
-      <svg viewBox="0 0 1148 90" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="0 0 {end:g} 90" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="heat" x1="0" x2="1"><stop offset="0" stop-color="#ff3038"/><stop offset=".7" stop-color="#ff7138"/><stop offset="1" stop-color="#ffa648"/></linearGradient>
-          <filter id="glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="1200" height="130"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="glow" filterUnits="userSpaceOnUse" x="-20" y="-20" width="{end + 52:g}" height="130"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
         <path d="{path}" fill="none" stroke="url(#heat)" stroke-width="2" filter="url(#glow)"/>
         <path class="pulse" d="{path}" fill="none" stroke="#ffe2c8" stroke-width="3" stroke-linecap="round" filter="url(#glow)"/>
         <text class="node-label" x="0" y="74">IN</text>
 {links}
-        <text class="node-label" x="1148" y="74" text-anchor="end">OUT</text>
+        <text class="node-label" x="{end:g}" y="74" text-anchor="end">OUT</text>
       </svg>
     </div>
   </div>"""
@@ -327,7 +331,7 @@ def build_home():
         </div>
       </div>
       <div class="stack" aria-hidden="true">
-        <img class="s-1" src="img/{by['krush']['img']}" alt="" width="{by['krush']['w']}" height="{by['krush']['h']}">
+        <img class="s-1" src="img/{by['recoil']['img']}" alt="" width="{by['recoil']['w']}" height="{by['recoil']['h']}">
         <img class="s-2" src="img/{by['peakslayer']['img']}" alt="" width="{by['peakslayer']['w']}" height="{by['peakslayer']['h']}">
         <img class="s-3" src="img/{by['masterfuse']['img']}" alt="" width="{by['masterfuse']['w']}" height="{by['masterfuse']['h']}">
       </div>
@@ -434,6 +438,25 @@ def listen_section(R, p, demo):
 """
 
 
+def workflow_sec(p):
+    # a worked method, step by step (FLATLINE: set the sound, calibrate, LEARN)
+    if not p.get("workflow"):
+        return ""
+    steps = "\n          ".join(f"<li><span>{t}</span></li>" for t in p["workflow"])
+    return f"""
+  <section class="sec" id="workflow" aria-labelledby="wf-title">
+    <div class="wrap">
+      <p class="label">Workflow</p>
+      <h2 id="wf-title">{esc(p.get("workflow_title", "Workflow"))}</h2>
+      <p class="lead">{p.get("workflow_lead", "")}</p>
+      <ol class="steps">
+          {steps}
+      </ol>
+    </div>
+  </section>
+"""
+
+
 def build_plugin(p):
     R = "../../"
     s = p["slug"]
@@ -441,8 +464,9 @@ def build_plugin(p):
     sections = ([("listen", "Listen")] if demo else []) + [("overview", "Overview")]
     if p.get("chain"): sections.append(("how", "How it works"))
     sections.append(("start", "Quick start"))
+    if p.get("workflow"): sections.append(("workflow", "Workflow"))
     sections.append(("controls", "Controls"))
-    if p.get("modes"): sections.append(("modes", "Modes"))
+    if p.get("modes"): sections.append(("modes", p.get("modes_nav", "Styles" if p.get("modes_title") else "Modes")))
     if p.get("sidechain"): sections.append(("sidechain", "Sidechain"))
     if p.get("presets"): sections.append(("presets", "Presets"))
     sections += [("tips", "Tips"), ("install", "Install"), ("help", "Help")]
@@ -524,7 +548,7 @@ def build_plugin(p):
     <div class="wrap">
       <p class="label">Under the hood</p>
       <h2 id="how-title">How it works</h2>
-      <p class="lead">Everything below moves together when you turn the knob, in this order.</p>
+      <p class="lead">{p.get("chain_lead", "Everything below moves together when you turn the knob, in this order.")}</p>
       <ol class="chain">
         {chain}
       </ol>
@@ -541,7 +565,7 @@ def build_plugin(p):
       </ol>
     </div>
   </section>
-
+{workflow_sec(p)}
   <section class="sec" id="controls" aria-labelledby="ct-title">
     <div class="wrap">
       <p class="label">Reference</p>
@@ -565,14 +589,14 @@ def build_plugin(p):
 """
     if p.get("modes"):
         modes = "\n        ".join(
-            f'<article class="mode"><h3>{esc(n)}</h3>{f"<p class=s>Character: {esc(c)}</p>" if c else ""}<p>{esc(d)}</p></article>' for n, c, d in p["modes"])
+            f'<article class="mode"><h3>{esc(n)}</h3>{f"<p class=s>{esc(p.get(chr(109) + "odes_word", "Character"))}: {esc(c)}</p>" if c else ""}<p>{esc(d)}</p></article>' for n, c, d in p["modes"])
         label = "SHAPE" if s == "krush" else "CHARACTER"
         body += f"""
   <section class="sec" id="modes" aria-labelledby="md-title">
     <div class="wrap">
-      <p class="label">Modes</p>
-      <h2 id="md-title">{len(p['modes'])} ways to break it</h2>
-      <p class="lead">{'Each band picks one mode. SHAPE changes its name and job with the mode.' if s == 'krush' else 'CHARACTER changes its job with the mode; the label above the knob shows what it does.'}</p>
+      <p class="label">{"Styles" if p.get("modes_title") else "Modes"}</p>
+      <h2 id="md-title">{p.get("modes_title", f"{len(p['modes'])} ways to break it")}</h2>
+      <p class="lead">{p.get("modes_lead") or ('Each band picks one mode. SHAPE changes its name and job with the mode.' if s == 'krush' else 'CHARACTER changes its job with the mode; the label above the knob shows what it does.')}</p>
       <div class="modes">
         {modes.replace('Character:', label.title() + ':') if s == 'krush' else modes}
       </div>
@@ -595,7 +619,9 @@ def build_plugin(p):
 """
     if p.get("presets"):
         pre = "\n        ".join(f'<li><span class="n">{esc(n)}</span><span class="d">{esc(d)}</span></li>' for n, d in p["presets"])
-        d = p["preset_dir"]
+        d = p.get("preset_dir")
+        note = (f"""Click SAVE to store your own. They are kept in <code>%APPDATA%\\{d}\\Presets</code> on Windows and <code>~/Library/Application Support/{d}/Presets</code> on a Mac, so you can back them up or share them."""
+                if d else esc(p.get("presets_note", "Your own settings are saved with the project.")))
         body += f"""
   <section class="sec" id="presets" aria-labelledby="pr-title">
     <div class="wrap">
@@ -604,7 +630,7 @@ def build_plugin(p):
       <ul class="presets">
         {pre}
       </ul>
-      <p class="note">Click SAVE to store your own. They are kept in <code>%APPDATA%\\{d}\\Presets</code> on Windows and <code>~/Library/Application Support/{d}/Presets</code> on a Mac, so you can back them up or share them.</p>
+      <p class="note">{note}</p>
     </div>
   </section>
 """

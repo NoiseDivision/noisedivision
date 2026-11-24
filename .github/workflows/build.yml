@@ -70,7 +70,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        plugin: [KRUSH, PeakSlayer, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL, PYRE]
+        plugin: [KRUSH, PeakSlayer, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL, PYRE, FLATLINE]
         name: [Windows, macOS]
         include:
           - name: Windows
@@ -197,5 +197,5 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --latest \
               --title "Noise Division plugins ${GITHUB_REF_NAME}" \
-              --notes "Free downloads of PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL and PYRE, one by one or all together (NoiseDivision-Suite). Windows: unzip and copy the .vst3 to C:\\Program Files\\Common Files\\VST3. macOS: open the .pkg installer (AU, VST3 and the standalone app)."
+              --notes "Free downloads of PEAKSLAYER, KRUSH, MASTERFUSE, SPECTRAKILL, DARK, SHRAPNEL, RECOIL, PYRE and FLATLINE, one by one or all together (NoiseDivision-Suite). Windows: unzip and copy the .vst3 to C:\\Program Files\\Common Files\\VST3. macOS: open the .pkg installer (AU, VST3 and the standalone app)."
           fi
