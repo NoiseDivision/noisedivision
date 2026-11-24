@@ -38,11 +38,13 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    Customize lets people untick any plugin. To add a plugin, add it to `scripts/plugins.sh` and the
    workflow's build list; both suites pick it up automatically.
 
-   Only the plugins that changed are compiled: each plugin's build is saved and reused until something
-   in its `plugins/<NAME>/` folder (or the workflow) changes. Every release still has every plugin and
-   both suites. Pushing plugin changes to main builds them right away (no release), so the tag run
-   later mostly reuses them. To force a full rebuild: Actions > Build plugins > Run workflow, tick
-   **Rebuild every plugin**.
+   Only the plugins that changed are compiled, on Windows and macOS alike. Each plugin's finished
+   build is kept on a hidden pre-release called **build-cache**, named after the fingerprint of its
+   `plugins/<NAME>/` folder, and reused until a file in that folder changes. Editing the workflow or
+   another plugin doesn't trigger a rebuild, and the saved builds don't expire. Every release still
+   has every plugin and both suites. Leave build-cache in place (it's never the "latest" release the
+   site links to); if it's deleted, everything compiles once more. To force a full rebuild:
+   Actions > Build plugins > Run workflow, tick **Rebuild every plugin**.
 
 The website's buttons link to `releases/latest/download/<file>`, so they always point at the
 newest release. `GITHUB_REPO`, the donation links and the download file names are at the top of `docs/assets/site.js`.

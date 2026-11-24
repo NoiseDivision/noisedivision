@@ -6,16 +6,16 @@
 #     appear at the bottom of the run's page under "Artifacts". Tick "Rebuild every plugin"
 #     to ignore the saved builds.
 #
-# Only the plugins that changed are compiled. Each plugin's finished build is saved (GitHub's
-# cache), keyed by a fingerprint of its own folder (plugins/<NAME>/) and this file. A plugin whose
-# files haven't changed since its last build reuses that build; one that changed (or is new) is
-# compiled again. Every release still contains every plugin and both suites, so the website's
-# download links keep working.
+# Only the plugins that changed are compiled. Each plugin's finished build (per system) is kept as a
+# file on a hidden pre-release called "build-cache", named after the git fingerprint of the plugin's
+# own folder (plugins/<NAME>/). That fingerprint only changes when a file in that folder changes, and
+# it is the same on Windows and macOS, so editing this workflow or another plugin doesn't rebuild
+# anything. The saved builds don't expire and have no size limit (unlike GitHub's Actions cache), and
+# tag runs and branch runs share them. Every release still contains every plugin and both suites.
 #
-# GitHub only shares saved builds from the main branch with tag runs, so pushes to main that touch
-# a plugin also run this (build only, no release): by the time you tag, the changed plugins are
-# already built and the release run mostly reuses them. Saved builds unused for 7 days are dropped;
-# then that plugin simply compiles again.
+# "build-cache" is a pre-release, so it is never the "latest" release the website links to. Don't
+# delete it: if you do, every plugin simply compiles once more. To force a full rebuild after
+# changing the build steps themselves, raise RECIPE below (or tick "Rebuild every plugin").
 #
 # Adding a plugin: add it to the "plugin" list below and to scripts/plugins.sh.
 name: Build plugins
@@ -37,6 +37,9 @@ on:
 
 permissions:
   contents: write
+
+env:
+  RECIPE: "2"   # raise this when the build steps change, to rebuild every plugin once
 
 jobs:
   # ---- tags only, first: keep the download links working while the plugins build.
@@ -84,14 +87,28 @@ jobs:
 
       - name: Reuse the saved build if this plugin hasn't changed
         id: saved
-        if: ${{ !inputs.rebuild_all }}
-        uses: actions/cache@v4
-        with:
-          path: art/${{ matrix.plugin }}.tar.gz
-          key: build-${{ runner.os }}-${{ matrix.plugin }}-${{ hashFiles(format('plugins/{0}/**', matrix.plugin), '.github/workflows/build.yml') }}
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REBUILD: ${{ inputs.rebuild_all }}
+        run: |
+          set -euo pipefail
+          p="${{ matrix.plugin }}"
+          # the git fingerprint of plugins/<NAME>/: it changes only when a file in that folder changes
+          key="$p-$RUNNER_OS-$(git rev-parse "HEAD:plugins/$p" | cut -c1-16)-r$RECIPE"
+          echo "key=$key" >> "$GITHUB_OUTPUT"
+          mkdir -p art
+          if [ "$REBUILD" != "true" ] && gh release download build-cache --repo "$GITHUB_REPOSITORY" --pattern "$key.tar.gz" --dir art 2> /dev/null; then
+            mv "art/$key.tar.gz" "art/$p.tar.gz"
+            echo "hit=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::$p (${{ matrix.name }}): unchanged, reused the saved build"
+          else
+            echo "hit=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::$p (${{ matrix.name }}): changed or new, compiling"
+          fi
 
       - name: Build ${{ matrix.plugin }}
-        if: steps.saved.outputs.cache-hit != 'true'
+        if: steps.saved.outputs.hit != 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -99,17 +116,34 @@ jobs:
           cmake -S "plugins/$p" -B "build/$p" -DCMAKE_BUILD_TYPE=Release
           cmake --build "build/$p" --config Release --parallel 4
           mkdir -p art
-          # a tarball keeps the macOS bundles' symlinks and permissions intact
-          tar -czf "art/$p.tar.gz" -C "build/$p/${p}_artefacts" Release
+          # a tarball keeps the macOS bundles' symlinks and permissions intact. Only what the installers
+          # use (VST3, AU, Standalone): the intermediate code library next to them is large, above all
+          # on macOS (two architectures), and would make every saved build slow to store and fetch.
+          cd "build/$p/${p}_artefacts"
+          parts=(); for d in VST3 AU Standalone; do [ -d "Release/$d" ] && parts+=("Release/$d"); done
+          tar -czf "$GITHUB_WORKSPACE/art/$p.tar.gz" "${parts[@]}"
+          ls -lh "$GITHUB_WORKSPACE/art/$p.tar.gz"
 
-      - name: Note whether it was reused
+      - name: Save the build for next time
+        if: steps.saved.outputs.hit != 'true'
         shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ steps.saved.outputs.cache-hit }}" = "true" ]; then
-            echo "::notice::${{ matrix.plugin }} (${{ matrix.name }}): unchanged, reused the saved build"
-          else
-            echo "::notice::${{ matrix.plugin }} (${{ matrix.name }}): compiled"
-          fi
+          set -euo pipefail
+          p="${{ matrix.plugin }}"; key="${{ steps.saved.outputs.key }}"; repo="$GITHUB_REPOSITORY"
+          # the hidden pre-release that holds the saved builds (several jobs may try to create it at once)
+          gh release view build-cache --repo "$repo" > /dev/null 2>&1 ||
+            gh release create build-cache --repo "$repo" --prerelease --target "$GITHUB_SHA" \
+              --title "Build cache (internal, not a download)" \
+              --notes "Saved plugin builds that the Build plugins workflow reuses so unchanged plugins aren't compiled again. Not for download. Safe to delete: everything then compiles once more." \
+              > /dev/null 2>&1 || sleep 5
+          mkdir -p upload && cp "art/$p.tar.gz" "upload/$key.tar.gz"
+          gh release upload build-cache "upload/$key.tar.gz" --clobber --repo "$repo"
+          # drop this plugin's older saved builds for this system
+          gh release view build-cache --repo "$repo" --json assets --jq '.assets[].name' |
+            grep "^$p-$RUNNER_OS-" | grep -vx "$key.tar.gz" |
+            while read -r old; do gh release delete-asset build-cache "$old" --repo "$repo" --yes || true; done
 
       - uses: actions/upload-artifact@v4
         with:
