@@ -1,10 +1,10 @@
 # Noise Division
 
 Free audio plugins: **PEAKSLAYER** (soft clipper), **KRUSH** (multiband distortion),
-**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion) and **RECOIL** (the sidechain weapon: zero-latency ducking with a song map). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
+**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map) and **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
 
 ```
-plugins/            the seven JUCE projects (each builds on its own with CMake)
+plugins/            the eight JUCE projects (each builds on its own with CMake)
 docs/               the website (GitHub Pages serves this folder)
 scripts/            packaging: Windows .zip and macOS .pkg installers
 .github/workflows/  builds everything on GitHub's Windows and Mac machines
@@ -27,6 +27,7 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    | DARK       | `DARK-Windows.zip`       | `DARK-macOS.pkg`       |
    | SHRAPNEL   | `SHRAPNEL-Windows.zip`   | `SHRAPNEL-macOS.pkg`   |
    | RECOIL     | `RECOIL-Windows.zip`     | `RECOIL-macOS.pkg`     |
+   | PYRE       | `PYRE-Windows.zip`       | `PYRE-macOS.pkg`       |
    | Full suite | `NoiseDivision-Suite-Windows.zip` | `NoiseDivision-Suite-macOS.pkg` |
 
    The suite holds every plugin: on Windows one folder per plugin, on macOS one installer where
@@ -77,8 +78,8 @@ docs/manuals/<NAME>-User-Manual.pdf
 
 **Adding a plugin:** add a screenshot to `docs/img/`, an entry to `PLUGINS` in `content.py`, its file names to
 `FILES` in `site.js`, and run the three scripts. The menu, home page, footer, sitemap and "more plugins"
-strips pick it up automatically. (The signal-chain graphic on the home page lists seven plugins; add a node to
-`trace()` in `build.py` for a seventh.)
+strips pick it up automatically. (The signal-chain graphic on the home page lists every plugin; add a node to
+`trace()` in `build.py` for a new one.)
 
 To preview locally: `cd docs` then `python -m http.server`, and open http://localhost:8000.
 
@@ -94,7 +95,7 @@ python tools/render/demos.py <folder with Before_Drumloop.wav, Before_Bassloop.w
 python scripts/site/build.py
 ```
 
-The settings used for each plugin and clip are at the top of `demos.py`. RECOIL's players are bounced from a real session instead (a sidechain and a song map need a whole song):
-`python tools/render/recoil_bounces.py <folder with the bounces>` encodes them (the expected file names are at the top of that script), and `demos.py` keeps them. It writes the MP3s to
+The settings used for each plugin and clip are at the top of `demos.py`. RECOIL's and PYRE's players are bounced from a real session instead (a sidechain, a song map or a whole mix):
+`python tools/render/bounces.py recoil|pyre <folder with the bounces>` encodes them (the expected file names are at the top of that script), and `demos.py` keeps them. It writes the MP3s to
 `docs/audio/` and the player data to `scripts/site/demos.json`. (Needs `pip install numpy soundfile pyloudnorm`
 and ffmpeg.) Render again whenever a plugin's sound changes.

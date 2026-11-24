@@ -48,6 +48,23 @@ namespace
 WaveView::WaveView (RecoilProcessor& p, RecoilLookAndFeel& l) : processor (p), lnf (l)
 {
     nodes = processor.currentNodes();
+    styleButton.getProperties().set ("seg", true); styleButton.getProperties().set ("hot", true); styleButton.getProperties().set ("size", 8.5f);
+    styleButton.setClickingTogglesState (false);
+    styleButton.setTooltip ("HIT: one lane per hit. The kick filled in red, the bass after RECOIL over it (with the last few hits fading behind), and the duck as a solid fill from the top. Click again for the two lanes (PHASE on top).");
+    styleButton.onClick = [this]
+    {
+        const bool on = ! (bool) processor.apvts.state.getProperty ("waveStyle", false);
+        processor.apvts.state.setProperty ("waveStyle", on, nullptr);
+        styleButton.setToggleState (on, juce::dontSendNotification);
+        repaint();
+    };
+    styleButton.setToggleState ((bool) processor.apvts.state.getProperty ("waveStyle", false), juce::dontSendNotification);
+    addAndMakeVisible (styleButton);
+}
+
+void WaveView::resized()
+{
+    styleButton.setBounds ((int) px1() + 4, getHeight() - 30, 38, 18);
 }
 
 double WaveView::cycleSec() const
@@ -87,10 +104,13 @@ void WaveView::endGesture (const char* id) { if (auto* p = processor.apvts.getPa
 void WaveView::update()
 {
     fs = processor.hostRate.load();
+    styleButton.setToggleState ((bool) processor.apvts.state.getProperty ("waveStyle", false), juce::dontSendNotification);
+    styleButton.setVisible (! editing);
     // AUTO, and MAP outside EDIT: show the duck the shown hit actually got (from the captured gain). In MAP each kind
     // of hit has its own shape, depth and length, so the slot picked in SHAPES isn't necessarily what the shown hit used.
     const bool mapLive = juce::roundToInt (param ("trigger")) == 3 && ! editing && haveCapture;
-    autoShape = processor.bassAutoActive() || mapLive;
+    const bool rmMode = juce::roundToInt (param ("trigger")) == 4;                // RM: no shape, only the duck it really did
+    autoShape = processor.bassAutoActive() || mapLive || rmMode;
     if (autoShape)
     {
         nodes.clear();
@@ -143,6 +163,7 @@ void WaveView::update()
         if (start >= 0)
         {
             const int64_t s0 = start - (int64_t) (pre * fs);
+            pushEcho();
             kick.resize ((size_t) n); before.resize ((size_t) n); after.resize ((size_t) n); gain.resize ((size_t) n);
             // the top lane: the kick's low end for kicks; for snares, rims and ghost notes the sidechain itself (the drums),
             // so the hit being shown starts at 0 ms there too
@@ -186,6 +207,7 @@ void WaveView::update()
     };
     if (pendingHit >= 0 && written >= pendingHit + (int64_t) (span * 1.08 * fs))
     {
+        pushEcho();
         capture (pendingHit - (int64_t) (pre * fs), true);
         pendingHit = -1;
         measureKeys();
@@ -519,13 +541,22 @@ void WaveView::paint (juce::Graphics& g)
             g.drawText (s, Rectangle<float> (x + 18.0f, 12.0f, 120.0f, 14.0f), Justification::centredLeft, false);
             x += 18.0f + (float) GlyphArrangement::getStringWidthInt (g.getCurrentFont(), s) + 16.0f;
         };
-        item ("AFTER", Pal::text, false);
-        item ("REMOVED", Pal::orange, true);
-        if (showPhase) item ("KICK", Pal::red, false);
+        if (hitStyle())
+        {
+            if (showPhase) item (laneIsDrums ? "DRUMS" : "KICK", Pal::red, false);
+            item ("BASS AFTER", Pal::text, false);
+        }
+        else
+        {
+            item ("AFTER", Pal::text, false);
+            item ("REMOVED", Pal::orange, true);
+            if (showPhase) item ("KICK", Pal::red, false);
+        }
         const bool mapMode = juce::roundToInt (processor.apvts.getRawParameterValue ("trigger")->load()) == 3;
         const char* kindNames[5] = { "SUB SHAPE", "SNARE SHAPE", "PLUCK SHAPE", "MID SHAPE", "NOTE SHAPE" };
         const char* hitDucks[4] = { "KICK DUCK", "SNARE DUCK", "RIM DUCK", "GHOST DUCK" };
-        item (processor.bassAutoActive() ? "AUTO DUCK" : mapMode && ! editing && autoShape ? hitDucks[juce::jlimit (0, 3, lastKind)]
+        const bool rmMode = juce::roundToInt (processor.apvts.getRawParameterValue ("trigger")->load()) == 4;
+        item (rmMode ? "RM SQUEEZE" : hitStyle() && ! autoShape ? "DUCK" : processor.bassAutoActive() ? "AUTO DUCK" : mapMode && ! editing && autoShape ? hitDucks[juce::jlimit (0, 3, lastKind)]
               : processor.bassShapesActive() ? kindNames[processor.shapeSlot()]
               : mapMode ? (processor.shapeSlot() == 1 ? "SNARE SHAPE" : "KICK SHAPE") : "SHAPE", Pal::orange, false);
     }
@@ -570,7 +601,8 @@ void WaveView::paint (juce::Graphics& g)
         }
     }
     g.setColour (Colour (0xff1c1f24));
-    if (showPhase) g.fillRect (x0, lane.getBottom() + 7.0f, x1 - x0, 1.0f);
+    if (twoLanes()) g.fillRect (x0, lane.getBottom() + 7.0f, x1 - x0, 1.0f);
+    const bool hit = hitStyle();
 
     // ---- captured waves, one value per pixel column (the sample with the largest swing)
     const int n = (int) after.size();
@@ -594,15 +626,7 @@ void WaveView::paint (juce::Graphics& g)
         }
     }
 
-    if (showPhase)
-    {
-    // ---- phase lane
-    g.setFont (lnf.caps (8.5f, 1.6f));
-    g.setColour (Colour (0xff6c737d));
-    static const char* kindNames[4] = { "KICK", "SNARE", "RIM", "GHOST NOTE" };
-    g.drawText (laneIsDrums ? String (kindNames[jlimit (0, 3, lastKind)]) + "  " + String::fromUTF8 ("\xc2\xb7") + "  THE DRUMS (SIDECHAIN) vs BASS"
-                            : "PHASE  " + String::fromUTF8 ("\xc2\xb7") + "  KICK LOWS vs BASS", Rectangle<float> (x0 + 14.0f, lane.getY() - 18.0f, 400.0f, 12.0f), Justification::centredLeft, false);
-    if (! laneIsDrums)
+    if (showPhase && ! laneIsDrums)
     {
         // keys: the kick's note and the bass's note, and how far apart they are
         const float kHz = keyOf (kickHz, kickN), bHz = keyOf (bassHz, bassN);
@@ -612,7 +636,7 @@ void WaveView::paint (juce::Graphics& g)
             g.setFont (f); g.setColour (c);
             const float w = (float) GlyphArrangement::getStringWidthInt (f, t) + 1.0f;
             x -= w;
-            g.drawText (t, Rectangle<float> (x, lane.getY() - 19.0f, w + 2.0f, 14.0f), Justification::centredLeft, false);
+            g.drawText (t, Rectangle<float> (x, 33.0f, w + 2.0f, 14.0f), Justification::centredLeft, false);
             x -= 10.0f;
         };
         auto key = [&] (float hz)
@@ -642,6 +666,20 @@ void WaveView::paint (juce::Graphics& g)
         right (key (kHz), lnf.chak (11.0f), processor.sidechainConnected.load() ? Pal::red : Pal::dim);
         right ("KICK", lnf.caps (8.5f, 1.6f), Colour (0xff6c737d));
     }
+    if (hit && showPhase)
+    {
+        g.setFont (lnf.caps (8.5f, 1.6f)); g.setColour (Colour (0xff6c737d));
+        g.drawText (laneIsDrums ? String ("HIT  ") + String::fromUTF8 ("\xc2\xb7") + "  THE DRUMS (SIDECHAIN), THE BASS AND ITS DUCK"
+                                : String ("HIT  ") + String::fromUTF8 ("\xc2\xb7") + "  KICK LOWS, THE BASS AND ITS DUCK", Rectangle<float> (jmax (x0 + 14.0f, tx (0.0) + 12.0f), 34.0f, 400.0f, 12.0f), Justification::centredLeft, false);
+    }
+    if (twoLanes())
+    {
+    // ---- phase lane
+    g.setFont (lnf.caps (8.5f, 1.6f));
+    g.setColour (Colour (0xff6c737d));
+    static const char* kindNames[4] = { "KICK", "SNARE", "RIM", "GHOST NOTE" };
+    g.drawText (laneIsDrums ? String (kindNames[jlimit (0, 3, lastKind)]) + "  " + String::fromUTF8 ("\xc2\xb7") + "  THE DRUMS (SIDECHAIN) vs BASS"
+                            : "PHASE  " + String::fromUTF8 ("\xc2\xb7") + "  KICK LOWS vs BASS", Rectangle<float> (x0 + 14.0f, lane.getY() - 18.0f, 400.0f, 12.0f), Justification::centredLeft, false);
     const float lc = lane.getCentreY();
     g.setColour (Colour (0xff1c1f24)); g.fillRect (x0, lc, x1 - x0, 1.0f);
     const bool sc = processor.sidechainConnected.load();
@@ -683,7 +721,97 @@ void WaveView::paint (juce::Graphics& g)
     // ---- main lane: before (hatched), after (white)
     const float mt = main.getY() + 10.0f, mb = main.getBottom() - 6.0f, mc = (mt + mb) * 0.5f, amp = (mb - mt) * 0.5f * 0.96f;
     g.setColour (Colour (0xff1c1f24)); g.fillRect (x0, mc, x1 - x0, 1.0f);
-    if (n > 0 && mB > 1e-5f)
+    if (hit)
+    {
+        // ---- HIT style: one lane. Back to front: the duck (a solid fill from the top down to the gain), the kick (filled),
+        // the bass of the last few hits (fading), the bass before (faint) and after RECOIL (bright)
+        Graphics::ScopedSaveState ss (g);
+        g.reduceClipRegion (main.toNearestInt());
+        // the gain per pixel column: what this hit really got (the lowest in the column), or the shape until a hit is caught
+        std::vector<float> cG ((size_t) cols + 1, 1.0f);
+        for (int c = 0; c <= cols; ++c)
+        {
+            if (haveCapture && n > 0)
+            {
+                const int i0 = (int) ((double) c / (cols + 1) * n), i1 = juce::jmax (i0 + 1, (int) ((double) (c + 1) / (cols + 1) * n));
+                float m = 1.0f; for (int i = i0; i < juce::jmin (i1, n); ++i) m = juce::jmin (m, gain[(size_t) i]);
+                cG[(size_t) c] = m;
+            }
+            else
+            {
+                const double t = xt (x0 + (float) c);
+                cG[(size_t) c] = (float) (t < 0.0 ? 1.0 : trig == 0 ? shownGain (nodes, std::fmod (t / cyc, 1.0)) : shownGain (nodes, juce::jmin (1.0, t / cyc)));
+            }
+        }
+        {
+            const float top = yLevel (1.0);                                   // 0 dB: no duck, no fill
+            Path duck; duck.startNewSubPath (x0, top);
+            for (int c = 0; c <= cols; ++c) duck.lineTo (x0 + (float) c, juce::jmax (top, yLevel (cG[(size_t) c])));
+            duck.lineTo (x0 + (float) cols, top); duck.closeSubPath();
+            g.setGradientFill (ColourGradient (Pal::orange.withAlpha (0.78f), 0.0f, top, Pal::orange.withAlpha (0.38f), 0.0f, main.getBottom(), false));
+            g.fillPath (duck);
+        }
+        if (n > 0)
+        {
+            auto lobe = [&] (const std::vector<float>& v, float scale)
+            {
+                Path p; p.startNewSubPath (x0, mc);
+                for (int c = 0; c <= cols; ++c) p.lineTo (x0 + (float) c, mc - v[(size_t) c] * scale);
+                p.lineTo (x0 + (float) cols, mc); p.closeSubPath();
+                return p;
+            };
+            auto line = [&] (const std::vector<float>& v, float scale)
+            {
+                Path p; for (int c = 0; c <= cols; ++c) { const Point<float> pt (x0 + (float) c, mc - v[(size_t) c] * scale); if (c == 0) p.startNewSubPath (pt); else p.lineTo (pt); }
+                return p;
+            };
+            const bool sc = processor.sidechainConnected.load();
+            if (sc && showPhase && mK > 1e-4f)
+            {
+                g.setColour (Pal::red.withAlpha (0.55f)); g.fillPath (lobe (cK, amp * 0.9f / mK));
+                g.setColour (Pal::red); g.strokePath (line (cK, amp * 0.9f / mK), PathStrokeType (1.0f));
+            }
+            if (mB > 1e-5f)
+            {
+                // the last few hits, fading (only those captured over the same window)
+                float alpha = 0.16f;
+                for (const auto& e : echoes)
+                {
+                    if ((int) e.size() != n) continue;
+                    std::vector<float> cE ((size_t) cols + 1);
+                    for (int c = 0; c <= cols; ++c)
+                    {
+                        const int i0 = (int) ((double) c / (cols + 1) * n), i1 = juce::jmax (i0 + 1, (int) ((double) (c + 1) / (cols + 1) * n));
+                        float a = 0; for (int i = i0; i < juce::jmin (i1, n); ++i) if (std::abs (e[(size_t) i]) > std::abs (a)) a = e[(size_t) i];
+                        cE[(size_t) c] = a;
+                    }
+                    g.setColour (Pal::text.withAlpha (alpha)); g.strokePath (line (cE, amp / mB), PathStrokeType (1.0f));
+                    alpha *= 0.6f;
+                }
+                g.setColour (Colour (0xff8a919b).withAlpha (0.35f)); g.strokePath (line (cB, amp / mB), PathStrokeType (0.9f));
+                g.setColour (Colour (0xffe9edf1)); g.strokePath (line (cA, amp / mB), PathStrokeType (1.4f));
+            }
+        }
+        // the edge of the duck, on top
+        {
+            Path edge;
+            for (int c = 0; c <= cols; ++c) { const Point<float> pt (x0 + (float) c, yLevel (cG[(size_t) c])); if (c == 0) edge.startNewSubPath (pt); else edge.lineTo (pt); }
+            g.setColour (Pal::orange.withAlpha (0.3f)); g.strokePath (edge, PathStrokeType (5.0f, PathStrokeType::curved, PathStrokeType::rounded));
+            g.setColour (Colour (0xffffb27a)); g.strokePath (edge, PathStrokeType (1.8f, PathStrokeType::curved, PathStrokeType::rounded));
+        }
+        if (n == 0 || mB <= 1e-5f)
+        {
+            g.setFont (lnf.caps (9.5f, 1.2f)); g.setColour (Pal::faint);
+            g.drawText ("PLAY SOMETHING THROUGH RECOIL", main.withTrimmedTop (main.getHeight() * 0.55f), Justification::centredTop, false);
+        }
+        else if (! processor.sidechainConnected.load() && showPhase && trig != 1)
+        {
+            g.setFont (lnf.caps (9.5f, 1.2f)); g.setColour (Pal::dim);
+            g.drawText (laneIsDrums ? "SEND THE DRUM BUS TO RECOIL'S SIDECHAIN TO SEE THE HITS" : "SEND THE KICK TO RECOIL'S SIDECHAIN TO SEE IT HERE",
+                        main.withTrimmedTop (main.getHeight() - 40.0f), Justification::centred, false);
+        }
+    }
+    else if (n > 0 && mB > 1e-5f)
     {
         auto lobe = [&] (const std::vector<float>& v)
         {
@@ -712,7 +840,8 @@ void WaveView::paint (juce::Graphics& g)
         g.drawText ("PLAY SOMETHING THROUGH RECOIL", main.withTrimmedTop (main.getHeight() * 0.55f), Justification::centredTop, false);
     }
 
-    // ---- shape
+    // ---- shape (HIT style: the edge of the fill is the duck)
+    if (! hit)
     {
         Graphics::ScopedSaveState ss (g);
         g.reduceClipRegion (main.toNearestInt());
@@ -2043,6 +2172,10 @@ RecoilUI::RecoilUI (RecoilProcessor& p) : processor (p), wave (p, lnf), spec (p,
         { &mapGhostDb, "mapGhostDb", "", { 46, 127 }, 18, 2, "mini brass", 12.0, "GHOSTS BELOW: a hit this much quieter than the main hits of its kind counts as a ghost note" },
         { &clearance, "clearance", "", { 900, 230 }, 56, 3, "", 6.0, "CLEARANCE: how far (dB) each kick and snare should stand above the bass. More clearance: deeper, longer ducks." },
         { &recovery, "recovery", "", { 1014, 230 }, 40, 3, "", 60.0, "RECOVERY: the fastest the bass may come back up (time for 20 dB). Longer: smoother, less pumping." },
+        { &rmCeiling, "rmCeiling", "", { 212, 81 }, 18, 2, "mini", -3.0, "CEILING: kick + bass may not go above this (dBFS). On every sample the bass gets only the room the kick leaves under it. Lower: more squeeze." },
+        { &rmRange, "rmRange", "", { 342, 81 }, 18, 2, "mini", 24.0, "RANGE: the furthest the bass may go down (dB)" },
+        { &rmHold, "rmHold", "", { 456, 81 }, 18, 2, "mini brass", 0.0, "HOLD: how long the bass stays down before it comes back. HOLD and SMOOTH at 0: the bass follows the kick's waveform sample by sample, the grittiest" },
+        { &rmRelease, "rmRelease", "", { 568, 81 }, 18, 2, "mini brass", 3.0, "SMOOTH: how fast the bass comes back after each squeeze. Longer: smoother, less grit, a little less level" },
     };
     for (const auto& d : kdefs)
     {
@@ -2083,14 +2216,15 @@ RecoilUI::RecoilUI (RecoilProcessor& p) : processor (p), wave (p, lnf), spec (p,
         }
         attachments.push_back (std::move (a));
     };
-    segRow (triggerButtons, 4, "trigger", { "SYNC", "MIDI", "AUDIO", "MAP" },
+    segRow (triggerButtons, 5, "trigger", { "SYNC", "MIDI", "AUDIO", "MAP", "RM" },
             { "SYNC: the shape runs in time with the song, no sidechain needed",
               "MIDI: every MIDI note into RECOIL starts the shape. Route the kick's MIDI pattern to RECOIL.",
               "AUDIO: every kick on RECOIL's sidechain input starts the shape",
-              "MAP: load the song's drum bus (bounced from bar 1); every kick and snare in it starts the shape exactly on time, with its own depth" }, "hot");
+              "MAP: load the song's drum bus (bounced from bar 1); every kick and snare in it starts the shape exactly on time, with its own depth",
+              "RM: \"ring mod\" sidechain. No shape: on every sample the bass gets only the room the kick on the sidechain leaves under CEILING. Louder, no pumping, a little grit" }, "hot");
     segRow (ghostButtons, 3, "mapGhost", { "IGNORE", "SCALE", "FULL" },
             { "Ghost notes don't duck the bass", "Ghost notes duck a little, softer ones less", "Ghost notes duck like the main hits" }, "hot", 9.0f);
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 5; ++i)
     {
         auto plain = triggerButtons[i].onClick;
         triggerButtons[i].onClick = [this, i, plain] { if (! switchToModeDefault (i)) plain(); };
@@ -2255,12 +2389,12 @@ void RecoilUI::filesDropped (const juce::StringArray& files, int, int)
 bool RecoilUI::switchToModeDefault (int mode)
 {
     // on one mode's default preset, picking another mode loads that mode's default instead of only switching
-    static const char* defaults[4] = { "Pump 1/4", "MIDI Duck", "Default", "Drum Bus Map" };
+    static const char* defaults[5] = { "Pump 1/4", "MIDI Duck", "Default", "Drum Bus Map", "RM Squeeze" };
     const auto cur = processor.presets.getCurrentName();
     bool onDefault = false;
     for (auto* d : defaults) onDefault = onDefault || cur == d;
-    if (! onDefault || cur == defaults[juce::jlimit (0, 3, mode)]) return false;
-    processor.presets.load (defaults[juce::jlimit (0, 3, mode)]);
+    if (! onDefault || cur == defaults[juce::jlimit (0, 4, mode)]) return false;
+    processor.presets.load (defaults[juce::jlimit (0, 4, mode)]);
     refreshPresetList();
     browser.syncBankToShape();
     return true;
@@ -2446,7 +2580,7 @@ void RecoilUI::showSaveShapeDialog()
 void RecoilUI::layoutTrigger()
 {
     const int t = trig();
-    const bool audio = t == 2, sync = t == 0, midi = t == 1, map = t == 3;
+    const bool audio = t == 2, sync = t == 0, midi = t == 1, map = t == 3, rm = t == 4;
     const bool mapShown = mapView.isVisible();
     { const bool was = browser.getProperties()["map"]; if (was != map) { browser.getProperties().set ("map", map); browser.refreshSlots(); browser.syncBankToShape(); } }
     {
@@ -2489,13 +2623,18 @@ void RecoilUI::layoutTrigger()
     offset.slider.setVisible (sync);
     swing.slider.setVisible (sync);
     autoOffsetButton.setVisible (sync);
+    for (auto* k : { &rmCeiling, &rmRange, &rmHold, &rmRelease }) k->slider.setVisible (rm);
+    // RM has no shape: the shape controls rest
+    for (auto* k : { &depth, &length, &curve, &attack }) { k->slider.setEnabled (! rm); k->slider.setAlpha (rm ? 0.3f : 1.0f); }
+    browser.setEnabled (! rm); browser.setAlpha (rm ? 0.35f : 1.0f);
+    if (rm && wave.editing) setEditing (false);
+    if (rm) editButton.setVisible (false);
     noteBox.setVisible (midi);
-    dynamic.slider.setVisible (map ? mapShown : ! sync);
+    dynamic.slider.setVisible (map ? mapShown : ! sync && ! rm);
     dynamic.centre = map ? juce::Point<int> (212, 127) : midi ? juce::Point<int> (346, 81) : juce::Point<int> (662, 81);
     dynamic.slider.setBounds (dynamic.centre.x - 14, dynamic.centre.y - 14, 28, 28);
 
-    length.slider.setEnabled (! sync);
-    length.slider.setAlpha (sync ? 0.45f : 1.0f);
+    if (! rm) { length.slider.setEnabled (! sync); length.slider.setAlpha (sync ? 0.45f : 1.0f); }
     const bool split = processor.apvts.getRawParameterValue ("band")->load() > 0.5f;
     for (auto* k : { &inside, &above }) { k->slider.setEnabled (split); k->slider.setAlpha (split ? 1.0f : 0.4f); }
     for (auto& b : edgeButtons) b.setEnabled (split);
@@ -2518,6 +2657,12 @@ void RecoilUI::timerCallback()
     const float sc = toDb (processor.scPeak.exchange (0.0f)), out = toDb (processor.outPeak.exchange (0.0f));
     scDb = sc >= scDb ? sc : juce::jmax (sc, scDb - 1.2f);
     outDb = out >= outDb ? out : juce::jmax (out, outDb - 1.2f);
+    if (trig() == 4)
+    {
+        const float r = const_cast<rc::Engine&> (processor.getEngine()).rmGrDb.exchange (0.0f);
+        rmDb = r <= rmDb ? r : juce::jmin (r, rmDb + 0.8f);
+        repaint (720, 64, 360, 30);
+    }
     thresh.levelDb = toDb (processor.getEngine().scLevel.load());
     if (thresh.isVisible()) thresh.repaint();
 
@@ -2561,16 +2706,17 @@ void RecoilUI::resized()
     clearButton.setBounds (412, 116, 54, 22);
     saveShapeButton.setBounds (472, 116, 94, 22);
 
-    prevButton.setBounds (290, 22, 28, 26);
-    presetBox.setBounds (324, 20, 260, 30);
-    nextButton.setBounds (590, 22, 28, 26);
-    saveButton.setBounds (626, 22, 52, 26);
-    deleteButton.setBounds (684, 22, 40, 26);
+    prevButton.setBounds (280, 22, 28, 26);
+    presetBox.setBounds (314, 20, 260, 30);
+    nextButton.setBounds (580, 22, 28, 26);
+    saveButton.setBounds (616, 22, 52, 26);
+    deleteButton.setBounds (674, 22, 40, 26);
     helpButton.setBounds (1050, 20, 30, 30);
-    triggerButtons[0].setBounds (812, 22, 50, 26);
-    triggerButtons[1].setBounds (862, 22, 48, 26);
-    triggerButtons[2].setBounds (910, 22, 56, 26);
-    triggerButtons[3].setBounds (966, 22, 46, 26);
+    triggerButtons[0].setBounds (794, 22, 46, 26);
+    triggerButtons[1].setBounds (840, 22, 44, 26);
+    triggerButtons[2].setBounds (884, 22, 52, 26);
+    triggerButtons[3].setBounds (936, 22, 42, 26);
+    triggerButtons[4].setBounds (978, 22, 36, 26);
 
     // trigger strip
     thresh.setBounds (228, 74, 100, 14);
@@ -2722,7 +2868,7 @@ void RecoilUI::renderStatic (float ps)
     drawPlate (g, { 706, 492, 186, 212 });
     drawPlate (g, { 904, 492, 180, 212 });
 
-    drawWell (g, { 810, 20, 204, 30 });
+    drawWell (g, { 792, 20, 224, 30 });
     drawWell (g, { 626, 114, 174, 26 });
     drawWell (g, { 582, 502, 100, 26 });
     drawWell (g, { 610, 532, 76, 24 });
@@ -2730,7 +2876,7 @@ void RecoilUI::renderStatic (float ps)
 
     g.setFont (lnf.caps (9.5f, 2.0f));
     g.setColour (Pal::caps);
-    g.drawText ("TRIGGER", Rectangle<float> (736.0f, 29.0f, 64.0f, 14.0f), Justification::centredRight, false);
+    g.drawText ("TRIGGER", Rectangle<float> (716.0f, 29.0f, 68.0f, 14.0f), Justification::centredRight, false);
 
     drawHead (g, 852.0f, 126.0f, "SHAPES", Pal::orange);
     drawHead (g, 450.0f, 510.0f, "BAND", Pal::orange);
@@ -2779,8 +2925,25 @@ void RecoilUI::paint (juce::Graphics& g)
         g.setFont (lnf.chak (11.5f)); g.setColour (vc);
         g.drawText (value, Rectangle<float> (x + w + 6.0f, 73.0f, 160.0f, 16.0f), Justification::centredLeft, false);
     };
-    drawHead (g, 34.0f, 75.0f, t == 0 ? "TEMPO SYNC" : t == 1 ? "MIDI TRIGGER" : t == 3 ? "SONG MAP" : "AUDIO TRIGGER", Pal::orange);
-    if (t == 3)
+    drawHead (g, 34.0f, 75.0f, t == 0 ? "TEMPO SYNC" : t == 1 ? "MIDI TRIGGER" : t == 3 ? "SONG MAP" : t == 4 ? "RING MOD" : "AUDIO TRIGGER", Pal::orange);
+    if (t == 4)
+    {
+        small ("CEILING", text ("rmCeiling"), 228.0f);
+        small ("RANGE", text ("rmRange"), 358.0f);
+        small ("HOLD", text ("rmHold"), 472.0f);
+        small ("SMOOTH", text ("rmRelease"), 584.0f);
+        // the squeeze right now: a bar from 0 dB down to -24 dB
+        const bool sc = processor.sidechainConnected.load();
+        cap ("SQUEEZE", 728.0f);
+        const Rectangle<float> bar (806.0f, 76.0f, 160.0f, 10.0f);
+        g.setColour (Pal::segWell); g.fillRoundedRectangle (bar, 3.0f);
+        const float db = jlimit (0.0f, 24.0f, -rmDb);
+        if (db > 0.05f) { g.setColour (Pal::orange); g.fillRoundedRectangle (bar.withWidth (bar.getWidth() * db / 24.0f), 3.0f); }
+        g.setFont (lnf.chak (11.5f)); g.setColour (sc ? Pal::text : Pal::dim);
+        g.drawText (! sc ? String ("no kick") : db < 0.05f ? String ("0 dB") : fixMinus ("-" + String (db, 1) + " dB"),
+                    Rectangle<float> (974.0f, 73.0f, 90.0f, 16.0f), Justification::centredLeft, false);
+    }
+    else if (t == 3)
     {
         // two rows: the drum bus, the bass bus
         const auto& info = processor.getMapInfo();
@@ -2897,6 +3060,11 @@ void RecoilUI::paint (juce::Graphics& g)
         const int sl = processor.shapeSlot();
         g.setColour (Pal::orange);
         g.drawText (String ("PER BASS  ") + dot + "  " + kinds[sl] + " " + processor.currentShapeName (sl).toUpperCase(), Rectangle<float> (112.0f, 509.0f, 290.0f, 14.0f), Justification::centredLeft, true);
+    }
+    else if (trig() == 4)
+    {
+        g.setColour (Pal::dim);
+        g.drawText ("RM  " + dot + "  NO SHAPE: SAMPLE BY SAMPLE", Rectangle<float> (112.0f, 509.0f, 290.0f, 14.0f), Justification::centredLeft, true);
     }
     else if (trig() == 3)
     {

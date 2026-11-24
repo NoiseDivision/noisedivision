@@ -231,7 +231,7 @@ def software_ld(p, standalone=True):
         "applicationCategory": "MultimediaApplication",
         "applicationSubCategory": f"Audio plugin ({p['kind']})",
         "operatingSystem": "Windows, macOS",
-        "softwareVersion": SITE["version"],
+        "softwareVersion": p.get("version", SITE["version"]),
         "image": f"{URL}/img/{p['img']}",
         "author": {"@id": f"{URL}/#org"},
         "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
@@ -262,7 +262,7 @@ def write(path, text):
 def trace(R):
     # the signal chain under the hero: IN -> the plugins (sidechain first) -> OUT, each node links to its page
     # (plugin, x, width) along the chain; the path dips between the boxes
-    nodes = [("recoil", 50, 96), ("peakslayer", 180, 118), ("krush", 332, 88), ("masterfuse", 454, 128), ("spectrakill", 616, 144), ("dark", 794, 76), ("shrapnel", 904, 118)]
+    nodes = [("recoil", 50, 96), ("pyre", 174, 76), ("peakslayer", 278, 118), ("krush", 424, 88), ("masterfuse", 540, 128), ("spectrakill", 696, 144), ("dark", 868, 76), ("shrapnel", 972, 118)]
     path = f"M 0 46 H {nodes[0][1] - 22}"
     for i, (_, x, w) in enumerate(nodes):
         gap = (nodes[i + 1][1] - (x + w)) if i + 1 < len(nodes) else 60
@@ -398,6 +398,10 @@ def listen_section(R, p, demo):
             "MAP is the Drum Bus Map preset with the drum bus and the bass bus bounced and loaded, so every kick and snare gets its own duck. "
             "Tick Match loudness to compare at equal volume."
             if p["slug"] == "recoil" else
+            "Bounced from a real session. Lead: a synth lead with a little IGNITE and HEAT and BURN at +3 dB, for level. "
+            "Mix: a whole track through PYRE, gently: a touch of HEAT with TILT toward bright, and no BURN. "
+            "The level change is real here; tick Match loudness to compare at equal volume."
+            if p["slug"] == "pyre" else
             "Same clips on every plugin page. The level change is real here, since loudness is what it's for; tick Match loudness to compare at equal volume."
             if demo["keepLevel"] else
             "Same clips on every plugin page. Before and after play at the same loudness, so you hear the character, not a volume jump.")
@@ -508,7 +512,7 @@ def build_plugin(p):
         <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
         <div><dt>Latency</dt><dd>{esc(p['latency'])}</dd></div>
-        <div><dt>Version · Price</dt><dd>{SITE['version']} · Free</dd></div>
+        <div><dt>Version · Price</dt><dd>{p.get('version', SITE['version'])} · Free</dd></div>
       </dl>
     </div>
   </section>

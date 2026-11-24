@@ -76,7 +76,7 @@ h1 {{ font-family: "Chakra Petch"; font-weight: 700; font-size: 56pt; line-heigh
 .foot {{ position: absolute; left: 18mm; right: 18mm; bottom: 16mm; display: flex; justify-content: space-between; font-size: 9pt; color: #8a8d95; }}
 </style></head><body>
 <div class="glow"></div>
-<div class="top"><div>NOISE <b>DIVISION</b></div><span>Version {SITE['version']}</span></div>
+<div class="top"><div>NOISE <b>DIVISION</b></div><span>Version {p.get('version', SITE['version'])}</span></div>
 <div class="title"><div class="kind">{esc(p['kind'])}</div><h1>{p['name']}</h1><div class="sub">User manual</div><div class="bar"></div></div>
 <div class="shot"><img src="{IMG}/{jpg(p)}"></div>
 <div class="foot"><span>VST3 · AU · Standalone · Windows &amp; macOS</span><span>noisedivision.net</span></div>
@@ -155,7 +155,7 @@ def body_html(p):
     else:
         secs.append(("Saving your settings", "<p>All settings are saved with your project. To reuse a setting in other projects, use your DAW's own preset function for the plugin.</p>"))
 
-    secs.append(("Latency", f"<p><b>{esc(p['latency'])}.</b> Your DAW reads the plugin's latency and delays the other tracks to match, so everything stays in time on playback. When recording through the plugin live, choose the lowest-latency setting.</p>"))
+    secs.append(("Latency", f"<p><b>{esc(p['latency'])}.</b> Your DAW reads the plugin's latency and delays the other tracks to match, so everything stays in time on playback. " + ("When recording through the plugin live, choose the lowest-latency setting." if p.get("quality") or "depending on" in p["latency"] else "When recording through the plugin live, bypass it.") + "</p>"))
 
     tips = "".join(f"<li>{t}</li>" for t in p["tips"])
     secs.append(("Tips", f"<ul class='tips'>{tips}</ul>"))
@@ -231,7 +231,7 @@ img.ui.square {{ max-height: 120mm; }}
 
 def footer(p):
     return f"""<div style="width:100%;font-family:Montserrat,Arial,sans-serif;font-size:7.5pt;color:#8a8d95;padding:0 17mm;display:flex;justify-content:space-between;">
-<span><b style="color:#1b1c1f;letter-spacing:.12em">{p['name']}</b> &nbsp;User manual &nbsp;·&nbsp; v{SITE['version']}</span><span>noisedivision.net &nbsp;·&nbsp; <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>"""
+<span><b style="color:#1b1c1f;letter-spacing:.12em">{p['name']}</b> &nbsp;User manual &nbsp;·&nbsp; v{p.get('version', SITE['version'])}</span><span>noisedivision.net &nbsp;·&nbsp; <span class="pageNumber"></span> / <span class="totalPages"></span></span></div>"""
 
 
 def main(only):
@@ -254,7 +254,7 @@ def main(only):
             for pg in PdfReader(io.BytesIO(body)).pages:
                 w.add_page(pg)
             w.add_metadata({"/Title": f"{p['name']} User Manual", "/Author": "Noise Division",
-                            "/Subject": f"{p['name']} {p['kind']} plugin, version {SITE['version']}"})
+                            "/Subject": f"{p['name']} {p['kind']} plugin, version {p.get('version', SITE['version'])}"})
             dest = out_dir / f"{p['name']}-User-Manual.pdf"
             with open(dest, "wb") as f:
                 w.write(f)

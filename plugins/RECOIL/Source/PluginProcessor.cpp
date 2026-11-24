@@ -29,7 +29,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout RecoilProcessor::createLayou
     auto id = [] (const char* s) { return juce::ParameterID { s, 2 }; };
 
     // trigger
-    l.add (std::make_unique<Choice> (id ("trigger"), "Trigger", juce::StringArray { "Sync", "MIDI", "Audio", "Map" }, 2));
+    l.add (std::make_unique<Choice> (id ("trigger"), "Trigger", juce::StringArray { "Sync", "MIDI", "Audio", "Map", "RM" }, 2));
     l.add (std::make_unique<Choice> (id ("rate"), "Rate", juce::StringArray { "1/1", "1/2", "1/4", "1/8", "1/16", "1/32" }, 2));
     l.add (std::make_unique<Choice> (id ("rateMode"), "Rate Mode", juce::StringArray { "Straight", "Dotted", "Triplet" }, 0));
     l.add (std::make_unique<Float> (id ("offset"), "Offset", juce::NormalisableRange<float> (-50.0f, 50.0f, 0.1f), 0.0f,
@@ -66,6 +66,18 @@ juce::AudioProcessorValueTreeState::ParameterLayout RecoilProcessor::createLayou
         Attr().withLabel ("dB").withStringFromValueFunction ([] (float v, int) { return juce::String (v, 1) + " dB"; })));
     l.add (std::make_unique<Float> (id ("recovery"), "Recovery", juce::NormalisableRange<float> (10.0f, 400.0f, 1.0f, 0.5f), 60.0f,
         Attr().withLabel ("ms").withStringFromValueFunction ([] (float v, int) { return juce::String (juce::roundToInt (v)) + " ms"; })));
+    // RM: per-sample ("ring mod") ducking against the kick on the sidechain
+    {
+        auto ms = [] (float v, int) { return v < 0.05f ? juce::String ("0 ms") : juce::String (v, v < 10.0f ? 1 : 0) + " ms"; };
+        juce::NormalisableRange<float> hold (0.0f, 50.0f, 0.1f); hold.setSkewForCentre (5.0f);
+        juce::NormalisableRange<float> rel (0.0f, 200.0f, 0.1f); rel.setSkewForCentre (10.0f);
+        l.add (std::make_unique<Float> (id ("rmCeiling"), "RM Ceiling", juce::NormalisableRange<float> (-30.0f, 0.0f, 0.1f), -3.0f,
+            Attr().withLabel ("dB").withStringFromValueFunction ([] (float v, int) { return (v < -0.05f ? juce::String (juce::CharPointer_UTF8 ("\xe2\x88\x92")) : juce::String()) + juce::String (std::abs (v), 1) + " dB"; })));
+        l.add (std::make_unique<Float> (id ("rmRange"), "RM Range", juce::NormalisableRange<float> (0.0f, 48.0f, 0.1f), 24.0f,
+            Attr().withLabel ("dB").withStringFromValueFunction ([] (float v, int) { return juce::String (juce::roundToInt (v)) + " dB"; })));
+        l.add (std::make_unique<Float> (id ("rmHold"), "RM Hold", hold, 0.0f, Attr().withLabel ("ms").withStringFromValueFunction (ms)));
+        l.add (std::make_unique<Float> (id ("rmRelease"), "RM Smooth", rel, 3.0f, Attr().withLabel ("ms").withStringFromValueFunction (ms)));
+    }
     l.add (std::make_unique<Float> (id ("depth"), "Depth", juce::NormalisableRange<float> (0.0f, 100.0f, 0.1f), 100.0f,
         Attr().withLabel ("%").withStringFromValueFunction ([] (float v, int) {
             if (v >= 99.95f) return juce::String (juce::CharPointer_UTF8 ("\xe2\x88\x92\xe2\x88\x9e dB"));
@@ -511,7 +523,7 @@ rc::Settings RecoilProcessor::currentSettings() const
 {
     auto v = [this] (const char* pid) { return apvts.getRawParameterValue (pid)->load(); };
     rc::Settings s;
-    s.trigger = (rc::Trigger) juce::jlimit (0, 3, juce::roundToInt (v ("trigger")));
+    s.trigger = (rc::Trigger) juce::jlimit (0, 4, juce::roundToInt (v ("trigger")));
     s.mapAmount = { v ("mapKick") * 0.01, v ("mapSnare") * 0.01, v ("mapRim") * 0.01, 0.0 };
     s.ghost = (rc::GhostMode) juce::jlimit (0, 2, juce::roundToInt (v ("mapGhost")));
     s.ghostDb = v ("mapGhostDb");
@@ -519,6 +531,7 @@ rc::Settings RecoilProcessor::currentSettings() const
     s.bassMode = juce::roundToInt (v ("bassMode"));
     s.clearanceDb = v ("clearance");
     s.recoveryMs = v ("recovery");
+    s.rmCeilDb = v ("rmCeiling"); s.rmRangeDb = v ("rmRange"); s.rmHoldMs = v ("rmHold"); s.rmReleaseMs = v ("rmRelease");
     const int mode = juce::roundToInt (v ("rateMode"));
     s.rateBeats = kRateBeats[juce::jlimit (0, 5, juce::roundToInt (v ("rate")))] * (mode == 1 ? 1.5 : mode == 2 ? 2.0 / 3.0 : 1.0);
     s.offset = v ("offset") * 0.01;

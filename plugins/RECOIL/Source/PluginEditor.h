@@ -22,6 +22,7 @@ public:
     void mouseUp (const juce::MouseEvent&) override;
     void mouseDoubleClick (const juce::MouseEvent&) override;
     void mouseExit (const juce::MouseEvent&) override { hoverNode = -1; hoverTab = 0; repaint(); }
+    void resized() override;
 
     enum class Tool { Point, Draw, Step };
     bool editing = false, snap = true;
@@ -39,8 +40,14 @@ private:
     float px1() const { return (float) getWidth() - 46.0f; }
     // the phase lane is only there in AUDIO and MAP (SYNC and MIDI have no kick to line up with): the main lane takes its room
     bool showPhase = true;
-    juce::Rectangle<float> laneR() const { return showPhase ? juce::Rectangle<float> (px0(), 52.0f, px1() - px0(), 56.0f) : juce::Rectangle<float> (px0(), 46.0f, px1() - px0(), 0.0f); }
-    juce::Rectangle<float> mainR() const { return showPhase ? juce::Rectangle<float> (px0(), 122.0f, px1() - px0(), 212.0f) : juce::Rectangle<float> (px0(), 46.0f, px1() - px0(), 288.0f); }
+    // HIT style: one lane, the kick filled, the bass over it, the duck as a solid fill from the top (EDIT always uses two lanes)
+    bool hitStyle() const { return (bool) processor.apvts.state.getProperty ("waveStyle", false) && ! editing; }
+    bool twoLanes() const { return showPhase && ! hitStyle(); }
+    juce::TextButton styleButton { "HIT" };
+    std::deque<std::vector<float>> echoes;              // HIT: the bass after RECOIL from the last few hits
+    void pushEcho() { if (haveCapture && ! after.empty()) { echoes.push_front (after); while (echoes.size() > 3) echoes.pop_back(); } }
+    juce::Rectangle<float> laneR() const { return twoLanes() ? juce::Rectangle<float> (px0(), 52.0f, px1() - px0(), 56.0f) : juce::Rectangle<float> (px0(), 46.0f, px1() - px0(), 0.0f); }
+    juce::Rectangle<float> mainR() const { return twoLanes() ? juce::Rectangle<float> (px0(), 122.0f, px1() - px0(), 212.0f) : juce::Rectangle<float> (px0(), 46.0f, px1() - px0(), 288.0f); }
     float tx (double t) const;                          // seconds from the hit -> x
     double xt (float x) const;
     float yLevel (double g) const { const auto m = mainR(); return m.getY() + 22.0f + (float) (1.0 - g) * (m.getHeight() - 32.0f); }
@@ -280,17 +287,17 @@ private:
 
     struct Knob { juce::Slider slider; std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attach; juce::String id, label; juce::Point<int> centre; int d = 44; int labelMode = 0; };
     Knob depth, length, curve, attack, inside, above, rotate, mix, gain, dynamic, offset, swing, mapKick, mapSnare, mapRim, mapOffset, mapGhostDb,
-         clearance, recovery;
-    Knob* knobs[19] { &depth, &length, &curve, &attack, &inside, &above, &rotate, &mix, &gain, &dynamic, &offset, &swing,
-                      &mapKick, &mapSnare, &mapRim, &mapOffset, &mapGhostDb, &clearance, &recovery };
+         clearance, recovery, rmCeiling, rmRange, rmHold, rmRelease;
+    Knob* knobs[23] { &depth, &length, &curve, &attack, &inside, &above, &rotate, &mix, &gain, &dynamic, &offset, &swing,
+                      &mapKick, &mapSnare, &mapRim, &mapOffset, &mapGhostDb, &clearance, &recovery, &rmCeiling, &rmRange, &rmHold, &rmRelease };
 
     juce::TextButton waveHitButtons[4];                         // MAP + WAVE: which kind of hit the view follows
-    juce::TextButton triggerButtons[4], ghostButtons[3], bassModeButtons[2], loadButton { "DRUMS" }, bassButton { "BASS" }, fitMapButton { "FIT LENGTH" }, alignButton { "ALIGN" }, rateButtons[6], rateModeButtons[3], listenButtons[2], bandButtons[2], edgeButtons[2], phaseButtons[3];
+    juce::TextButton triggerButtons[5], ghostButtons[3], bassModeButtons[2], loadButton { "DRUMS" }, bassButton { "BASS" }, fitMapButton { "FIT LENGTH" }, alignButton { "ALIGN" }, rateButtons[6], rateModeButtons[3], listenButtons[2], bandButtons[2], edgeButtons[2], phaseButtons[3];
     juce::TextButton fitButton { "FIT LENGTH" }, grooveButton { "GROOVE LOCK" }, autoOffsetButton { "AUTO OFFSET" }, polarityButton { juce::String::fromUTF8 ("\xc3\x98") }, relearnButton { "RELEARN" };
     std::vector<std::unique_ptr<juce::ParameterAttachment>> attachments;
     std::unique_ptr<juce::ParameterAttachment> noteAttach;
 
-    float scDb = -100.0f, outDb = -100.0f;
+    float scDb = -100.0f, outDb = -100.0f, rmDb = 0.0f;
     juce::String lastText;
     int frame = 0, lastTrig = -1;
     double lastTick = 0.0;

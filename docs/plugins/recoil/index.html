@@ -44,7 +44,7 @@
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Audio plugin (Sidechain ducking)",
    "operatingSystem": "Windows, macOS",
-   "softwareVersion": "1.0.0",
+   "softwareVersion": "1.1.0",
    "image": "https://noisedivision.net/img/recoil.webp",
    "author": {
     "@id": "https://noisedivision.net/#org"
@@ -98,6 +98,7 @@
         <button class="dd-btn" type="button" aria-expanded="false" aria-controls="dd-plugins" data-current>Plugins <svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
         <div class="dd-panel" id="dd-plugins">
           <a href="../../plugins/recoil/" style="--c:#ff7a3d" aria-current="page"><span class="n">RECOIL</span><span class="k">Sidechain ducking</span></a>
+          <a href="../../plugins/pyre/" style="--c:#ff6a1a"><span class="n">PYRE</span><span class="k">Harmonic loudness for leads</span></a>
           <a href="../../plugins/peakslayer/" style="--c:#ff3038"><span class="n">PEAKSLAYER</span><span class="k">Soft clipper</span></a>
           <a href="../../plugins/krush/" style="--c:#ff3038"><span class="n">KRUSH</span><span class="k">Multiband distortion</span></a>
           <a href="../../plugins/masterfuse/" style="--c:#ffa648"><span class="n">MASTERFUSE</span><span class="k">One-knob mastering</span></a>
@@ -127,7 +128,7 @@
         </div>
         <p class="dl-note" data-note="recoil">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
         <a class="manual-link" href="../../manuals/RECOIL-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> User manual (PDF)</a>
-        <a class="suite-link" href="../../#suite">Want them all? Get the full suite of 7 <span aria-hidden="true">→</span></a>
+        <a class="suite-link" href="../../#suite">Want them all? Get the full suite of 8 <span aria-hidden="true">→</span></a>
       </div>
       <figure class="shot"><img src="../../img/recoil.webp" alt="RECOIL: a gunmetal interface with a waveform display showing a bass ducked under each kick, the removed part hatched in orange, the Punch-Through shape drawn on top, a 4 by 4 grid of shape tiles, and SHAPE, BAND, PHASE and OUTPUT panels" width="2200" height="1440" fetchpriority="high"></figure>
     </div>
@@ -180,19 +181,18 @@
       <h2 id="ov-title">What it does</h2>
       <div class="two">
         <div class="prose">
-            <p>RECOIL turns a track down in a shape you choose every time something triggers it: a kick on its sidechain input, a MIDI note, the beat of the song, or a map of your drum bus. The shape is drawn right over the waveform, so you see the bass go down under each kick and come back up.</p>
-            <p>It is built to sound clean at any depth: every drop is a smooth fade, so the bass never clicks, the audio passes untouched between hits, and there is zero latency. In AUDIO mode it listens to the kick's low end, sizes the shape to each kick (FIT LENGTH) and learns the groove to start each duck a few milliseconds early (GROOVE LOCK).</p>
-            <p>The default setting is meant to be right for most kicks: load RECOIL, send it the kick, press play.</p>
+            <p>RECOIL turns a track down in a shape you choose every time something triggers it: a kick on its sidechain input, a MIDI note, the beat of the song, or a map of your drum bus.</p>
+            <p>It is built to sound clean at any depth: every drop is a smooth fade, so the bass never clicks, the audio passes untouched between hits, and there is zero latency. In AUDIO mode it listens to the kick's low end, sizes the shape to each kick (FIT LENGTH) and learns the groove to start each duck a few milliseconds early (GROOVE LOCK). The default fits most kicks: load it, send it the kick, press play.</p>
             <p>MAP mode goes one step further: drop a bounce of the song's drum bus on RECOIL and it finds every kick, snare, rim and hat, how loud each one is and how long it rings. The bass then ducks exactly on each hit, with its own depth and shape for kicks and snares, and ghost notes handled their own way. Add a bounce of the bass bus and every duck follows the bass that is really playing.</p>
         </div>
         <div style="display:grid;gap:28px;align-content:start">
           <ul class="features">
-            <li><span><b>Four triggers:</b> SYNC to the song, MIDI notes, AUDIO on the sidechain input, or MAP</span></li>
+            <li><span><b>Five triggers:</b> SYNC to the song, MIDI notes, AUDIO on the sidechain input, MAP, or RM: sample by sample, no pumping</span></li>
             <li><span><b>MAP:</b> ducks exactly on every kick and snare of your bounced drum bus; add the bass bus and each duck follows the bass under it</span></li>
             <li><span><b>20 shapes</b> (16 familiar, 4 made for RECOIL) plus your own, drawn and edited on the display</span></li>
             <li><span><b>FIT LENGTH</b> sizes the duck to each kick, <b>GROOVE LOCK</b> starts it early, <b>DYNAMIC</b> ducks softer hits less</span></li>
             <li><span><b>BAND</b> ducks only part of the spectrum, with a separate amount for the rest</span></li>
-            <li><span><b>Clean:</b> click-free at full depth, untouched between hits, 0 ms latency, 16 presets</span></li>
+            <li><span><b>Clean:</b> click-free at full depth, untouched between hits, 0 ms latency, 18 presets</span></li>
           </ul>
           <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Kick and 808 or bass</span><span class="chip">Four-on-the-floor pumping</span><span class="chip">Pads and chords that breathe with the beat</span><span class="chip">Trance gates and chopped sixteenths</span><span class="chip">Vocals over synths</span><span class="chip">Room for the snare&#x27;s crack</span></div></div>
         </div>
@@ -201,7 +201,7 @@
         <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
         <div><dt>Latency</dt><dd>Zero</dd></div>
-        <div><dt>Version · Price</dt><dd>1.0.0 · Free</dd></div>
+        <div><dt>Version · Price</dt><dd>1.1.0 · Free</dd></div>
       </dl>
     </div>
   </section>
@@ -227,7 +227,7 @@
       <h2 id="ct-title">Every control</h2>
       <div class="ctls">
           <div class="ctl-group"><h3>Trigger</h3>
-            <div class="ctl"><span class="n">TRIGGER</span><span class="r">SYNC · MIDI · AUDIO · MAP · default AUDIO</span><p class="d">What starts the shape: the song's beat, MIDI notes, the sidechain input, or the map of your drum bus. On a mode's starting preset (Default, Pump 1/4, MIDI Duck, Drum Bus Map), picking another mode loads that mode's starting preset.</p></div>
+            <div class="ctl"><span class="n">TRIGGER</span><span class="r">SYNC · MIDI · AUDIO · MAP · RM · default AUDIO</span><p class="d">What starts the shape: the song's beat, MIDI notes, the sidechain input, the map of your drum bus, or RM (sample by sample, no shape). On a mode's starting preset (Default, Pump 1/4, MIDI Duck, Drum Bus Map, RM Squeeze), picking another mode loads that mode's starting preset.</p></div>
             <div class="ctl"><span class="n">THRESHOLD</span><span class="r">−60 – 0 dB · default −40 dB</span><p class="d">AUDIO: the level a hit has to reach. Hits must also come within 20 dB of the recent kicks.</p></div>
             <div class="ctl"><span class="n">LISTEN</span><span class="r">KICK LOWS · FULL</span><p class="d">AUDIO: listen below 150 Hz, or to the whole trigger.</p></div>
             <div class="ctl"><span class="n">DYNAMIC</span><span class="r">0 – 100% · default 50%</span><p class="d">AUDIO and MIDI: how much softer hits duck less. 0% ducks every hit fully.</p></div>
@@ -239,6 +239,13 @@
             <div class="ctl"><span class="n">SWING</span><span class="r">0 – 100% · default 0%</span><p class="d">SYNC: delays every second cycle by up to a third of a cycle.</p></div>
             <div class="ctl"><span class="n">AUTO OFFSET</span><span class="r">On / Off</span><p class="d">SYNC: lines the cycle up with the kicks on the sidechain input.</p></div>
             <div class="ctl"><span class="n">NOTE</span><span class="r">Any · C−2 – G8</span><p class="d">MIDI: which note starts the shape.</p></div>
+          </div>
+          <div class="ctl-group"><h3>RM</h3>
+            <div class="ctl"><span class="n">CEILING</span><span class="r">−30 – 0 dBFS · default −3 dB</span><p class="d">Kick plus bass may not go above this. On every sample the bass gets only the room the kick leaves under it. Lower: more squeeze. It compares with the kick as it arrives on the sidechain, so keep the send at unity.</p></div>
+            <div class="ctl"><span class="n">RANGE</span><span class="r">0 – 48 dB · default 24 dB</span><p class="d">The furthest the bass may go down.</p></div>
+            <div class="ctl"><span class="n">HOLD</span><span class="r">0 – 50 ms · default 0 ms</span><p class="d">How long the bass stays down before it starts back up.</p></div>
+            <div class="ctl"><span class="n">SMOOTH</span><span class="r">0 – 200 ms · default 3 ms</span><p class="d">How fast the bass comes back after each squeeze. Longer: smoother, less grit, a little less level. HOLD and SMOOTH at 0: the bass follows the kick's waveform sample by sample, the grittiest.</p></div>
+            <div class="ctl"><span class="n">SQUEEZE</span><span class="r">meter</span><p class="d">How far down the bass is going right now.</p></div>
           </div>
           <div class="ctl-group"><h3>Song map</h3>
             <div class="ctl"><span class="n">DRUMS</span><span class="r">WAV · AIFF · FLAC · OGG · MP3</span><p class="d">The drum bus of the whole song, bounced from bar 1. Or drop the file on RECOIL.</p></div>
@@ -283,6 +290,10 @@
             <div class="ctl"><span class="n">AVG DUCK</span><span class="r"></span><p class="d">How much level the ducking takes on average, if you want to make it up with GAIN.</p></div>
             <div class="ctl"><span class="n">Meters</span><span class="r">SC · OUT</span><p class="d">The sidechain input level and the output level.</p></div>
           </div>
+          <div class="ctl-group"><h3>Display</h3>
+            <div class="ctl"><span class="n">WAVE · SPECTRUM · MAP</span><span class="r"></span><p class="d">The display's view.</p></div>
+            <div class="ctl"><span class="n">HIT</span><span class="r">On / Off · default Off</span><p class="d">WAVE: one lane per hit (the duck as a solid fill, the kick filled, the bass over it) instead of two lanes. Saved with the project.</p></div>
+          </div>
           <div class="ctl-group"><h3>Shapes</h3>
             <div class="ctl"><span class="n">Punch-Through</span><span class="r">FACTORY</span><p class="d">Eases into the duck over the first few ms instead of slamming, so the hit keeps its punch. The everyday choice.</p></div>
             <div class="ctl"><span class="n">Hold</span><span class="r">FACTORY</span><p class="d">Fully down for a moment, then a smooth return.</p></div>
@@ -314,7 +325,7 @@
     <div class="wrap">
       <p class="label">Sidechain</p>
       <h2 id="sc-title">Route the trigger</h2>
-      <p class="lead">In AUDIO mode RECOIL listens to the trigger on its sidechain input. Here is how to get the kick there in the common DAWs. (SYNC needs no sidechain and MIDI needs a MIDI track routed to RECOIL. MAP ducks from the map alone, but send it the whole drum bus the same way: ALIGN and the snare views in SPECTRUM and WAVE need it.)</p>
+      <p class="lead">In AUDIO and RM mode RECOIL listens to the trigger on its sidechain input. Here is how to get the kick there in the common DAWs. (RM needs the kick at unity level, as CEILING compares with it. SYNC needs no sidechain and MIDI needs a MIDI track routed to RECOIL. MAP ducks from the map alone, but send it the whole drum bus the same way: ALIGN and the snare views in SPECTRUM and WAVE need it.)</p>
       <ol class="steps">
           <li><span>Put RECOIL on the bass track (or whatever should make room). The default setting is a good start.</span></li>
           <li><span>Send the kick to RECOIL's sidechain input. <b>FL Studio:</b> select the kick's mixer track, right-click the send arrow on the bass's mixer track and choose <b>Sidechain to this track</b>, then in RECOIL's wrapper settings set the sidechain input to that send. <b>Ableton Live:</b> open the sidechain section of RECOIL's device and pick the kick track. <b>Logic Pro:</b> pick the kick in the Side Chain menu at the top of the plugin window. <b>Reaper:</b> make RECOIL 4 channels and send the kick to channels 3/4.</span></li>
@@ -327,7 +338,7 @@
   <section class="sec" id="presets" aria-labelledby="pr-title">
     <div class="wrap">
       <p class="label">Presets</p>
-      <h2 id="pr-title">16 factory presets</h2>
+      <h2 id="pr-title">18 factory presets</h2>
       <ul class="presets">
         <li><span class="n">Default</span><span class="d">Slap it on, send the kick: fits itself to most kicks</span></li>
         <li><span class="n">Kick -&gt; 808</span><span class="d">Low end cleared for every kick, length fitted to the kick</span></li>
@@ -343,6 +354,8 @@
         <li><span class="n">Swell 1/2</span><span class="d">Pads that swell in between the hits</span></li>
         <li><span class="n">Drum Bus Map</span><span class="d">Load your bounced drum bus (and the bass bus: a shape per kind of bass): kicks duck fully, snares half, ghost notes a little; BAND reaches 500 Hz for the snares</span></li>
         <li><span class="n">MIDI Duck</span><span class="d">Triggered by MIDI notes; velocity sets how deep</span></li>
+        <li><span class="n">RM Squeeze</span><span class="d">RM: the bass&#x27;s low end gets only the room the kick leaves under the ceiling, sample by sample. Louder, no pumping (SMOOTH 10 ms)</span></li>
+        <li><span class="n">RM Grit</span><span class="d">RM on the whole bass, no hold, no smoothing: the kick&#x27;s waveform carved straight into the bass</span></li>
         <li><span class="n">Vocal Space</span><span class="d">Mids give way to the vocal&#x27;s consonants, highs and lows untouched</span></li>
         <li><span class="n">Snare Click Gap</span><span class="d">A short gap in the mids for the snare&#x27;s crack</span></li>
       </ul>
@@ -367,6 +380,7 @@
         <li>The WAVE view shows the kick's note and the bass's note above the phase lane. If they are a semitone or two apart, re-tune the kick sample to the bass's key: they stop beating against each other, and the phase stays put.</li>
         <li>Several basses on one bus? Load the bass bus too. PER BASS gives each kind of bass its own shape; AUTO works out every duck for you (ducks too deep: lower CLEARANCE; the bass pumps: raise RECOVERY).</li>
         <li>MAP: send the drum bus to RECOIL's sidechain input too. The ducking doesn't need it, but ALIGN, the dashed kick and snare curves in SPECTRUM and the snare, rim and ghost views in WAVE do.</li>
+        <li>RM: start from RM Squeeze and lower CEILING until the SQUEEZE meter moves on every kick. If the bass gets gritty, raise SMOOTH; for the raw, carved sound try RM Grit.</li>
         <li>MIDI can't start the drop before the note (zero latency). If the kick feels soft, move the MIDI notes 3 to 4 ms earlier, or use SYNC or MAP, which start the drop early by themselves.</li>
       </ul>
     </div>
@@ -410,6 +424,8 @@
       <h2 id="hp-title">Troubleshooting</h2>
       <div class="faq">
       <details><summary>Nothing is ducked</summary><p>AUDIO: the trigger isn't arriving. The INPUT meter stays still and the status says “no input”. Check the sidechain routing in your DAW. SYNC only runs while the song plays. MIDI needs a MIDI track routed to RECOIL.</p></details>
+      <details><summary>RM does nothing</summary><p>The kick must arrive on the sidechain input, and kick plus bass must reach CEILING: lower CEILING until SQUEEZE moves.</p></details>
+      <details><summary>RM sounds too gritty</summary><p>Raise SMOOTH (10 ms in RM Squeeze), or add a little HOLD. Use SPLIT so only the low end is squeezed.</p></details>
       <details><summary>Hats or the snare set it off</summary><p>Keep LISTEN on KICK LOWS and raise THRESHOLD a little.</p></details>
       <details><summary>A click when the duck starts</summary><p>Raise ATTACK. 4 ms (the default) is clean on any bass; under 2 ms can click. Projects saved with an older RECOIL keep their old ATTACK.</p></details>
       <details><summary>The duck comes back too early or too late</summary><p>Turn FIT LENGTH off and drag the brass LENGTH tab, or pick a shorter or longer shape.</p></details>
@@ -435,6 +451,15 @@
       <p class="label">More from Noise Division</p>
       <h2 id="ot-title">The rest of the arsenal</h2>
       <div class="cards">
+        <article class="card" style="--c:#ff6a1a">
+          <div class="stage"><img src="../../img/pyre.webp" alt="" width="1840" height="1240" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Harmonic loudness</p>
+            <h3><a href="../../plugins/pyre/">PYRE</a></h3>
+            
+            
+          </div>
+        </article>
         <article class="card" style="--c:#ff3038">
           <div class="stage"><img src="../../img/peakslayer.webp" alt="" width="1520" height="1484" loading="lazy" decoding="async"></div>
           <div class="body">
@@ -522,6 +547,7 @@
       <h2>Plugins</h2>
       <ul>
         <li><a href="../../plugins/recoil/">RECOIL</a></li>
+        <li><a href="../../plugins/pyre/">PYRE</a></li>
         <li><a href="../../plugins/peakslayer/">PEAKSLAYER</a></li>
         <li><a href="../../plugins/krush/">KRUSH</a></li>
         <li><a href="../../plugins/masterfuse/">MASTERFUSE</a></li>
@@ -540,6 +566,6 @@
     </div>
   </div>
 </footer>
-<script src="../../assets/site.js?v=b825572b" defer></script>
+<script src="../../assets/site.js?v=da7abf72" defer></script>
 </body>
 </html>

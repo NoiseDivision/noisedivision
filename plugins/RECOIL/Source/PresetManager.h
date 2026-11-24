@@ -166,7 +166,7 @@ private:
     // 20 dB of the recent kicks, so any send level works), GROOVE LOCK, FIT LENGTH (250 ms until the first kick is measured),
     // DYNAMIC 50 %, Punch-Through at full DEPTH, ATTACK 4 ms, SPLIT below 180 Hz with ABOVE at 0 % (the rest untouched), PHASE off, MIX 100 %.
     // Every other preset starts from classicBase() and lists only what differs from it.
-    // trigger: 0 SYNC, 1 MIDI, 2 AUDIO, 3 MAP. mapGhost: 0 IGNORE, 1 SCALE, 2 FULL. rate: 0 1/1 .. 5 1/32. band: 1 SPLIT. phase: 0 AUTO, 1 MANUAL, 2 OFF.
+    // trigger: 0 SYNC, 1 MIDI, 2 AUDIO, 3 MAP, 4 RM. mapGhost: 0 IGNORE, 1 SCALE, 2 FULL. rate: 0 1/1 .. 5 1/32. band: 1 SPLIT. phase: 0 AUTO, 1 MANUAL, 2 OFF.
     static const std::vector<Factory>& factory()
     {
         static const std::vector<Factory> presets {
@@ -196,6 +196,10 @@ private:
             { "Drum Bus Map", "Load your bounced drum bus (and the bass bus: a shape per kind of bass): kicks duck fully, snares half, ghost notes a little. BAND reaches 500 Hz for the snares",
               { { "trigger", 3 }, { "dynamic", 50 }, { "fit", 1 }, { "band", 1 }, { "bandHi", 500 }, { "bassMode", 1 },
                 { "mapKick", 100 }, { "mapSnare", 50 }, { "mapRim", 0 }, { "mapGhost", 1 }, { "snareShape", 7 } } },
+            { "RM Squeeze", "RM: the bass's low end gets only the room the kick leaves under the ceiling, sample by sample. Louder, no pumping",
+              { { "trigger", 4 }, { "band", 1 }, { "bandHi", 200 }, { "rmCeiling", -3 }, { "rmRange", 24 }, { "rmHold", 0 }, { "rmRelease", 10 } } },
+            { "RM Grit", "RM on the whole bass, no hold, no smoothing: the kick's waveform carved straight into the bass",
+              { { "trigger", 4 }, { "band", 0 }, { "rmCeiling", -6 }, { "rmRange", 36 }, { "rmHold", 0 }, { "rmRelease", 0 } } },
             { "MIDI Duck", "Triggered by MIDI notes; velocity sets how deep",
               { { "trigger", 1 }, { "dynamic", 100 }, { "length", 350 } } },
             { "Vocal Space", "Mids give way to the vocal's consonants, highs and lows untouched",

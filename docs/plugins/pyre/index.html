@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PYRE: Free Harmonic loudness for leads VST3 &amp; AU Plugin | Noise Division</title>
+<meta name="description" content="PYRE, harmonic loudness: a free VST3 and AU plugin for Windows and macOS that makes leads and synths louder. It evens out a sound&#x27;s harmonics toward a saw&#x27;s dense spectrum, adds drive for thin sounds, and pushes the result into a soft ceiling.">
+<link rel="canonical" href="https://noisedivision.net/plugins/pyre/">
+<meta name="theme-color" content="#0c0d0f">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Noise Division">
+<meta property="og:title" content="PYRE: Free Harmonic loudness for leads VST3 &amp; AU Plugin | Noise Division">
+<meta property="og:description" content="PYRE, harmonic loudness: a free VST3 and AU plugin for Windows and macOS that makes leads and synths louder. It evens out a sound&#x27;s harmonics toward a saw&#x27;s dense spectrum, adds drive for thin sounds, and pushes the result into a soft ceiling.">
+<meta property="og:url" content="https://noisedivision.net/plugins/pyre/">
+<meta property="og:image" content="https://noisedivision.net/img/og/pyre.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="PYRE: Free Harmonic loudness for leads VST3 &amp; AU Plugin | Noise Division">
+<meta name="twitter:description" content="PYRE, harmonic loudness: a free VST3 and AU plugin for Windows and macOS that makes leads and synths louder. It evens out a sound&#x27;s harmonics toward a saw&#x27;s dense spectrum, adds drive for thin sounds, and pushes the result into a soft ceiling.">
+<meta name="twitter:image" content="https://noisedivision.net/img/og/pyre.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preload" href="../../assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/site.css?v=6272cf05">
+<style>:root { --accent: #ff6a1a; --on-accent: #0c0d0f; }</style>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@graph": [
+  {
+   "@type": "Organization",
+   "@id": "https://noisedivision.net/#org",
+   "name": "Noise Division",
+   "url": "https://noisedivision.net/",
+   "email": "noisedivision@proton.me",
+   "logo": "https://noisedivision.net/img/share.jpg"
+  },
+  {
+   "@type": "SoftwareApplication",
+   "name": "PYRE",
+   "url": "https://noisedivision.net/plugins/pyre/",
+   "description": "PYRE, harmonic loudness: a free VST3 and AU plugin for Windows and macOS that makes leads and synths louder. It evens out a sound's harmonics toward a saw's dense spectrum, adds drive for thin sounds, and pushes the result into a soft ceiling.",
+   "applicationCategory": "MultimediaApplication",
+   "applicationSubCategory": "Audio plugin (Harmonic loudness for leads)",
+   "operatingSystem": "Windows, macOS",
+   "softwareVersion": "1.0.0",
+   "image": "https://noisedivision.net/img/pyre.webp",
+   "author": {
+    "@id": "https://noisedivision.net/#org"
+   },
+   "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "EUR"
+   },
+   "@id": "https://noisedivision.net/plugins/pyre/#app",
+   "downloadUrl": "https://noisedivision.net/plugins/pyre/",
+   "softwareHelp": {
+    "@type": "CreativeWork",
+    "url": "https://noisedivision.net/manuals/PYRE-User-Manual.pdf"
+   }
+  },
+  {
+   "@type": "BreadcrumbList",
+   "itemListElement": [
+    {
+     "@type": "ListItem",
+     "position": 1,
+     "name": "Noise Division",
+     "item": "https://noisedivision.net/"
+    },
+    {
+     "@type": "ListItem",
+     "position": 2,
+     "name": "Plugins",
+     "item": "https://noisedivision.net/#plugins"
+    },
+    {
+     "@type": "ListItem",
+     "position": 3,
+     "name": "PYRE",
+     "item": "https://noisedivision.net/plugins/pyre/"
+    }
+   ]
+  }
+ ]
+}
+</script>
+</head>
+<body data-page="pyre">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="../../" aria-label="Noise Division home"><svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true"><line x1="0" y1="7" x2="9" y2="7" stroke="#777a82" stroke-width="1.6"/><rect x="9" y="1.5" width="16" height="11" fill="none" stroke="#c6c8cc" stroke-width="1.6"/><line x1="9" y1="7" x2="25" y2="7" stroke="#ff3038" stroke-width="1.8"/><line x1="25" y1="7" x2="34" y2="7" stroke="#777a82" stroke-width="1.6"/></svg> NOISE <b>DIVISION</b></a>
+    <nav class="links" aria-label="Main">
+      <div class="dd">
+        <button class="dd-btn" type="button" aria-expanded="false" aria-controls="dd-plugins" data-current>Plugins <svg width="10" height="7" viewBox="0 0 10 7" aria-hidden="true"><path d="M1 1.5 5 5.5l4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+        <div class="dd-panel" id="dd-plugins">
+          <a href="../../plugins/recoil/" style="--c:#ff7a3d"><span class="n">RECOIL</span><span class="k">Sidechain ducking</span></a>
+          <a href="../../plugins/pyre/" style="--c:#ff6a1a" aria-current="page"><span class="n">PYRE</span><span class="k">Harmonic loudness for leads</span></a>
+          <a href="../../plugins/peakslayer/" style="--c:#ff3038"><span class="n">PEAKSLAYER</span><span class="k">Soft clipper</span></a>
+          <a href="../../plugins/krush/" style="--c:#ff3038"><span class="n">KRUSH</span><span class="k">Multiband distortion</span></a>
+          <a href="../../plugins/masterfuse/" style="--c:#ffa648"><span class="n">MASTERFUSE</span><span class="k">One-knob mastering</span></a>
+          <a href="../../plugins/spectrakill/" style="--c:#e6dcc8"><span class="n">SPECTRAKILL</span><span class="k">Spectral compressor</span></a>
+          <a href="../../plugins/dark/" style="--c:#c4141e"><span class="n">DARK</span><span class="k">One-knob darkener</span></a>
+          <a href="../../plugins/shrapnel/" style="--c:#ff7138"><span class="n">SHRAPNEL</span><span class="k">Spectral distortion</span></a>
+          <a class="all" href="../../#plugins">All plugins <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <a href="../../contact/">Contact</a>
+      <a class="hot" href="../../donate/">Donate</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="p-hero wide" aria-labelledby="p-title">
+    <div class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb"><ol><li><a href="../../">Home</a></li><li><a href="../../#plugins">Plugins</a></li><li aria-current="page">PYRE</li></ol></nav>
+      <div class="info">
+        <p class="label kind">Harmonic loudness</p>
+        <h1 id="p-title">PYRE</h1>
+        <p class="pitch">Leads and synths, louder. PYRE finds every harmonic of the note and evens them out toward the dense, even spectrum of a saw, then drives the result into a soft ceiling. A thin lead comes out bright, thick and in your face, and it stays in tune.</p>
+        <div class="ctas">
+          <a class="btn primary" href="#" data-download="pyre" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Pyre for Windows</a>
+          <a class="btn mac" href="#" data-download="pyre" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Pyre for <span class="kc">macOS</span></a>
+        </div>
+        <p class="dl-note" data-note="pyre">Free · Windows: .zip with the VST3 and the app · macOS: installer with AU, VST3 and the app, for Apple Silicon and Intel</p>
+        <a class="manual-link" href="../../manuals/PYRE-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> User manual (PDF)</a>
+        <a class="suite-link" href="../../#suite">Want them all? Get the full suite of 8 <span aria-hidden="true">→</span></a>
+      </div>
+      <figure class="shot"><img src="../../img/pyre.webp" alt="PYRE: a brushed steel interface with the logo cut by a molten seam, a sunken firebox where a lead&#x27;s harmonics burn as orange and yellow flames over a grey ash line, a dashed line showing the slope HEAT aims for, embers rising, and forged steel knobs for IGNITE, HEAT, TILT and BURN with molten seams" width="1840" height="1240" fetchpriority="high"></figure>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="On this page">
+    <div class="wrap">
+      <a href="#listen">Listen</a>
+      <a href="#overview">Overview</a>
+      <a href="#how">How it works</a>
+      <a href="#start">Quick start</a>
+      <a href="#controls">Controls</a>
+      <a href="#tips">Tips</a>
+      <a href="#install">Install</a>
+      <a href="#help">Help</a>
+    </div>
+  </nav>
+
+
+  <section class="sec listen" id="listen" aria-labelledby="ls-title">
+    <div class="wrap">
+      <p class="label">Hear it</p>
+      <h2 id="ls-title">Before and after</h2>
+      <p class="lead">Bounced from a real session. Lead: a synth lead with a little IGNITE and HEAT and BURN at +3 dB, for level. Mix: a whole track through PYRE, gently: a touch of HEAT with TILT toward bright, and no BURN. The level change is real here; tick Match loudness to compare at equal volume.</p>
+      <div class="ab" data-side="after">
+        <div class="ab-tabs" role="tablist" aria-label="Sample"><button type="button" role="tab" aria-selected="true" data-clip="pylead">Lead</button><button type="button" role="tab" aria-selected="false" data-clip="pymix">Mix</button></div>
+        <div class="ab-main">
+          <button class="ab-play" type="button" aria-label="Play"><svg class="i-play" width="18" height="20" viewBox="0 0 18 20" aria-hidden="true"><path d="M2 1.5v17L17 10z" fill="currentColor"/></svg><svg class="i-pause" width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h4v16H2zM10 1h4v16h-4z" fill="currentColor"/></svg></button>
+          <div class="ab-wave" role="slider" tabindex="0" aria-label="Position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><canvas></canvas></div>
+          <div class="ab-switch" role="group" aria-label="Before or after">
+            <button type="button" data-side="before" aria-pressed="false">Before</button>
+            <button type="button" data-side="after" aria-pressed="true">After</button>
+          </div>
+        </div>
+        <div class="ab-foot">
+          <span class="ab-setting">IGNITE 15% · HEAT 15% · TILT -6 dB/oct · BURN +3 dB</span>
+          <span class="ab-level"></span>
+          <label class="ab-match"><input type="checkbox"> Match loudness</label>
+          <span class="ab-hint">Press <kbd>B</kbd> to flip</span>
+        </div>
+        <script type="application/json" class="ab-data">{"plugin":"pyre","base":"../../audio/","keepLevel":true,"clips":[{"id":"pylead","label":"Lead","setting":"IGNITE 15% \u00b7 HEAT 15% \u00b7 TILT -6 dB/oct \u00b7 BURN +3 dB","louder":6.2,"wb":[0,8,15,32,33,36,31,25,25,26,26,26,26,26,26,26,26,26,28,27,29,26,28,27,27,27,27,27,28,22,25,28,24,24,24,22,28,25,15,10,7,10,10,8,10,9,8,11,10,7,6,5,6,6,4,4,5,5,5,5,3,13,17,31,37,33,30,25,21,21,22,22,22,22,21,24,25,24,27,27,27,28,26,28,25,27,25,24,25,29,25,25,28,24,26,27,28,26,17,12,10,10,9,11,11,10,10,11,11,7,6,6,7,6,6,5,5,5,6,5,3,13,18,32,36,33,25,26,22,21,21,21,22,21,21,21,22,21,23,23,21,24,21,24,24,24,24,24,26,24,24,26,22,22,28,23,24,28,13,15,9,11,11,8,11,12,12,12,7,7,7,7,7,9,7,6,7,7,7,5,2,13,18,31,35,33,25,26,22,21,21,22,21,21,22,21,21,22,24,22,21,24,22,25,24,23,25,23,27,25,24,25,21,23,28,22,24,29,13,14,9,11,11,8,11,13,12,12,7,7,8,7,8,9,8,6,7,7,7,5],"wa":[0,0,30,34,34,35,34,34,32,32,32,32,32,33,32,32,34,33,35,34,35,34,33,35,34,34,34,34,34,35,33,35,34,35,33,33,35,34,31,22,18,22,23,19,22,22,20,23,23,16,13,12,14,15,11,11,11,13,13,12,7,27,33,35,37,39,36,35,32,32,31,32,32,32,32,32,32,33,33,32,33,35,34,35,33,34,36,33,35,34,34,34,34,37,35,35,35,35,31,26,24,23,21,25,24,23,24,25,26,17,14,15,16,14,15,13,13,12,14,13,8,26,33,34,36,36,35,34,32,32,32,31,32,31,31,31,33,33,35,33,36,35,32,34,33,33,35,33,36,34,34,34,34,34,34,33,33,35,29,30,22,25,26,20,25,28,27,26,16,17,16,17,16,21,18,14,16,16,16,11,6,26,34,34,36,36,35,34,32,32,32,32,31,31,31,32,33,33,36,33,36,35,33,35,32,33,35,33,35,34,34,34,35,34,34,33,33,35,29,29,22,25,25,19,25,28,27,26,16,17,17,16,17,21,18,13,16,16,16,12]},{"id":"pymix","label":"Mix","setting":"IGNITE 5% \u00b7 HEAT 10% \u00b7 TILT -2 dB/oct \u00b7 BURN 0 dB","louder":1.1,"wb":[22,22,22,22,22,22,22,19,22,22,22,22,22,22,21,22,22,22,22,22,22,22,22,22,22,22,22,22,22,21,22,22,22,22,22,21,19,16,22,22,22,22,22,22,22,22,17,15,22,22,22,20,19,17,17,22,22,22,22,22,20,22,22,22,22,22,19,17,22,22,22,22,22,22,20,22,22,22,22,22,21,22,22,22,22,22,22,21,22,22,22,22,22,22,22,22,22,22,22,20,18,18,18,22,22,22,22,22,18,16,22,22,22,22,22,22,22,17,22,22,22,22,22,22,22,22,22,19,22,22,22,22,21,21,20,22,22,22,22,22,22,22,22,22,20,21,19,18,22,22,22,22,20,17,16,22,22,22,22,22,22,22,22,22,22,22,21,18,22,22,22,19,19,18,18,22,22,22,22,22,19,19,20,22,22,22,22,22,22,19,22,22,22,22,22,22,17,14,22,22,22,22,22,22,22,22,20,16,22,22,22,22,21,19,17,22,22,22,22,22,22,22,22,22,22,22,22,20,22,22,22,22,21,21,19,22,22,22,22,22],"wa":[0,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,20,18,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,21,20,19,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22]}]}</script>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="overview" aria-labelledby="ov-title">
+    <div class="wrap">
+      <p class="label">Overview</p>
+      <h2 id="ov-title">What it does</h2>
+      <div class="two">
+        <div class="prose">
+            <p>PYRE is a loudness tool for leads, plucks, chords and synths. Most loudness plugins squash the level; PYRE works on the sound's harmonics instead. HEAT finds them in every moment (the peaks that stand out from the noise around them) and moves each one toward a line that falls a set number of dB per octave from the strongest, as a saw's harmonics do. Weak upper harmonics come up, overbearing ones come down, and the phases and the noise between them are left alone, so the notes and their character stay.</p>
+            <p>A dense, even spectrum sounds bigger and cuts through a mix, and it hides the clipping's own harmonics, so it can be pushed harder. BURN then drives it into a soft ceiling at −0.3 dBFS: that is where the level comes from. IGNITE, a drive in front, gives thin sounds (a sine, a soft square, a filtered pad) harmonics to work with.</p>
+        </div>
+        <div style="display:grid;gap:28px;align-content:start">
+          <ul class="features">
+            <li><span><b>HEAT</b> evens out the harmonics toward a saw's spectrum, note by note, chords included</span></li>
+            <li><span><b>TILT</b> sets the slope it aims for: darker and warmer, or brighter with more bite</span></li>
+            <li><span><b>IGNITE</b>: a 4x oversampled drive in front, for sounds with few harmonics</span></li>
+            <li><span><b>BURN</b> drives the result into a soft ceiling at −0.3 dBFS: louder, never over</span></li>
+            <li><span><b>The fire</b>: the harmonics drawn as flames over the original's ash line, with the line HEAT aims for</span></li>
+            <li><span><b>Stereo-linked</b>, so the image holds; MIX stays in time with the untouched sound</span></li>
+          </ul>
+          <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Leads and plucks</span><span class="chip">Supersaws and chords</span><span class="chip">Thin presets and samples</span><span class="chip">Arps that need to cut through</span><span class="chip">Synth buses</span></div></div>
+        </div>
+      </div>
+      <dl class="specs">
+        <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
+        <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
+        <div><dt>Latency</dt><dd>43 ms at 48 kHz (2048 samples), compensated by your DAW</dd></div>
+        <div><dt>Version · Price</dt><dd>1.0.0 · Free</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec" id="how" aria-labelledby="how-title">
+    <div class="wrap">
+      <p class="label">Under the hood</p>
+      <h2 id="how-title">How it works</h2>
+      <p class="lead">Everything below moves together when you turn the knob, in this order.</p>
+      <ol class="chain">
+        <li><h3>IGNITE</h3><p>A soft, asymmetric drive, 4x oversampled.</p></li>
+        <li><h3>HEAT</h3><p>Finds the harmonics in every moment (an STFT, 2048 points) and moves each toward TILT&#x27;s line, by HEAT, up to MAX. Both channels share the same gains.</p></li>
+        <li><h3>BURN</h3><p>Drive into a soft ceiling at −0.3 dBFS.</p></li>
+        <li><h3>MIX · OUTPUT</h3><p>Blend with the untouched sound (delayed to match), then the output level.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="start" aria-labelledby="qs-title">
+    <div class="wrap">
+      <p class="label">Quick start</p>
+      <h2 id="qs-title">Up and running</h2>
+      <ol class="steps">
+          <li><span>Put PYRE on a lead, pluck or synth.</span></li>
+          <li><span>Turn up <b>HEAT</b> and watch the flames even out against the grey ash line. 10 to 30% is often plenty.</span></li>
+          <li><span>Set <b>TILT</b>: left for darker and warmer, right for brighter. The middle is a saw.</span></li>
+          <li><span>Raise <b>BURN</b> for level: it pushes into the ceiling at −0.3 dBFS. The BURNING readout shows how far.</span></li>
+          <li><span>Thin sound (a sine, a soft square)? Add a little <b>IGNITE</b> first, so HEAT has harmonics to work with.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="controls" aria-labelledby="ct-title">
+    <div class="wrap">
+      <p class="label">Reference</p>
+      <h2 id="ct-title">Every control</h2>
+      <div class="ctls">
+          <div class="ctl-group"><h3>Main</h3>
+            <div class="ctl"><span class="n">IGNITE</span><span class="r">0 – 100% · default 0%</span><p class="d">A soft, slightly asymmetric drive in front, 4x oversampled. It adds harmonics to thin sounds so HEAT has something to work with, and lifts quiet parts a little.</p></div>
+            <div class="ctl"><span class="n">HEAT</span><span class="r">0 – 100% · default 60%</span><p class="d">Evens out the harmonics. 0% leaves them as they are; 100% moves each one all the way to the line (up to MAX). Noise between the harmonics and the phases are left alone.</p></div>
+            <div class="ctl"><span class="n">TILT</span><span class="r">−10 – −2 dB/oct · default −6 dB/oct</span><p class="d">The slope HEAT aims for, from the strongest harmonic. −6 dB per octave is a saw. Left: darker, warmer. Right: brighter, more bite.</p></div>
+            <div class="ctl"><span class="n">BURN</span><span class="r">0 – 18 dB · default +3 dB</span><p class="d">Drives the result into a soft ceiling at −0.3 dBFS. The level comes from here. At 0 dB the ceiling only catches the odd peak.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Side</h3>
+            <div class="ctl"><span class="n">MAX</span><span class="r">0 – 24 dB · default 18 dB</span><p class="d">The most HEAT may raise any one harmonic. Lower it if quiet harmonics or hiss come up too much.</p></div>
+            <div class="ctl"><span class="n">MIX</span><span class="r">0 – 100% · default 100%</span><p class="d">Blends the untouched sound back in, kept in time with PYRE's latency.</p></div>
+            <div class="ctl"><span class="n">OUTPUT</span><span class="r">−24 – 0 dB · default 0 dB</span><p class="d">The level after everything.</p></div>
+          </div>
+          <div class="ctl-group"><h3>Display</h3>
+            <div class="ctl"><span class="n">The fire</span><span class="r"></span><p class="d">The harmonics after PYRE as flames, the sound before PYRE as a grey ash line, and the line HEAT aims for, dashed. Embers rise from the hottest flames.</p></div>
+            <div class="ctl"><span class="n">LEVEL · BURNING</span><span class="r"></span><p class="d">How much louder than the input, and how far BURN pushes into the ceiling.</p></div>
+            <div class="ctl"><span class="n">? (Help)</span><span class="r">On / Off · default Off</span><p class="d">Pop-up explanations when you hover over a control. Remembered for every project.</p></div>
+          </div>
+      </div>
+      <p class="note">Every plugin window scales from 60% to 200%: drag the bottom-right corner. Double-click a knob to return it to its default.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="tips" aria-labelledby="tp-title">
+    <div class="wrap">
+      <p class="label">Tips</p>
+      <h2 id="tp-title">Getting the most out of it</h2>
+      <ul class="tips">
+        <li>Start low: HEAT 10–20% with BURN at 0–3 dB already makes most leads bigger. Past 50%, everything starts to sound like a saw.</li>
+        <li>A lead that disappears in the drop? Raise TILT to the right so the upper harmonics come up, where the ear is most sensitive.</li>
+        <li>On a sine or a soft square, IGNITE 10–20% gives HEAT harmonics to even out; without it there is little to work with.</li>
+        <li>BURN is the loudness. Watch BURNING: a few dB is clean on a dense sound; much more starts to crunch.</li>
+        <li>Chords work, but single-note leads gain the most: each harmonic stands clear of the others.</li>
+        <li>PYRE has about 43 ms of latency. Your DAW compensates on playback; for playing a synth live through it, bypass it while recording.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec" id="install" aria-labelledby="in-title">
+    <div class="wrap">
+      <p class="label">Install</p>
+      <h2 id="in-title">Up and running in a minute</h2>
+      <div class="os-cols">
+        <div class="os-col">
+          <h3 class="os-title">Windows</h3>
+          <ol class="steps">
+            <li><h3>Unzip</h3><p>Open the downloaded <code>.zip</code>. Inside is the plugin (<code>.vst3</code>) and a standalone app.</p></li>
+            <li><h3>Copy the .vst3</h3><p>Move the <code>.vst3</code> to <code>C:\Program Files\Common Files\VST3</code>. Every Windows DAW looks there.</p></li>
+            <li><h3>Rescan</h3><p>Let your DAW scan for new plugins. The plugin shows up under <b>Noise Division</b>.</p></li>
+          </ol>
+          <p class="reqs">Windows 10 or 11, 64-bit. VST3 host or the standalone app.</p>
+        </div>
+        <div class="os-col">
+          <h3 class="os-title"><span class="kc">macOS</span></h3>
+          <ol class="steps">
+            <li><h3>Open the installer</h3><p>Double-click the <code>.pkg</code>. It installs the Audio Unit, the VST3 and the standalone app.</p></li>
+            <li><h3>If macOS blocks it</h3><p>Open System Settings, Privacy &amp; Security, scroll down and click <b>Open Anyway</b>. This shows once, because the installers aren't from the App Store.</p></li>
+            <li><h3>Open your DAW</h3><p>Logic and GarageBand find the AU on their next start. Ableton Live, FL Studio, Reaper, Bitwig and Studio One use the VST3.</p></li>
+          </ol>
+          <p class="reqs">macOS 10.13 or newer, Apple Silicon or Intel. AU or VST3 host, or the standalone app.</p>
+        </div>
+      </div>
+      <div class="manual-box">
+        <div class="ico" aria-hidden="true">PDF</div>
+        <div><h3>PYRE user manual</h3><p>Installation, every control, tips and troubleshooting in one PDF to keep next to your DAW.</p></div>
+        <a class="btn ghost" href="../../manuals/PYRE-User-Manual.pdf"><svg width="16" height="18" viewBox="0 0 16 18" aria-hidden="true"><path d="M2 1h8l4 4v12H2z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 1v4h4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M8 7.5v6m-2.5-2.5L8 13.5l2.5-2.5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg> Download PDF</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="help" aria-labelledby="hp-title">
+    <div class="wrap">
+      <p class="label">Help</p>
+      <h2 id="hp-title">Troubleshooting</h2>
+      <div class="faq">
+      <details><summary>Hiss or noise comes up</summary><p>Lower MAX, or HEAT. Only peaks that stand 6 dB above their surroundings count as harmonics, but very noisy sounds have many.</p></details>
+      <details><summary>It sounds harsh</summary><p>Move TILT to the left, lower HEAT, or lower BURN.</p></details>
+      <details><summary>It's late against the other tracks</summary><p>Your DAW should compensate PYRE's 43 ms. If it doesn't (some live or low-latency modes), turn that mode off.</p></details>
+      <details><summary>Little changes on a sine or soft sound</summary><p>There are few harmonics to even out. Add some IGNITE.</p></details>
+      <details><summary>The plugin doesn't show up</summary><p>Check the <code>.vst3</code> is in <code>C:\Program Files\Common Files\VST3</code> (Windows) and rescan. On a Mac, run the installer again and restart the DAW.</p></details>
+      <details><summary>No name, maker or category in FL Studio</summary><p>Rescan with <b>Verify plugins</b> ticked in the plugin manager.</p></details>
+      <details><summary>macOS says the installer can't be opened</summary><p>System Settings, Privacy &amp; Security, <b>Open Anyway</b>. The installers aren't signed with an Apple developer certificate yet.</p></details>
+      <details><summary>Windows SmartScreen warns about the app</summary><p>Click <b>More info</b>, then <b>Run anyway</b>. This only concerns the standalone app.</p></details>
+      <details><summary>The window is too big or too small</summary><p>Drag the bottom-right corner. Every plugin scales from 60% to 200% and remembers the size.</p></details>
+      <details><summary>Something else is wrong</summary><p>E-mail <a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a> with the plugin name, version, your DAW and your operating system.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec others" aria-labelledby="ot-title">
+    <div class="wrap">
+      <p class="label">More from Noise Division</p>
+      <h2 id="ot-title">The rest of the arsenal</h2>
+      <div class="cards">
+        <article class="card" style="--c:#ff7a3d">
+          <div class="stage"><img src="../../img/recoil.webp" alt="" width="2200" height="1440" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Precision sidechain</p>
+            <h3><a href="../../plugins/recoil/">RECOIL</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/peakslayer.webp" alt="" width="1520" height="1484" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Soft clipper</p>
+            <h3><a href="../../plugins/peakslayer/">PEAKSLAYER</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff3038">
+          <div class="stage"><img src="../../img/krush.webp" alt="" width="2000" height="1232" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Multiband distortion</p>
+            <h3><a href="../../plugins/krush/">KRUSH</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ffa648">
+          <div class="stage"><img src="../../img/masterfuse.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob mastering</p>
+            <h3><a href="../../plugins/masterfuse/">MASTERFUSE</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#e6dcc8">
+          <div class="stage"><img src="../../img/spectrakill.webp" alt="" width="2080" height="1400" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral compressor</p>
+            <h3><a href="../../plugins/spectrakill/">SPECTRAKILL</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#c4141e">
+          <div class="stage"><img src="../../img/dark.webp" alt="" width="1040" height="1360" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">One-knob darkener</p>
+            <h3><a href="../../plugins/dark/">DARK</a></h3>
+            
+            
+          </div>
+        </article>
+        <article class="card" style="--c:#ff7138">
+          <div class="stage"><img src="../../img/shrapnel.webp" alt="" width="2200" height="1440" loading="lazy" decoding="async"></div>
+          <div class="body">
+            <p class="label kind">Spectral distortion</p>
+            <h3><a href="../../plugins/shrapnel/">SHRAPNEL</a></h3>
+            
+            
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="donate slim" aria-labelledby="do-title">
+    <div class="wrap">
+      <div class="txt">
+        <p class="label" style="color:var(--orange)">Support</p>
+        <h2 id="do-title">Keep the plugins free</h2>
+        <p>Everything here is free and stays free. If a plugin made it into your tracks and you want to say thanks, a donation pays for the time that goes into new plugins and updates.</p>
+      </div>
+      <div>
+        <div class="donate-options">
+          <a class="donate-option beer" href="#" data-donate="bmc"><span><strong>Buy me a beer <span class="emoji" aria-hidden="true">🍺</span></strong><span>On Buy Me a Coffee: one beer, a round, or monthly</span></span><span class="go">Cheers →</span></a>
+          <a class="donate-option paypal" href="#" data-donate="paypal"><span><strong>PayPal</strong><span>Send any amount directly</span></span><span class="go">Donate →</span></a>
+        </div>
+        <p class="donate-msg" id="donate-msg" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="about">
+      <a class="brand" href="../../">NOISE <b>DIVISION</b></a>
+      <p>Free VST3 and AU plugins for Windows and macOS. Free to use in commercial and personal music.</p>
+      <p>© 2026 Noise Division</p>
+    </div>
+    <div>
+      <h2>Plugins</h2>
+      <ul>
+        <li><a href="../../plugins/recoil/">RECOIL</a></li>
+        <li><a href="../../plugins/pyre/">PYRE</a></li>
+        <li><a href="../../plugins/peakslayer/">PEAKSLAYER</a></li>
+        <li><a href="../../plugins/krush/">KRUSH</a></li>
+        <li><a href="../../plugins/masterfuse/">MASTERFUSE</a></li>
+        <li><a href="../../plugins/spectrakill/">SPECTRAKILL</a></li>
+        <li><a href="../../plugins/dark/">DARK</a></li>
+        <li><a href="../../plugins/shrapnel/">SHRAPNEL</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Noise Division</h2>
+      <ul>
+        <li><a href="../../contact/">Contact</a></li>
+        <li><a href="../../donate/">Donate</a></li>
+        <li><a href="mailto:noisedivision@proton.me">noisedivision@proton.me</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+<script src="../../assets/site.js?v=da7abf72" defer></script>
+</body>
+</html>

@@ -216,7 +216,7 @@ struct Quadrature
 inline double wrapPi (double a) { while (a > kPi) a -= 2 * kPi; while (a < -kPi) a += 2 * kPi; return a; }
 
 //==============================================================================
-enum class Trigger { Sync = 0, Midi = 1, Audio = 2, Map = 3 };
+enum class Trigger { Sync = 0, Midi = 1, Audio = 2, Map = 3, Rm = 4 };
 enum class GhostMode { Ignore = 0, Scale = 1, Full = 2 };
 enum class PhaseMode { Auto = 0, Manual = 1, Off = 2 };
 
@@ -249,6 +249,8 @@ struct Settings
     // MAP with a bass bounce: AUTO works out each duck from the clash (CLEARANCE, RECOVERY); SHAPES picks a shape per kind of bass
     int bassMode = 0;                       // 0 AUTO, 1 SHAPES
     double clearanceDb = 6.0, recoveryMs = 60.0;
+    // RM ("ring mod" sidechain): every sample the bass gets only the room the kick leaves under CEILING
+    double rmCeilDb = -3.0, rmRangeDb = 24.0, rmHoldMs = 0.0, rmReleaseMs = 3.0;
 };
 
 struct HostTime
@@ -274,6 +276,7 @@ public:
     std::atomic<bool> phaseLocked { false }, hasSidechain { false };
     std::atomic<int> relearnRequest { 0 };
     std::atomic<float> mapNow { -1.0f }, mapDriftMs { 0.0f }, mapInStep { -1.0f };   // MAP: song time; kick check (-1: no data)
+    std::atomic<float> rmGrDb { 0.0f };                // RM: the deepest the bass went in the last block (dB, <= 0)
     int lastHit = -1;                                  // offset in the last block where a hit / cycle started (-1: none)
     int lastHitKind = 0;                               // MAP: what it was: 0 kick, 1 snare, 2 rim, 3 ghost note
     double cycleSamples = 0.0;                         // current cycle length (for the display)
@@ -299,6 +302,7 @@ public:
         sa = sb = skk = srr = skr = 0; avgA = avgB = 0; thetaAuto = 0; thetaCur = 0; lockRun = 0; hitsLearned = 0; lastThetaAuto = 1e9; accum = false;
         zcLast = 0; zcPrev = 0; zcCount = 0; f0Est = 50.0;
         duckPow = 1.0;
+        rmG = 1.0; rmHoldLeft = 0;
         mapCursor = kickCursor = 0; mapLastT = -1e9; mapAmt = 1.0; mapLen = 0.25 * fs; nMapFire = nMapKick = mk2 = 0;
         clock = 0; expected.fill (0); expMatched.fill (false); expHead = 0; pendingEarly = 0; driftAvg = 0; inStepAvg = -1.0;
         mapDriftMs.store (0.0f); mapInStep.store (-1.0f);
@@ -358,6 +362,7 @@ public:
         const double lenAudio = std::max (0.02, (s.fit && fitMs > 0 ? fitMs : s.lengthMs) * 0.001) * fs;
         const bool sync = s.trigger == Trigger::Sync;
         const bool mapMode = s.trigger == Trigger::Map;
+        const bool rm = s.trigger == Trigger::Rm;
         autoActive.store (mapMode && ! activeBass.kind.empty() && s.bassMode == 0, std::memory_order_relaxed);
         if (! mapMode) cur = &slots[0].active;
         const double spb = fs * 60.0 / std::max (1.0, host.bpm);                 // samples per beat
@@ -367,6 +372,11 @@ public:
         if (rotate) phaseA0 = ch[0].quad.phaseA (fs, f0Est);
         lastHit = -1;
         const double outGain = std::pow (10.0, s.gainDb / 20.0);
+        // RM constants
+        const double rmCeil = std::pow (10.0, s.rmCeilDb / 20.0), rmFloor = std::pow (10.0, -std::max (0.0, s.rmRangeDb) / 20.0);
+        const int rmHoldN = (int) std::lround (std::max (0.0, s.rmHoldMs) * 0.001 * fs);
+        const double rmRel = s.rmReleaseMs <= 0.0 ? 1.0 : 1.0 - std::exp (-1.0 / (s.rmReleaseMs * 0.001 * fs));
+        double rmMin = 1.0;
 
         // groove lock: predicted hits inside this block (AUDIO trigger, host playing)
         int predictAt = -1;
@@ -427,8 +437,9 @@ public:
                     ageKicks (clock);
                 }
             }
-            else if (s.trigger == Trigger::Audio)
+            else if (s.trigger == Trigger::Audio || rm)
             {
+                // (RM: the hits only feed the display and PHASE; the duck itself is worked out sample by sample below)
                 // a hit: above THRESHOLD, a sudden rise, and within 20 dB of the recent kicks (so snare thumps and
                 // bleed on the same bus are ignored at any send level)
                 const bool onset = haveSc && fastEnv >= thr && fastEnv >= 0.1 * refPeak && fastEnv > 2.0 * slowEnv && sinceHit > holdoff;
@@ -536,9 +547,9 @@ public:
             double shapeNow = target;
             if (rampPos < rampLen) { const double u = (double) rampPos / rampLen; shapeNow = gStart + (target - gStart) * (0.5 - 0.5 * std::cos (kPi * u)); ++rampPos; }
             gCur = shapeNow;
-            const double gIn = 1.0 - a * (s.split ? s.inside : 1.0) * (1.0 - gCur);
-            const double gOut = s.split ? 1.0 - a * s.above * (1.0 - gCur) : gIn;
-            duckPow = duckAvgCoef * duckPow + (1 - duckAvgCoef) * gIn * gIn;
+            double gIn = 1.0 - a * (s.split ? s.inside : 1.0) * (1.0 - gCur);
+            double gOut = s.split ? 1.0 - a * s.above * (1.0 - gCur) : gIn;
+            if (rm) { gIn = rmG; gOut = s.split ? 1.0 - s.above * (1.0 - rmG) : rmG; }   // for PHASE's glide; set again below
 
             // ---------------- phase: theta (applied) moves freely only while the bass is ducked
             double thetaWant = 0.0;
@@ -557,30 +568,33 @@ public:
             const double ct = std::cos (thetaCur), st = std::sin (thetaCur);
 
             // ---------------- audio
+            // each channel in two parts: "band" gets gIn, "rest" (outside the band) gets gOut: y = band * gIn + rest * gOut
             double monoBefore = 0, monoAfter = 0, monoA = 0, monoB = 0, monoIn = 0;
-            for (int c = 0; c < std::min (numCh, 2); ++c)
+            double bandC[2] {}, restC[2] {};
+            const int nCh = std::min (numCh, 2);
+            for (int c = 0; c < nCh; ++c)
             {
                 auto& st2 = ch[(size_t) c];
                 const double in = io[c][i];
                 monoIn += in;
-                double y, yBefore;
+                double yBefore;
                 if (! s.split)
                 {
                     double v = in;
                     if (rotate) { double qa, qb; st2.quad.process (in, qa, qb); v = qa * ct - qb * st; monoA += qa; monoB += qb; }
-                    yBefore = v; y = v * gIn;
+                    yBefore = v; bandC[c] = v; restC[c] = 0.0;
                 }
                 else if (! rotate)
                 {
                     // SPLIT without rebuilding the signal from crossover bands: the whole input is ducked to gIn, and the part
                     // outside the band (high-passed above it, low-passed below it) is given back up to gOut:
-                    //   y = in * gIn + outside * (gOut - gIn)
+                    //   y = in * gIn + outside * (gOut - gIn) = (in - outside) * gIn + outside * gOut
                     // Between hits gIn = gOut = 1 and the bass comes out exactly as it went in (no phase shift, no delay,
                     // no level change). At the deepest point only the outside part is left, just as with crossover bands.
                     yBefore = in;
                     double outside = st2.xHi.highpass (in);
                     if (useLo) outside += st2.xLo.lowpass (in);
-                    y = in * gIn + outside * (gOut - gIn);
+                    bandC[c] = in - outside; restC[c] = outside;
                 }
                 else
                 {
@@ -590,9 +604,47 @@ public:
                     if (useLo) { double b2; st2.xLo.process (low, below, b2); band = b2; high = st2.apLo.process (high); }
                     { double qa, qb; st2.quad.process (band, qa, qb); band = qa * ct - qb * st; monoA += qa; monoB += qb; }
                     yBefore = below + band + high;
-                    y = (below + high) * gOut + band * gIn;
+                    bandC[c] = band; restC[c] = below + high;
                 }
-                monoBefore += yBefore; monoAfter += y;
+                monoBefore += yBefore;
+            }
+
+            // ---------------- RM: per sample, the bass may only fill what the kick leaves under CEILING:
+            //   |kick| + (|band| + ABOVE * |rest|) * g <= CEILING   (output GAIN included)
+            // In SPLIT only the band (and ABOVE's share of the rest) is held against the kick; the rest isn't ducked, so it isn't counted.
+            // down at once, then HOLD, then back up at the SMOOTH (release) rate. The fast gain moves are the sound of it:
+            // the bass is modulated by the kick's own waveform (hence "ring mod").
+            if (rm)
+            {
+                double want = 1.0;
+                if (haveSc)
+                {
+                    const double kAbs = std::max (std::abs ((double) scL[i]), scR ? std::abs ((double) scR[i]) : 0.0);
+                    const double ab = s.split ? std::clamp (s.above, 0.0, 1.0) : 0.0;
+                    for (int c = 0; c < nCh; ++c)
+                    {
+                        const double B = std::abs (bandC[c]) * outGain, Rr = std::abs (restC[c]) * outGain;
+                        const double den = B + ab * Rr;
+                        if (kAbs + den <= rmCeil) continue;
+                        const double g = den > 1e-12 ? (rmCeil - kAbs) / den : 1.0;
+                        want = std::min (want, g);
+                    }
+                }
+                want = std::clamp (want, rmFloor, 1.0);
+                if (want < rmG) { rmG = want; rmHoldLeft = rmHoldN; }
+                else if (rmHoldLeft > 0) --rmHoldLeft;
+                else rmG += (want - rmG) * rmRel;
+                rmMin = std::min (rmMin, rmG);
+                const double m = std::clamp (s.mix, 0.0, 1.0);
+                gIn = 1.0 - m * (1.0 - rmG);
+                gOut = s.split ? 1.0 - m * std::clamp (s.above, 0.0, 1.0) * (1.0 - rmG) : gIn;
+            }
+            duckPow = duckAvgCoef * duckPow + (1 - duckAvgCoef) * gIn * gIn;
+
+            for (int c = 0; c < nCh; ++c)
+            {
+                const double y = bandC[c] * gIn + restC[c] * gOut;
+                monoAfter += y;
                 io[c][i] = (float) (y * outGain);
             }
             const double nC = std::max (1, std::min (numCh, 2));
@@ -629,6 +681,8 @@ public:
         grooveConf.store (gc, std::memory_order_relaxed);
         scLevel.store ((float) fastEnv, std::memory_order_relaxed);
         dynScale.store ((float) curScale, std::memory_order_relaxed);
+        // the deepest since the editor last read it (it swaps in 0)
+        if (rm) rmGrDb.store (std::min (rmGrDb.load (std::memory_order_relaxed), (float) (20.0 * std::log10 (std::max (1e-6, rmMin)))), std::memory_order_relaxed);
     }
 
 private:
@@ -662,6 +716,9 @@ private:
 
     // auto offset (SYNC)
     double offCos = 0, offSin = 0; int offCount = 0;
+
+    // RM
+    double rmG = 1.0; int rmHoldLeft = 0;
 
     // phase
     double sa = 0, sb = 0, skk = 0, srr = 0, skr = 0, avgA = 0, avgB = 0, thetaAuto = 0, thetaCur = 0, lastThetaAuto = 1e9, phaseA0 = 0;

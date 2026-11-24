@@ -193,13 +193,14 @@ def main(src, tools):
                 }
                 print(f"{slug}/{cid}: {label}; change {diff:+.1f} LU, heard {after_lufs - lufs(x, sr):+.1f} LU, peak {20 * np.log10(np.abs(y).max()):.1f} dB")
             out["plugins"][slug] = entry
-    # RECOIL's players come from DAW bounces (recoil_bounces.py): keep them
+    # RECOIL's and PYRE's players come from DAW bounces (bounces.py): keep them
     old = json.loads((REPO / "scripts" / "site" / "demos.json").read_text()) if (REPO / "scripts" / "site" / "demos.json").exists() else {}
-    if "recoil" in old.get("plugins", {}):
-        out["clips"] += [c for c in old["clips"] if c["id"].startswith("rc")]
-        out["plugins"]["recoil"] = old["plugins"]["recoil"]
-    else:
-        recoil_demos(out, tools)
+    for plugin, prefix in (("recoil", "rc"), ("pyre", "py")):
+        if plugin in old.get("plugins", {}):
+            out["clips"] += [c for c in old["clips"] if c["id"].startswith(prefix)]
+            out["plugins"][plugin] = old["plugins"][plugin]
+        elif plugin == "recoil":
+            recoil_demos(out, tools)
     (REPO / "scripts" / "site" / "demos.json").write_text(json.dumps(out, separators=(",", ":")))
     print("wrote scripts/site/demos.json")
 
