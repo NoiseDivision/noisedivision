@@ -2,72 +2,72 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://noisedivision.net/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>1.0</priority>
     <image:image><image:loc>https://noisedivision.net/img/share.jpg</image:loc><image:title>Noise Division free audio plugins</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/pyre/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/pyre.webp</image:loc><image:title>PYRE</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/krush/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/krush.webp</image:loc><image:title>KRUSH</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/shrapnel/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/shrapnel.webp</image:loc><image:title>SHRAPNEL</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/dark/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/dark.webp</image:loc><image:title>DARK</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/recoil/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/recoil.webp</image:loc><image:title>RECOIL</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/spectrakill/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/spectrakill.webp</image:loc><image:title>SPECTRAKILL</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/peakslayer/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/peakslayer.webp</image:loc><image:title>PEAKSLAYER</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/masterfuse/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/masterfuse.webp</image:loc><image:title>MASTERFUSE</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/plugins/flatline/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.9</priority>
     <image:image><image:loc>https://noisedivision.net/img/flatline.webp</image:loc><image:title>FLATLINE</image:title></image:image>
   </url>
   <url>
     <loc>https://noisedivision.net/contact/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.4</priority>
   </url>
   <url>
     <loc>https://noisedivision.net/donate/</loc>
-    <lastmod>2026-11-24</lastmod>
+    <lastmod>2026-11-25</lastmod>
     <priority>0.5</priority>
   </url>
 </urlset>
