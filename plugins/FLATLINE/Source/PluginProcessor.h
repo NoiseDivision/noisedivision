@@ -3,7 +3,7 @@
 #include "FlatlineDSP.h"
 
 // FLATLINE: clean loudness. GAIN -> UPWARD -> CLIPPER -> true-peak LIMITER, with loudness meters (see FlatlineDSP.h).
-class FlatlineProcessor : public juce::AudioProcessor
+class FlatlineProcessor : public juce::AudioProcessor, private juce::AsyncUpdater
 {
 public:
     FlatlineProcessor();
@@ -16,7 +16,7 @@ public:
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
 
-    const juce::String getName() const override { return "FLATLINE"; }
+    const juce::String getName() const override { return JucePlugin_Name; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     double getTailLengthSeconds() const override { return 0.0; }
@@ -44,6 +44,8 @@ private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
     fl::Settings settings() const;
     fl::Engine dsp;
+    std::atomic<int> wantLatency { -1 };
+    void handleAsyncUpdate() override { setLatencySamples (wantLatency.load()); }   // MASK on or off: the DAW is told the new latency
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FlatlineProcessor)
 };

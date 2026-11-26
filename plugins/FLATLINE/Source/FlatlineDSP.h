@@ -41,6 +41,8 @@ struct Settings
     bool clipOn = false;
     double clipDriveDb = 1.5;
     bool clipHard = false;
+    bool clipMask = false;           // MASK: the clipping distortion moved to where the music hides it (+21 ms latency while on)
+    double maskDb = 10.0;            // how far under the masking threshold the clipping error stays
     bool truePeak = false;           // sample peak by default (louder); true peak in ADVANCED
     double lookaheadMs = -1.0;       // ADVANCED: < 0 = AUTO (from STYLE), else 0.5..5 ms
     int dither = 0;                  // 0 off, 1 24-bit, 2 16-bit
@@ -302,6 +304,206 @@ private:
     std::vector<T> buf; int len = 1, pos = 0;
 };
 
+// ---------------------------------------------------------------- MASK clipper: the clipping distortion is reshaped, frame by frame,
+// so that in every frequency band it stays under what the music itself masks there (the ear can't hear it).
+// Each frame (N samples, hop N/4): find the overs (2x oversampled) -> the clipping error's spectrum -> cap every bin at
+// the masking threshold of the music around it -> back to time -> what is still over -> ... Passes 1-4 stay under the
+// threshold; peaks still over after that get a growing allowance (passes 5-8), placed where it's least audible.
+// Latency: N samples (1024 at 44.1/48 kHz), only while MASK is on.
+// Both channels go through each FFT together (left as the real part, right as the imaginary part).
+class MaskClipper
+{
+public:
+    void prepare (double fs)
+    {
+        N = fs > 70000.0 ? 2048 : 1024; H = N / 4; M = N * kOs;
+        win.resize ((size_t) N); win4.resize ((size_t) M);
+        for (int i = 0; i < N; ++i) win[(size_t) i] = 0.5 - 0.5 * std::cos (2.0 * kPi * i / N);
+        for (int i = 0; i < M; ++i) win4[(size_t) i] = 0.5 - 0.5 * std::cos (2.0 * kPi * i / M);
+        const int K = N / 2 + 1;
+        for (int c = 0; c < 2; ++c)
+        {
+            seg[c].assign ((size_t) N, 0.0); ola[c].assign ((size_t) N, 0.0); outQ[c].assign ((size_t) H, 0.0); corr[c].assign ((size_t) N, 0.0);
+            cr[c].assign ((size_t) K, 0.0); ci[c].assign ((size_t) K, 0.0); cap[c].assign ((size_t) K, 0.0);
+        }
+        inCount = 0;
+        zr.assign ((size_t) N, 0.0); zi.assign ((size_t) N, 0.0); ur.assign ((size_t) M, 0.0); ui.assign ((size_t) M, 0.0);
+        tc.resize ((size_t) M / 2); ts.resize ((size_t) M / 2);
+        for (int i = 0; i < M / 2; ++i) { tc[(size_t) i] = std::cos (2.0 * kPi * i / M); ts[(size_t) i] = -std::sin (2.0 * kPi * i / M); }
+        // bands a third of a Bark wide, and how a loud band masks its neighbours (Schroeder's spreading function)
+        band.resize ((size_t) K);
+        auto bark = [] (double f) { return 13.0 * std::atan (0.00076 * f) + 3.5 * std::atan ((f / 7500.0) * (f / 7500.0)); };
+        nb = 0;
+        for (int k = 0; k < K; ++k) { band[(size_t) k] = (int) (bark (k * fs / N) * 3.0); nb = std::max (nb, band[(size_t) k] + 1); }
+        cnt.assign ((size_t) nb, 0); for (int k = 0; k < K; ++k) ++cnt[(size_t) band[(size_t) k]];
+        spread.assign ((size_t) (nb * nb), 0.0);
+        for (int b = 0; b < nb; ++b)
+            for (int j = 0; j < nb; ++j)
+            {
+                const double dz = (b - j) / 3.0 + 0.474;    // maskee above the masker: -10 dB/Bark; below: about -25 dB/Bark
+                const double db = 15.81 + 7.5 * dz - 17.5 * std::sqrt (1.0 + dz * dz);
+                spread[(size_t) (b * nb + j)] = db > -60.0 ? std::pow (10.0, db / 10.0) : 0.0;
+            }
+        // normalise: a flat spectrum's threshold sits right at its own level (MASK dB under it is then the margin)
+        norm.assign ((size_t) nb, 1.0);
+        for (int b = 0; b < nb; ++b)
+        {
+            if (cnt[(size_t) b] == 0) continue;
+            double s = 0; for (int j = 0; j < nb; ++j) s += spread[(size_t) (b * nb + j)] * cnt[(size_t) j];
+            norm[(size_t) b] = 1.0 / s;
+        }
+        E.assign ((size_t) nb, 0.0); T.assign ((size_t) nb, 0.0);
+    }
+    int latency() const { return N; }
+    void reset()
+    {
+        for (int c = 0; c < 2; ++c) { std::fill (seg[c].begin(), seg[c].end(), 0.0); std::fill (ola[c].begin(), ola[c].end(), 0.0); std::fill (outQ[c].begin(), outQ[c].end(), 0.0); }
+        inCount = 0;
+    }
+
+    // one stereo sample (in place); on = shape, off = a plain delay; c = clip level;
+    // maskDb = how far under the masking threshold the error must stay. Returns the input's peak over c (for the meter).
+    double process (double& l, double& r, bool on, double c, double maskDb)
+    {
+        seg[0][(size_t) (N - H + inCount)] = l; seg[1][(size_t) (N - H + inCount)] = r;
+        l = outQ[0][(size_t) inCount]; r = outQ[1][(size_t) inCount];
+        if (++inCount == H) { frame (on, c, maskDb); inCount = 0; }
+        return std::max (std::abs (seg[0][(size_t) (N - H + (inCount + H - 1) % H)]), std::abs (seg[1][(size_t) (N - H + (inCount + H - 1) % H)])) / c;
+    }
+
+private:
+    static constexpr int kOs = 2;   // the overs are found at 2x (the limiter after it catches what's left between those)
+    int kPasses = 8, kHidden = 4;   // passes in all, and how many stay strictly under the masking threshold
+    // in-place radix-2 FFT of size n (a power of two dividing M)
+    void fft (std::vector<double>& xr, std::vector<double>& xi, int n, bool inverse)
+    {
+        for (int i = 1, j = 0; i < n; ++i)
+        {
+            int bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit;
+            if (i < j) { std::swap (xr[(size_t) i], xr[(size_t) j]); std::swap (xi[(size_t) i], xi[(size_t) j]); }
+        }
+        for (int len = 2; len <= n; len <<= 1)
+        {
+            const int half = len / 2, step = M / len;
+            for (int i = 0; i < n; i += len)
+                for (int j = 0; j < half; ++j)
+                {
+                    const double wr = tc[(size_t) (j * step)], wi = inverse ? -ts[(size_t) (j * step)] : ts[(size_t) (j * step)];
+                    const size_t a = (size_t) (i + j), b = (size_t) (i + j + half);
+                    const double vr = xr[b] * wr - xi[b] * wi, vi = xr[b] * wi + xi[b] * wr;
+                    xr[b] = xr[a] - vr; xi[b] = xi[a] - vi; xr[a] += vr; xi[a] += vi;
+                }
+        }
+        if (inverse) for (int i = 0; i < n; ++i) { xr[(size_t) i] /= n; xi[(size_t) i] /= n; }
+    }
+    // the spectra of the two real signals packed in (xr + j xi) of size n, bin k
+    static void split (const std::vector<double>& xr, const std::vector<double>& xi, int n, int k, double s,
+                       double& lr, double& li, double& rr, double& ri)
+    {
+        const size_t a = (size_t) k, b = (size_t) ((n - k) % n);
+        lr = 0.5 * s * (xr[a] + xr[b]); li = 0.5 * s * (xi[a] - xi[b]);
+        rr = 0.5 * s * (xi[a] + xi[b]); ri = -0.5 * s * (xr[a] - xr[b]);
+    }
+
+    void frame (bool on, double c, double maskDb)
+    {
+        double peak = 0;
+        for (int ch = 0; ch < 2; ++ch) for (int i = 0; i < N; ++i) peak = std::max (peak, std::abs (seg[ch][(size_t) i] + ola[ch][(size_t) i]));
+        if (on && peak > 0.5 * c)   // true peaks can't be more than a few dB over the samples' peaks
+        {
+            const int K = N / 2 + 1;
+            // the masking threshold of this frame's music, per channel
+            for (int i = 0; i < N; ++i) { zr[(size_t) i] = win[(size_t) i] * seg[0][(size_t) i]; zi[(size_t) i] = win[(size_t) i] * seg[1][(size_t) i]; }
+            fft (zr, zi, N, false);
+            const double off = std::pow (10.0, -maskDb / 10.0);
+            for (int ch = 0; ch < 2; ++ch)
+            {
+                std::fill (E.begin(), E.end(), 0.0);
+                for (int k = 0; k < K; ++k)
+                {
+                    double lr, li, rr, ri; split (zr, zi, N, k, 1.0, lr, li, rr, ri);
+                    E[(size_t) band[(size_t) k]] += ch == 0 ? lr * lr + li * li : rr * rr + ri * ri;
+                }
+                for (int b = 0; b < nb; ++b)
+                {
+                    if (cnt[(size_t) b] == 0) continue;
+                    double s = 0; for (int j = 0; j < nb; ++j) s += spread[(size_t) (b * nb + j)] * E[(size_t) j];
+                    T[(size_t) b] = s * off * norm[(size_t) b];
+                }
+                for (int k = 0; k < K; ++k) cap[ch][(size_t) k] = std::sqrt (T[(size_t) band[(size_t) k]]);
+                std::fill (cr[ch].begin(), cr[ch].end(), 0.0); std::fill (ci[ch].begin(), ci[ch].end(), 0.0); std::fill (corr[ch].begin(), corr[ch].end(), 0.0);
+            }
+            // find the overs, shape the error, repeat
+            bool touched = false;
+            // passes 1-4: only where the music hides it. Peaks still over after that: the allowance grows 6 dB per pass
+            // (passes 5-8), so the clipper still does its job, with the extra distortion where it's least audible.
+            for (int pass = 0; pass < kPasses; ++pass)
+            {
+                const double capScale = pass < kHidden ? 1.0 : std::pow (2.0, pass - kHidden + 1);
+                // the frame as it stands, 4x oversampled (zero-padded spectrum)
+                for (int i = 0; i < N; ++i)
+                {
+                    zr[(size_t) i] = seg[0][(size_t) i] + ola[0][(size_t) i] + corr[0][(size_t) i];
+                    zi[(size_t) i] = seg[1][(size_t) i] + ola[1][(size_t) i] + corr[1][(size_t) i];
+                }
+                fft (zr, zi, N, false);
+                std::fill (ur.begin(), ur.end(), 0.0); std::fill (ui.begin(), ui.end(), 0.0);
+                for (int k = 0; k < N / 2; ++k) { ur[(size_t) k] = zr[(size_t) k] * kOs; ui[(size_t) k] = zi[(size_t) k] * kOs; }
+                for (int k = 1; k < N / 2; ++k) { ur[(size_t) (M - k)] = zr[(size_t) (N - k)] * kOs; ui[(size_t) (M - k)] = zi[(size_t) (N - k)] * kOs; }
+                ur[(size_t) (N / 2)] = ur[(size_t) (M - N / 2)] = 0.5 * zr[(size_t) (N / 2)] * kOs;
+                ui[(size_t) (N / 2)] = ui[(size_t) (M - N / 2)] = 0.5 * zi[(size_t) (N / 2)] * kOs;
+                fft (ur, ui, M, true);
+                bool any = false;
+                for (int i = 0; i < M; ++i)
+                {
+                    const double yl = ur[(size_t) i], yr = ui[(size_t) i];
+                    const double dl = std::abs (yl) > c ? std::copysign (c, yl) - yl : 0.0;
+                    const double dr = std::abs (yr) > c ? std::copysign (c, yr) - yr : 0.0;
+                    any = any || ((dl != 0.0 || dr != 0.0) && win4[(size_t) i] > 0.02);
+                    ur[(size_t) i] = win4[(size_t) i] * dl; ui[(size_t) i] = win4[(size_t) i] * dr;
+                }
+                if (! any) break;
+                touched = true;
+                fft (ur, ui, M, false);
+                std::fill (zr.begin(), zr.end(), 0.0); std::fill (zi.begin(), zi.end(), 0.0);
+                for (int k = 0; k < K; ++k)
+                {
+                    double e[2][2]; split (ur, ui, M, k, 1.0 / kOs, e[0][0], e[0][1], e[1][0], e[1][1]);
+                    double v[2][2];
+                    for (int ch = 0; ch < 2; ++ch)
+                    {
+                        double ar = cr[ch][(size_t) k] + e[ch][0], ai = ci[ch][(size_t) k] + e[ch][1];
+                        if (k == 0 || k == N / 2) ai = 0.0;
+                        const double m = std::sqrt (ar * ar + ai * ai);
+                        const double cp = cap[ch][(size_t) k] * capScale;
+                        if (m > cp) { const double g = cp / m; ar *= g; ai *= g; }
+                        cr[ch][(size_t) k] = ar; ci[ch][(size_t) k] = ai; v[ch][0] = ar; v[ch][1] = ai;
+                    }
+                    // pack again: L + j R (each Hermitian)
+                    zr[(size_t) k] = v[0][0] - v[1][1]; zi[(size_t) k] = v[0][1] + v[1][0];
+                    if (k > 0 && k < N / 2) { zr[(size_t) (N - k)] = v[0][0] + v[1][1]; zi[(size_t) (N - k)] = -v[0][1] + v[1][0]; }
+                }
+                fft (zr, zi, N, true);
+                for (int i = 0; i < N; ++i) { corr[0][(size_t) i] = win[(size_t) i] * zr[(size_t) i]; corr[1][(size_t) i] = win[(size_t) i] * zi[(size_t) i]; }
+            }
+            if (touched) for (int ch = 0; ch < 2; ++ch) for (int i = 0; i < N; ++i) ola[ch][(size_t) i] += corr[ch][(size_t) i];
+        }
+        else if (! on) { std::fill (ola[0].begin(), ola[0].end(), 0.0); std::fill (ola[1].begin(), ola[1].end(), 0.0); }
+        for (int ch = 0; ch < 2; ++ch)
+        {
+            auto& s = seg[ch]; auto& o = ola[ch];
+            for (int i = 0; i < H; ++i) outQ[ch][(size_t) i] = s[(size_t) i] + o[(size_t) i];
+            std::copy (s.begin() + H, s.end(), s.begin()); std::fill (s.end() - H, s.end(), 0.0);
+            std::copy (o.begin() + H, o.end(), o.begin()); std::fill (o.end() - H, o.end(), 0.0);
+        }
+    }
+
+    int N = 1024, H = 256, M = 4096, inCount = 0, nb = 1;
+    std::vector<double> seg[2], ola[2], outQ[2], corr[2], cr[2], ci[2], cap[2];
+    std::vector<double> win, win4, zr, zi, ur, ui, tc, ts, spread, norm, E, T;
+    std::vector<int> band, cnt;
+};
+
 // ---------------------------------------------------------------- the engine
 class Engine
 {
@@ -323,20 +525,25 @@ public:
     std::atomic<int> scopeWrite { 0 };
 
     int maxLookahead (double fs) const { return (int) std::ceil (5.0 * 0.001 * fs); }
-    int latency() const { return OsClipper::kLatency + TruePeak::kTaps / 2 + lookMax; }
+    int latency() const { return OsClipper::kLatency + (maskPath ? maskLat : 0) + TruePeak::kTaps / 2 + lookMax; }
+    // MASK adds its latency only while it's on: set it before prepare (from the saved settings) or let process() switch it
+    void setMaskPath (bool on) { maskPath = on; }
 
     void prepare (double sampleRate, int channels)
     {
         fs = sampleRate; nCh = std::clamp (channels, 1, 2);
         lookMax = maxLookahead (fs);
+        switchFadeLen = (int) (0.04 * fs); switchFade = switchFadeLen;
+        mclip.prepare (fs);
+        maskLat = mclip.latency();
         for (auto& c : ch)
         {
             c.clip.reset(); c.tp.reset();
             c.tpPlain.setSize (TruePeak::kTaps / 2);
             c.audio.setSize (TruePeak::kTaps / 2 + lookMax);
-            c.preOs.setSize (OsClipper::kLatency);
+            c.preOs.setSize (OsClipper::kLatency + maskLat); c.preOs.setSize (OsClipper::kLatency + (maskPath ? maskLat : 0));   // (room for both)
             c.pre.setSize (TruePeak::kTaps / 2 + lookMax);
-            c.dry.setSize (latency());
+            { const bool m = maskPath; maskPath = true; c.dry.setSize (latency()); maskPath = m; } c.dry.setSize (latency());
             c.fast = c.slow = 0;
         }
         curLook = -1;
@@ -369,7 +576,15 @@ public:
         const double gainTarget = std::pow (10.0, s.gainDb / 20.0);
         if (gainSm < 0) gainSm = gainTarget;
         const double gainC = 1.0 - std::exp (-1.0 / (0.02 * fs));
-        const int clipMode = s.clipOn ? (s.clipHard ? 2 : 1) : 0;
+        const bool maskMode = s.clipOn && s.clipMask;
+        if (maskMode != maskPath)
+        {
+            // MASK in or out of the path: the latency changes (the DAW is told), so the delays are re-set and the sound fades back in
+            maskPath = maskMode; mclip.reset();
+            for (auto& c : ch) { c.preOs.setSize (OsClipper::kLatency + (maskPath ? maskLat : 0)); c.dry.setSize (latency()); }
+            switchFade = 0;
+        }
+        const int clipMode = s.clipOn && ! maskMode ? (s.clipHard ? 2 : 1) : 0;
         const double drive = std::pow (10.0, (s.clipOn ? s.clipDriveDb : 0.0) / 20.0);
         // upward
         const double envC = std::exp (-1.0 / (0.03 * fs)), refDecay = std::pow (10.0, -1.5 / 20.0 / fs);   // the peak reference falls 1.5 dB/s
@@ -427,6 +642,12 @@ public:
                 pre[c] = x[c] * drive;   // what the clipper and limiter start from (for CLEAN and DELTA)
                 x[c] = ch[(size_t) c].clip.process (x[c], clipMode, drive, ceil, overMax);
             }
+            // MASK: the oversampled clipper above is a plain delay (no drive applied): drive here, then the shaped clip
+            if (maskPath)
+            {
+                x[0] *= drive; x[1] *= drive;
+                overMax = std::max (overMax, mclip.process (x[0], x[1], true, ceil, s.maskDb));
+            }
             clipBlock = std::max (clipBlock, (float) (20.0 * std::log10 (overMax)));
             // pre, delayed by the clipper's latency, to line up with the limiter's input
             for (int c = 0; c < 2; ++c) pre[c] = ch[(size_t) c].preOs.push (pre[c]);
@@ -482,6 +703,11 @@ public:
                 const double want = (loudIn.shortTerm > -70 && loudOut.shortTerm > -70) ? std::pow (10.0, std::clamp (loudOut.shortTerm - loudIn.shortTerm, -24.0, 24.0) / 20.0) : 1.0;
                 matchSm += (want - matchSm) * matchC;
             }
+            if (switchFade < switchFadeLen)   // after MASK was switched: 20 ms of silence, then 20 ms fading in
+            {
+                const double f = std::clamp ((switchFade - switchFadeLen * 0.5) / (switchFadeLen * 0.5), 0.0, 1.0);
+                out[0] *= f; out[1] *= f; ++switchFade;
+            }
             io[0][i] = (float) out[0];
             if (numCh > 1) io[1][i] = (float) out[1];
 
@@ -525,9 +751,10 @@ private:
         double fast = 0, slow = 0;
     };
     std::array<Chan, 2> ch;
+    MaskClipper mclip;
     std::array<TruePeak, 2> tpOut;
     Loudness loudOut, loudIn;
-    double fs = 48000; int nCh = 2, lookMax = 240, curLook = -1;
+    double fs = 48000; int nCh = 2, lookMax = 240, curLook = -1, maskLat = 1024, switchFade = 1 << 30, switchFadeLen = 1920; bool maskPath = false;
     double upEnv = 1e-9, upRef = -120, upLiftDb = 0, gainSm = -1, matchSm = 1;
     double trFast = 1e-12, trSlow = 1e-12;
     double cleanErr = 0, cleanRef = 0, cleanC = 0.9999, tpMaxLin = 0, grMaxDb = 0;

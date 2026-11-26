@@ -413,3 +413,19 @@ kbd { font-family: var(--display); font-weight: 700; font-size: 0.8em; border: 1
 .suite-link { display: inline-block; margin-top: 14px; font-family: var(--display); font-weight: 600; font-size: 0.85rem; letter-spacing: 0.1em; color: var(--orange); text-decoration: none; }
 .suite-link:hover { text-decoration: underline; }
 @media (max-width: 860px) { .suite .wrap { grid-template-columns: 1fr; gap: 24px; } .suite { padding: 48px 0; } }
+
+/* a feature in depth (FLATLINE: MASK) */
+.badge-new { margin: 0 0 10px; font-family: var(--display); font-weight: 600; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--c, var(--accent)); display: inline-flex; align-items: center; gap: 8px; }
+.badge-new::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+.new-link { justify-self: start; width: fit-content; display: inline-flex; align-items: center; gap: 8px; margin: 0 0 14px; padding: 6px 12px; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); border-radius: 999px; font-family: var(--display); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); text-decoration: none; background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.new-link:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.spotlight { background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 65%); }
+.spot-prose { max-width: 75ch; margin-top: 18px; }
+.spot-fig { margin: 28px 0 8px; }
+.spot-fig img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 4px; }
+.spot-fig figcaption { color: var(--steel); font-size: 0.9rem; margin-top: 10px; max-width: 80ch; }
+.spot-h { margin: 34px 0 14px; font-size: var(--step-1); letter-spacing: 0.04em; }
+.spot-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 22px 0 0; }
+.spot-facts div { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 16px 18px; }
+.spot-facts dt { font-family: var(--display); font-weight: 600; font-size: 0.75rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.spot-facts dd { margin: 0; color: var(--silver); font-size: 0.93rem; }

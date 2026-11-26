@@ -1,7 +1,7 @@
 # Noise Division
 
 Free audio plugins: **PEAKSLAYER** (soft clipper), **KRUSH** (multiband distortion),
-**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map), **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling) and **FLATLINE** (clean loudness: a clipper, an upward compressor and a lookahead limiter for the master, with LEARN to hit a LUFS target). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
+**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map), **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling) and **FLATLINE** (clean loudness: a clipper whose MASK mode hides its distortion under the music, an upward compressor and a lookahead limiter for the master, with LEARN to hit a LUFS target). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
 
 ```
 plugins/            the nine JUCE projects (each builds on its own with CMake)

@@ -99,7 +99,7 @@ private:
     GainTank tank;
     Knob ceiling, release, link, transient, upAmount, upBelow, clipDrive;
     Knob* knobs[7] { &ceiling, &release, &link, &transient, &upAmount, &upBelow, &clipDrive };
-    juce::TextButton styleBtn[4], autoBtn { "AUTO" }, upLed, clipLed, softBtn { "SOFT" }, hardBtn { "HARD" },
+    juce::TextButton styleBtn[4], autoBtn { "AUTO" }, upLed, clipLed, softBtn { "SOFT" }, hardBtn { "HARD" }, maskBtn { "MASK" },
                      bypassBtn { juce::String::fromUTF8 ("BYPASS \xc2\xb7 LEVEL MATCHED") }, deltaBtn { "DELTA" }, advBtn { "ADVANCED" },
                      learnBtn { "LEARN" }, tMinus { "-" }, tPlus { "+" }, prevBtn { "<" }, nextBtn { ">" }, helpBtn { "?" };
     juce::ComboBox presetBox;

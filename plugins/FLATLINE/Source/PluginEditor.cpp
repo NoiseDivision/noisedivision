@@ -541,15 +541,24 @@ FlatContent::FlatContent (FlatlineProcessor& p, FlatLookAndFeel& l)
     bypassAtt = std::make_unique<juce::ButtonParameterAttachment> (*proc.apvts.getParameter ("bypass"), bypassBtn);
     deltaAtt = std::make_unique<juce::ButtonParameterAttachment> (*proc.apvts.getParameter ("delta"), deltaBtn);
 
-    // SOFT / HARD
+    // SOFT / HARD / MASK
     auto* hardP = proc.apvts.getParameter ("clipHard");
-    for (auto* b : { &softBtn, &hardBtn }) { b->getProperties().set ("kind", "seg"); b->getProperties().set ("size", 9.0f); addAndMakeVisible (*b); }
+    auto* maskP = proc.apvts.getParameter ("clipMask");
+    for (auto* b : { &softBtn, &hardBtn, &maskBtn }) { b->getProperties().set ("kind", "seg"); b->getProperties().set ("size", 9.0f); addAndMakeVisible (*b); }
     softBtn.setTooltip ("SOFT: rounds the tips off: smooth, the cleaner choice."); hardBtn.setTooltip ("HARD: cuts them flat: crisper and more aggressive.");
-    softBtn.onClick = [hardP] { hardP->setValueNotifyingHost (0.0f); };
-    hardBtn.onClick = [hardP] { hardP->setValueNotifyingHost (1.0f); };
-    atts.push_back (std::make_unique<juce::ParameterAttachment> (*hardP, [this] (float v) { softBtn.setToggleState (v < 0.5f, juce::dontSendNotification); hardBtn.setToggleState (v >= 0.5f, juce::dontSendNotification); }));
-    atts.back()->sendInitialUpdate();
-    for (const char* id : { "upOn", "clipOn", "autoRelease", "ceiling", "target", "gain" })
+    maskBtn.setTooltip ("MASK: clips like HARD, then moves the distortion to where the music itself covers it, band by band, so you hear far less of it. You can push much harder before it sounds distorted. Adds about 21 ms of latency while it's on.");
+    softBtn.onClick = [hardP, maskP] { hardP->setValueNotifyingHost (0.0f); maskP->setValueNotifyingHost (0.0f); };
+    hardBtn.onClick = [hardP, maskP] { hardP->setValueNotifyingHost (1.0f); maskP->setValueNotifyingHost (0.0f); };
+    maskBtn.onClick = [maskP] { maskP->setValueNotifyingHost (1.0f); };
+    auto segUpdate = [this, hardP, maskP] (float)
+    {
+        const bool m = maskP->getValue() >= 0.5f, h = hardP->getValue() >= 0.5f;
+        softBtn.setToggleState (! m && ! h, juce::dontSendNotification); hardBtn.setToggleState (! m && h, juce::dontSendNotification);
+        maskBtn.setToggleState (m, juce::dontSendNotification);
+    };
+    atts.push_back (std::make_unique<juce::ParameterAttachment> (*hardP, segUpdate)); atts.back()->sendInitialUpdate();
+    atts.push_back (std::make_unique<juce::ParameterAttachment> (*maskP, segUpdate)); atts.back()->sendInitialUpdate();
+    for (const char* id : { "upOn", "clipOn", "clipMask", "autoRelease", "ceiling", "target", "gain" })
         atts.push_back (std::make_unique<juce::ParameterAttachment> (*proc.apvts.getParameter (id), [this] (float) { repaint(); }));
 
     // ADVANCED: a menu
@@ -649,7 +658,7 @@ void FlatContent::resized()
     helpBtn.setBounds (1046, 19, 32, 32);
     autoBtn.setBounds (335, 664, 50, 20);
     upLed.setBounds (618, 486, 20, 20); clipLed.setBounds (808, 486, 20, 20);
-    softBtn.setBounds (817, 664, 39, 20); hardBtn.setBounds (856, 664, 39, 20);
+    softBtn.setBounds (806, 664, 33, 20); hardBtn.setBounds (839, 664, 33, 20); maskBtn.setBounds (872, 664, 33, 20);
     bypassBtn.setBounds (932, 494, 136, 40); deltaBtn.setBounds (932, 542, 136, 40); advBtn.setBounds (932, 590, 136, 40);
     learnBtn.setBounds (828, 190, 116, 26); tMinus.setBounds (952, 190, 26, 26); tPlus.setBounds (1042, 190, 26, 26);
 }
@@ -685,7 +694,7 @@ void FlatContent::timerCallback()
     {
         float sig = 0;
         for (const char* id : { "gain", "ceiling", "style", "autoRelease", "release", "link", "transient", "upOn", "upAmount", "upBelow",
-                                "clipOn", "clipDrive", "clipHard", "truePeak", "lookahead", "bypass", "delta" })
+                                "clipOn", "clipDrive", "clipHard", "clipMask", "truePeak", "lookahead", "bypass", "delta" })
             sig = sig * 1.37f + proc.apvts.getRawParameterValue (id)->load();
         if (std::abs (sig - lastGain) > 1e-4f * (1.0f + std::abs (sig))) { lastGain = sig; hist.clear(); settle = 95; if (! learning && learnMsg == "TARGET HIT") learnMsg = {}; }
         if (settle > 0) --settle;
@@ -721,7 +730,7 @@ void FlatContent::timerCallback()
     release.s.setEnabled (! autoRel);
     upAmount.s.setEnabled (upLed.getToggleState()); upBelow.s.setEnabled (upLed.getToggleState());
     clipDrive.s.setEnabled (clipLed.getToggleState());
-    softBtn.setEnabled (clipLed.getToggleState()); hardBtn.setEnabled (clipLed.getToggleState());
+    softBtn.setEnabled (clipLed.getToggleState()); hardBtn.setEnabled (clipLed.getToggleState()); maskBtn.setEnabled (clipLed.getToggleState());
     repaint (0, 70, kW, 400);
 }
 
@@ -864,7 +873,7 @@ void FlatContent::paint (juce::Graphics& g)
         return "LOOKAHEAD " + String (ms, ms == std::floor (ms) ? 0 : 1) + " MS" + (l == 0 ? " (AUTO)" : "");
     };
     const String info[4] = { String (proc.engine().latency() * 1000.0 / fs, 1) + " MS LATENCY",
-                             String ("TRUE PEAK ") + (proc.apvts.getRawParameterValue ("truePeak")->load() > 0.5f ? "8X" : "OFF") + " " + dot + " CLIP 4X",
+                             String ("TRUE PEAK ") + (proc.apvts.getRawParameterValue ("truePeak")->load() > 0.5f ? "8X" : "OFF") + " " + dot + " CLIP " + (proc.apvts.getRawParameterValue ("clipMask")->load() > 0.5f ? String ("MASK") : String ("4X")),
                              String ("DITHER ") + (dith == 0 ? "OFF" : dith == 1 ? "24-BIT" : "16-BIT"),
                              lookText() };
     for (int i = 0; i < 4; ++i) g.drawText (info[i], Rectangle<float> (934, 640.0f + 14.0f * (float) i, 140, 12), Justification::centredLeft, false);

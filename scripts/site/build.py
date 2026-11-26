@@ -209,6 +209,8 @@ def donate_block(R, slim=False, heading="h2"):
 def card(R, p, small=False):
     tags = "" if small else '<div class="chips">' + "".join(f'<span class="chip">{esc(t)}</span>' for t in p["tags"]) + "</div>"
     desc = "" if small else f'<p class="desc">{esc(p["card"])}</p>'
+    if not small and p.get("badge"):
+        tags = f'<p class="badge-new">{esc(p["badge"])}</p>' + tags
     tags += "" if small else '<span class="more" aria-hidden="true">Details →</span>'
     h = "h3"
     return f"""<article class="card" style="--c:{p['accent']}">
@@ -298,8 +300,11 @@ def build_home():
     R = ""
     n = len(PLUGINS)
     words = {6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten"}.get(n, str(n))
-    kinds = [p["kind"].lower().replace("one-knob mastering", "one-knob mastering chain") for p in PLUGINS]
-    kinds_txt = ", ".join(("a " if not k.startswith("one") else "a ") + k for k in kinds[:-1]) + " and a " + kinds[-1]
+    # how each plugin reads inside a sentence ("a ... , a ... and a ..."): some kind labels are tags, not nouns
+    prose = {"one-knob mastering": "one-knob mastering chain", "harmonic loudness for leads": "harmonic exciter for leads",
+             "sidechain ducking": "sidechain ducker"}
+    kinds = [prose.get(p["kind"].lower(), p["kind"].lower()) for p in PLUGINS]
+    kinds_txt = ", ".join("a " + k for k in kinds[:-1]) + " and a " + kinds[-1]
     ld = {"@context": "https://schema.org", "@graph": [
         ORG,
         {"@type": "WebSite", "@id": f"{URL}/#site", "name": "Noise Division", "url": f"{URL}/", "publisher": {"@id": f"{URL}/#org"}},
@@ -457,11 +462,46 @@ def workflow_sec(p):
 """
 
 
+def spotlight_sec(p):
+    # a feature in depth (FLATLINE: MASK clipping): what it is, a figure, how to use it, the small print
+    sp = p.get("spotlight")
+    if not sp:
+        return ""
+    paras = "\n          ".join(f"<p>{t}</p>" for t in sp["paras"])
+    fig = ""
+    if sp.get("figure"):
+        img, w, h, alt, cap = sp["figure"]
+        fig = f'<figure class="spot-fig"><img src="../../img/{img}" alt="{esc(alt)}" width="{w}" height="{h}" loading="lazy" decoding="async"><figcaption>{cap}</figcaption></figure>'
+    steps = "\n          ".join(f"<li><span>{t}</span></li>" for t in sp["steps"])
+    facts = "\n          ".join(f"<div><dt>{esc(a)}</dt><dd>{b}</dd></div>" for a, b in sp.get("facts", []))
+    return f"""
+  <section class="sec spotlight" id="{sp['id']}" aria-labelledby="sp-title">
+    <div class="wrap">
+      <p class="label">{esc(sp['label'])}</p>
+      <h2 id="sp-title">{esc(sp['title'])}</h2>
+      <p class="lead">{sp['lead']}</p>
+      <div class="prose spot-prose">
+          {paras}
+      </div>
+      {fig}
+      <h3 class="spot-h">{esc(sp.get('steps_title', 'How to use it'))}</h3>
+      <ol class="steps">
+          {steps}
+      </ol>
+      <dl class="spot-facts">
+          {facts}
+      </dl>
+    </div>
+  </section>
+"""
+
+
 def build_plugin(p):
     R = "../../"
     s = p["slug"]
     demo = DEMOS["plugins"].get(p["slug"])
     sections = ([("listen", "Listen")] if demo else []) + [("overview", "Overview")]
+    if p.get("spotlight"): sections.append((p["spotlight"]["id"], p["spotlight"]["nav"]))
     if p.get("chain"): sections.append(("how", "How it works"))
     sections.append(("start", "Quick start"))
     if p.get("workflow"): sections.append(("workflow", "Workflow"))
@@ -500,6 +540,7 @@ def build_plugin(p):
       <div class="info">
         <p class="label kind">{esc(p.get('tagline', p['kind']))}</p>
         <h1 id="p-title">{p['name']}</h1>
+        {f'<a class="new-link" href="#{p["spotlight"]["id"]}">{esc(p["spotlight"]["label"])}: {esc(p["spotlight"]["nav_long"])} <span aria-hidden="true">→</span></a>' if p.get("spotlight") else ""}
         <p class="pitch">{p['pitch']}</p>
         {download_buttons(p)}
         <p class="dl-note" data-note="{s}">{DL_NOTE}</p>
@@ -541,6 +582,7 @@ def build_plugin(p):
     </div>
   </section>
 """
+    body += spotlight_sec(p)
     if p.get("chain"):
         chain = "\n        ".join(f"<li><h3>{esc(a)}</h3><p>{esc(b)}</p></li>" for a, b in p["chain"])
         body += f"""

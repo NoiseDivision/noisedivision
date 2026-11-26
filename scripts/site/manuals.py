@@ -108,6 +108,17 @@ def body_html(p):
         wf = "".join(f"<li>{t}</li>" for t in p["workflow"])
         secs.append((p.get("workflow_title", "Workflow"), f"<p>{p.get('workflow_lead', '')}</p><ol class='steps'>{wf}</ol>"))
 
+    if p.get("spotlight"):
+        sp = p["spotlight"]
+        paras = "".join(f"<p>{t}</p>" for t in sp["paras"])
+        fig = ""
+        if sp.get("figure"):
+            img, w, h, alt, cap = sp["figure"]
+            fig = f"<figure class='annot'><img src='{IMG}/{img.rsplit('.', 1)[0]}.jpg'></figure><p class='cap'>{cap}</p>"
+        steps = "".join(f"<li>{t}</li>" for t in sp["steps"])
+        facts = "".join(f"<tr><th>{a}</th><td>{b}</td></tr>" for a, b in sp.get("facts", []))
+        secs.append((sp["title"], f"<p><b>{sp['lead']}</b></p>{paras}{fig}<h3>{sp.get('steps_title', 'How to use it')}</h3><ol class='steps'>{steps}</ol><h3>Good to know</h3><table class='kv wide'>{facts}</table>"))
+
     help_line = " Turn on the <b>?</b> button to get a pop-up explanation when you hover any control." if p["slug"] in ("krush", "spectrakill", "shrapnel", "recoil", "pyre", "flatline") else " Hover a control to see a short explanation."
     if p.get("overview"):
         ov_img, ov_items = p["overview"]
@@ -181,7 +192,7 @@ def body_html(p):
 <p class="muted">{p['name']} is free to use in commercial and personal music. It is provided as is, without warranty of any kind. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units, macOS and Logic Pro are trademarks of Apple Inc. All other product names are trademarks of their respective owners.</p>"""))
 
     toc = "".join(f"<li><span>{i + 1:02d}</span>{esc(t)}</li>" for i, (t, _) in enumerate(secs))
-    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation", "Reading the display") or (t == "The interface" and p.get("overview")) else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works", "Styles") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
+    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation", "Reading the display") or (t == "The interface" and p.get("overview")) or t == p.get("spotlight", {}).get("title") else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works", "Styles") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{FONT_CSS}
 @page {{ size: A4; margin: 18mm 17mm 20mm; }}
 body {{ margin: 0; font-family: Montserrat, sans-serif; font-size: 9.6pt; line-height: 1.55; color: #1b1c1f; }}
@@ -219,6 +230,7 @@ ul.tips li {{ border-left: .8mm solid {acc}; padding: 1mm 0 1mm 4mm; margin-bott
 figure {{ margin: 0 0 5mm; text-align: center; }}
 figure.annot {{ margin: 0 0 3mm; }}
 figure.annot img {{ width: 100%; border-radius: 1.5mm; display: block; }}
+p.cap {{ font-size: 8pt; color: #6a6d74; margin: -1mm 0 4mm; line-height: 1.45; }}
 .vis {{ break-inside: avoid; margin-top: 6mm; }}
 ol.key {{ list-style: none; padding: 0; margin: 0 0 4mm; }}
 ol.key.two {{ columns: 2; column-gap: 8mm; }}

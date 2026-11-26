@@ -4,25 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>FLATLINE: Free Loudness limiter VST3 &amp; AU Plugin | Noise Division</title>
-<meta name="description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. A clipper, an upward compressor and a lookahead limiter in one, with loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
+<meta name="description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. MASK clipping moves the distortion to where the music hides it; with an upward compressor, a lookahead limiter, loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
 <link rel="canonical" href="https://noisedivision.net/plugins/flatline/">
 <meta name="theme-color" content="#0c0d0f">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Noise Division">
 <meta property="og:title" content="FLATLINE: Free Loudness limiter VST3 &amp; AU Plugin | Noise Division">
-<meta property="og:description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. A clipper, an upward compressor and a lookahead limiter in one, with loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
+<meta property="og:description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. MASK clipping moves the distortion to where the music hides it; with an upward compressor, a lookahead limiter, loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
 <meta property="og:url" content="https://noisedivision.net/plugins/flatline/">
 <meta property="og:image" content="https://noisedivision.net/img/og/flatline.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="FLATLINE: Free Loudness limiter VST3 &amp; AU Plugin | Noise Division">
-<meta name="twitter:description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. A clipper, an upward compressor and a lookahead limiter in one, with loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
+<meta name="twitter:description" content="FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. MASK clipping moves the distortion to where the music hides it; with an upward compressor, a lookahead limiter, loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.">
 <meta name="twitter:image" content="https://noisedivision.net/img/og/flatline.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
 <link rel="preload" href="../../assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../assets/site.css?v=6272cf05">
+<link rel="stylesheet" href="../../assets/site.css?v=f602e978">
 <style>:root { --accent: #46f08f; --on-accent: #0c0d0f; }</style>
 <script type="application/ld+json">
 {
@@ -40,11 +40,11 @@
    "@type": "SoftwareApplication",
    "name": "FLATLINE",
    "url": "https://noisedivision.net/plugins/flatline/",
-   "description": "FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. A clipper, an upward compressor and a lookahead limiter in one, with loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.",
+   "description": "FLATLINE, clean loudness: a free VST3 and AU loudness limiter for Windows and macOS. MASK clipping moves the distortion to where the music hides it; with an upward compressor, a lookahead limiter, loudness meters, streaming previews and LEARN, which sets the gain to hit a LUFS target.",
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Audio plugin (Loudness limiter)",
    "operatingSystem": "Windows, macOS",
-   "softwareVersion": "1.0.0",
+   "softwareVersion": "1.1.0",
    "image": "https://noisedivision.net/img/flatline.webp",
    "author": {
     "@id": "https://noisedivision.net/#org"
@@ -122,7 +122,8 @@
       <div class="info">
         <p class="label kind">Clean loudness</p>
         <h1 id="p-title">FLATLINE</h1>
-        <p class="pitch">The last plugin on your master. FLATLINE pushes a mix as loud as it will go and keeps it clean: a 4x oversampled clipper shaves the tips, a lookahead limiter catches the rest, and an upward compressor lifts the quiet parts. Set a loudness target, play the drop, press LEARN.</p>
+        <a class="new-link" href="#mask">New in 1.1: MASK clipping <span aria-hidden="true">→</span></a>
+        <p class="pitch">The last plugin on your master. FLATLINE pushes a mix as loud as it will go and keeps it clean. Its MASK clipper moves the distortion to where the music itself covers it, so you can drive it far harder before you hear it. A lookahead limiter catches the rest and an upward compressor lifts the quiet parts. Set a loudness target, play the drop, press LEARN.</p>
         <div class="ctas">
           <a class="btn primary" href="#" data-download="flatline" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Flatline for Windows</a>
           <a class="btn mac" href="#" data-download="flatline" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Flatline for <span class="kc">macOS</span></a>
@@ -138,6 +139,7 @@
   <nav class="toc" aria-label="On this page">
     <div class="wrap">
       <a href="#overview">Overview</a>
+      <a href="#mask">MASK</a>
       <a href="#how">How it works</a>
       <a href="#start">Quick start</a>
       <a href="#workflow">Workflow</a>
@@ -157,12 +159,13 @@
       <h2 id="ov-title">What it does</h2>
       <div class="two">
         <div class="prose">
-            <p>FLATLINE is a mastering limiter built for loudness. A plain limiter does all the work in one place, and pushed hard it starts to pump and smear. FLATLINE spreads the work: TRANSIENTS sharpens the attacks first, the CLIPPER shaves the very tips of the peaks, so the limiter behind it only has to catch what's left, and UPWARD lifts the quiet parts without touching the peaks. Each stage works a little, so the whole can go much further.</p>
+            <p>FLATLINE is a mastering limiter built for loudness. A plain limiter does all the work in one place, and pushed hard it starts to pump and smear. FLATLINE spreads the work: TRANSIENTS sharpens the attacks first, the CLIPPER shaves the very tips of the peaks (in MASK mode it hides its own distortion under the music, band by band), so the limiter behind it only has to catch what's left, and UPWARD lifts the quiet parts without touching the peaks. Each stage works a little, so the whole can go much further.</p>
             <p>The display shows where the work happens: the output with the gain reduction hanging from the top, the clipped peaks marked on the ceiling, and the upward lift rising from the bottom. On the right, the loudness in LUFS, the highest true peak, how much punch is left and how clean the result is, plus how far Spotify, Apple Music, YouTube, Tidal and Deezer would turn the song down. Set a TARGET, let the loudest part play and press LEARN: FLATLINE sets the GAIN for you.</p>
         </div>
         <div style="display:grid;gap:28px;align-content:start">
           <ul class="features">
-            <li><span><b>Clipper into limiter</b>: a 4x oversampled soft or hard clipper takes the peaks first, so the limiter has less to do</span></li>
+            <li><span><b>MASK clipping</b> (new in 1.1): the clipping distortion is moved, band by band, to where the music covers it, so a master can get much louder before it sounds distorted</span></li>
+            <li><span><b>Clipper into limiter</b>: SOFT, HARD or MASK takes the peaks first, so the limiter has less to do</span></li>
             <li><span><b>Four STYLES</b> (Transparent, Punch, Dense, Safe) with an AUTO release that follows the music, or set it from 1 ms to 10 s</span></li>
             <li><span><b>UPWARD</b> lifts the quiet parts and <b>TRANSIENTS</b> keeps the drums' snap</span></li>
             <li><span><b>LEARN</b>: play the loud part, click, and GAIN lands on your LUFS TARGET</span></li>
@@ -175,8 +178,35 @@
       <dl class="specs">
         <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
-        <div><dt>Latency</dt><dd>About 7 ms (328 samples at 48 kHz), compensated by your DAW</dd></div>
-        <div><dt>Version · Price</dt><dd>1.0.0 · Free</dd></div>
+        <div><dt>Latency</dt><dd>About 7 ms (328 samples at 48 kHz); about 28 ms while MASK is on. Compensated by your DAW</dd></div>
+        <div><dt>Version · Price</dt><dd>1.1.0 · Free</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec spotlight" id="mask" aria-labelledby="sp-title">
+    <div class="wrap">
+      <p class="label">New in 1.1</p>
+      <h2 id="sp-title">MASK: clipping you don&#x27;t hear</h2>
+      <p class="lead">Every clipper adds distortion. MASK decides where it goes.</p>
+      <div class="prose spot-prose">
+          <p>A clipper shaves the peaks off the waveform, and whatever it shaves turns into distortion. With SOFT or HARD, that distortion lands wherever the maths puts it: a clipped kick or bass spreads crackle into the upper mids and highs, often right where the mix is quiet enough for you to hear it.</p>
+          <p>MASK works on the distortion itself. It looks at the music in short, overlapping slices, works out how much each band would cover up, the way your ear does (a loud sound hides quieter ones near it, especially just above it), and keeps the clipping distortion under that, band by band. Where the music is loud, the distortion may be bigger; where it's quiet, it's kept tiny.</p>
+          <p>When a peak can't be shaved without being heard, MASK still does the job: it allows a little more, step by step, always in the bands where it's least audible. So it's a clipper you can push much harder before it sounds distorted, and the limiter behind it barely has to work.</p>
+      </div>
+      <figure class="spot-fig"><img src="../../img/flatline-mask.webp" alt="A spectrum: the music in grey, the distortion SOFT clipping adds in amber, and the much lower distortion MASK clipping adds in green, both at the same loudness" width="2200" height="1040" loading="lazy" decoding="async"><figcaption>One mix, both versions at −5 LUFS integrated (Redline settings): what SOFT clipping adds (amber) and what MASK adds (green). By a hearing model, SOFT's distortion stood out above the music in 38% of moments, MASK's in 21%.</figcaption></figure>
+      <h3 class="spot-h">How to use it</h3>
+      <ol class="steps">
+          <li><span><b>Turn the CLIPPER on and click MASK.</b> The Club −7 and Redline −4 presets start with it on.</span></li>
+          <li><span><b>Drive it harder than you would SOFT.</b> 6 to 9 dB of DRIVE is normal for loud masters. Watch the readouts: CLIP takes the peaks, LIMIT should stay small (under about 1 dB).</span></li>
+          <li><span><b>Listen with DELTA.</b> It should sound thin and quiet: the top of the hats and the thump of the peaks. If you can hear the melody or the vocal in it, back off DRIVE.</span></li>
+          <li><span><b>Then set the loudness</b> with GAIN or LEARN, as always, and compare with BYPASS (level-matched) on the loudest part.</span></li>
+          <li><span><b>Don't judge it by CLEAN.</b> CLEAN counts every change equally, including the distortion MASK has hidden, so MASK reads lower than SOFT while sounding cleaner. DELTA and your ears tell the truth.</span></li>
+      </ol>
+      <dl class="spot-facts">
+          <div><dt>Latency</dt><dd>MASK adds 1024 samples (about 21 ms at 48 kHz) while it's on: about 28 ms in all. Your DAW is told and compensates. Switching MASK on or off fades out and in (about 40 ms) while it re-aligns.</dd></div>
+          <div><dt>CPU</dt><dd>More than SOFT or HARD, most while it's clipping hard: roughly two to three times FLATLINE's usual load on one core. One instance on the master is no problem.</dd></div>
+          <div><dt>When to use SOFT or HARD</dt><dd>For the sound of clipping itself (HARD's crunch on drums), for the lowest latency, or when FLATLINE runs live.</dd></div>
       </dl>
     </div>
   </section>
@@ -190,7 +220,7 @@
         <li><h3>GAIN</h3><p>The input level, smoothed so moving it never clicks.</p></li>
         <li><h3>UPWARD</h3><p>Lifts what sits BELOW dB under the recent peaks, by up to AMOUNT.</p></li>
         <li><h3>TRANSIENTS</h3><p>A fast and a slow envelope; where the fast one jumps ahead (an attack), it is turned up.</p></li>
-        <li><h3>CLIPPER</h3><p>4x oversampled, soft or hard, at the ceiling. Always in the path (a pure delay when off), so the latency never changes.</p></li>
+        <li><h3>CLIPPER</h3><p>SOFT or HARD: 4x oversampled, at the ceiling, always in the path (a pure delay when off). MASK: the clipping is reshaped in short overlapping slices so its distortion stays under what the music masks, band by band; it joins the path only while it&#x27;s on.</p></li>
         <li><h3>LIMITER</h3><p>Lookahead, sample or true peak (8x) detection, a fast and a slow release blended by AUTO, and LINK between the sides.</p></li>
         <li><h3>DITHER</h3><p>TPDF dither at 24 or 16 bit, when it&#x27;s on.</p></li>
       </ol>
@@ -219,7 +249,7 @@
       <ol class="steps">
           <li><span><b>Loop the loudest part of the song</b>: the drop or the last chorus. That's where the limiter works hardest, so that's where you set it.</span></li>
           <li><span><b>Bring GAIN up roughly</b> to the loudness you're after. It doesn't have to be exact; LEARN fine-tunes it at the end.</span></li>
-          <li><span><b>Set the CLIPPER first.</b> Turn it on and raise DRIVE until you just start to hear distortion, then back off a little. Flip on <b>DELTA</b> to hear what's being removed: clicks and crackle are fine, if you can hear the music in it, it's too much. The more the clipper takes, the less the limiter has to.</span></li>
+          <li><span><b>Set the CLIPPER first.</b> Turn it on (for loud masters, choose MASK: see below) and raise DRIVE until you just start to hear distortion, then back off a little. Flip on <b>DELTA</b> to hear what's being removed: clicks and crackle are fine, if you can hear the music in it, it's too much. The more the clipper takes, the less the limiter has to.</span></li>
           <li><span><b>Then the rest</b>: pick a STYLE, add TRANSIENTS if the drums lose their snap, and UPWARD if the quiet parts get lost.</span></li>
           <li><span><b>Let the loud part play for about 10 seconds.</b> The bar under the button fills up while it reads CALIBRATING: FLATLINE is learning how loud the song gets with these settings. Changing any setting starts it again, so do this last.</span></li>
           <li><span><b>Click LEARN.</b> FLATLINE sets GAIN so the loudest moment hits your TARGET, then listens once more to fine-tune. The button reads TARGET HIT when it's done.</span></li>
@@ -252,9 +282,9 @@
             <div class="ctl"><span class="n">BELOW</span><span class="r">−6 – −40 dB · default −14 dB</span><p class="d">How far under the recent peaks a sound has to be to count as quiet. Closer to −6 lifts more of the music.</p></div>
           </div>
           <div class="ctl-group"><h3>Clipper</h3>
-            <div class="ctl"><span class="n">On / Off</span><span class="r">default Off</span><p class="d">Turns the clipper on. It sits before the limiter, 4x oversampled, and clips at the ceiling.</p></div>
+            <div class="ctl"><span class="n">On / Off</span><span class="r">default Off</span><p class="d">Turns the clipper on. It sits before the limiter and clips at the ceiling.</p></div>
             <div class="ctl"><span class="n">DRIVE</span><span class="r">0 – 12 dB · default +1.5 dB</span><p class="d">How hard the sound hits the clipper. The more it takes, the less the limiter has to.</p></div>
-            <div class="ctl"><span class="n">SOFT · HARD</span><span class="r">default SOFT</span><p class="d">SOFT rounds the tips off; HARD cuts them flat, crisper and more aggressive.</p></div>
+            <div class="ctl"><span class="n">SOFT · HARD · MASK</span><span class="r">default SOFT</span><p class="d">SOFT rounds the tips off; HARD cuts them flat, crisper and more aggressive (both 4x oversampled). MASK moves the clipping distortion to where the music hides it: the cleanest at high DRIVE, with about 21 ms of extra latency while it's on. See MASK above.</p></div>
           </div>
           <div class="ctl-group"><h3>Monitoring</h3>
             <div class="ctl"><span class="n">BYPASS · LEVEL MATCHED</span><span class="r">On / Off</span><p class="d">The untouched sound, turned to the same loudness as FLATLINE's output, so you judge the sound and not the volume.</p></div>
@@ -273,7 +303,7 @@
             <div class="ctl"><span class="n">TP MAX</span><span class="r">dBTP</span><p class="d">The highest true peak since the last reset. Amber when it's over the ceiling in sample peak mode (expected), red in true peak mode.</p></div>
             <div class="ctl"><span class="n">LIMIT · CLIP · LIFT</span><span class="r">dB</span><p class="d">What the limiter and the clipper take off and what UPWARD adds, right now.</p></div>
             <div class="ctl"><span class="n">PUNCH LEFT (PLR)</span><span class="r">dB</span><p class="d">TP MAX minus INTEGRATED: how much room the peaks still have above the loudness. Below about 6 dB, a master starts to sound squashed.</p></div>
-            <div class="ctl"><span class="n">CLEAN</span><span class="r">%</span><p class="d">How close the output is to the sound before the clipper and limiter, over the last 3 seconds. 100% is untouched.</p></div>
+            <div class="ctl"><span class="n">CLEAN</span><span class="r">%</span><p class="d">How close the output is to the sound before the clipper and limiter, over the last 3 seconds. 100% is untouched. It counts every change, heard or not, so MASK reads lower than SOFT while sounding cleaner.</p></div>
             <div class="ctl"><span class="n">STREAMING</span><span class="r">dB</span><p class="d">How many dB each service would turn the song down from its INTEGRATED loudness.</p></div>
           </div>
       </div>
@@ -303,8 +333,8 @@
         <li><span class="n">Default</span><span class="d">Clean and transparent: turn GAIN up until the loudness feels right</span></li>
         <li><span class="n">Streaming -14</span><span class="d">Aimed at Spotify and YouTube, true peak: nothing for them to turn down</span></li>
         <li><span class="n">Loud Pop -9</span><span class="d">Loud and polished: some upward lift, a soft clip on the very tips</span></li>
-        <li><span class="n">Club -7</span><span class="d">Dense limiting and soft clipping, ceiling −0.5 dB</span></li>
-        <li><span class="n">Redline -4</span><span class="d">Everything up to the red line: the clipper does the heavy lifting (+7.5 dB), the limiter cleans up</span></li>
+        <li><span class="n">Club -7</span><span class="d">Dense limiting with MASK clipping, ceiling −0.5 dB</span></li>
+        <li><span class="n">Redline -4</span><span class="d">Everything up to the red line: MASK clipping does the heavy lifting (+7.5 dB), the limiter cleans up</span></li>
         <li><span class="n">Punch Keeper</span><span class="d">Emphasises the attacks and lets the front of every hit through</span></li>
         <li><span class="n">Dense Wall</span><span class="d">Quiet parts up, peaks down: thick and even</span></li>
         <li><span class="n">Gentle Master</span><span class="d">Slow and safe, true peak: catches the peaks, barely touches the rest</span></li>
@@ -320,11 +350,12 @@
       <h2 id="tp-title">Getting the most out of it</h2>
       <ul class="tips">
         <li>Clip before you limit: a few dB of CLIPPER DRIVE takes the sharpest peaks off cleanly, so the limiter can stay gentle. Check with DELTA.</li>
+        <li>Going louder than about −7 LUFS? Use MASK and let it do most of the work: more DRIVE, and LIMIT should stay under about 1 dB.</li>
         <li>Set everything before you press LEARN. Any change restarts the calibration, because the loudness it learned no longer matches the sound.</li>
         <li>TARGET is short-term loudness, set on the loudest part. The INTEGRATED loudness of the whole song will come out lower, because the quieter parts pull the average down.</li>
         <li>Going to streaming? Use the Streaming -14 preset, or switch ADVANCED to true peak with the ceiling at −1 dB. Sample peak is louder, but its peaks between samples (TP MAX) can distort in the encoders.</li>
         <li>Drums losing their snap at high GAIN? Add TRANSIENTS (20–40%), or try the Punch style.</li>
-        <li>CLEAN dropping under 70% or PUNCH LEFT under 6 dB means it's working very hard. Fine for some genres; just make sure it's a choice.</li>
+        <li>CLEAN dropping under 70% or PUNCH LEFT under 6 dB means it's working very hard. Fine for some genres; just make sure it's a choice. With MASK, trust DELTA and your ears over CLEAN.</li>
         <li>Compare with BYPASS, which is level-matched: if the original sounds better at the same loudness, back off.</li>
       </ul>
     </div>
@@ -372,7 +403,8 @@
       <details><summary>LEARN keeps reading CALIBRATING</summary><p>It needs about 10 seconds of the song playing with no setting changing. Automating a FLATLINE control restarts it all the time; stop the automation while you learn. You can click before the bar is full, after a second or so of audio.</p></details>
       <details><summary>LEARN says GAIN AT MAX</summary><p>TARGET is louder than 20 dB of GAIN can reach. Turn on the CLIPPER or raise its DRIVE, or lower TARGET.</p></details>
       <details><summary>TP MAX is over the ceiling</summary><p>In sample peak mode that is expected: it limits the samples, not the peaks between them. For a guaranteed ceiling, switch ADVANCED to true peak.</p></details>
-      <details><summary>It's late against the other tracks</summary><p>Your DAW should compensate FLATLINE's 7 ms. If it doesn't (some live or low-latency modes), turn that mode off.</p></details>
+      <details><summary>It's late against the other tracks</summary><p>Your DAW should compensate FLATLINE's 7 ms (28 ms with MASK). If it doesn't (some live or low-latency modes), turn that mode off, or use SOFT or HARD.</p></details>
+      <details><summary>The sound dips for a moment when I switch MASK</summary><p>Expected: MASK changes FLATLINE's latency, so it fades out and back in (about 40 ms) while your DAW re-aligns. Set the mode before you bounce, not during.</p></details>
       <details><summary>The plugin doesn't show up</summary><p>Check the <code>.vst3</code> is in <code>C:\Program Files\Common Files\VST3</code> (Windows) and rescan. On a Mac, run the installer again and restart the DAW.</p></details>
       <details><summary>No name, maker or category in FL Studio</summary><p>Rescan with <b>Verify plugins</b> ticked in the plugin manager.</p></details>
       <details><summary>macOS says the installer can't be opened</summary><p>System Settings, Privacy &amp; Security, <b>Open Anyway</b>. The installers aren't signed with an Apple developer certificate yet.</p></details>
