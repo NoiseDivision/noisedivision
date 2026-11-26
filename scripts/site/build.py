@@ -264,7 +264,7 @@ def write(path, text):
 def trace(R):
     # the signal chain under the hero: IN -> the plugins in the order you'd chain them in a DAW -> OUT, each node links to its page
     # (plugin, x, width) along the chain; the path dips between the boxes
-    W = {"pyre": 76, "krush": 88, "shrapnel": 118, "dark": 76, "recoil": 96, "spectrakill": 144, "peakslayer": 118, "masterfuse": 128, "flatline": 104}
+    W = {"pyre": 76, "krush": 88, "shrapnel": 118, "dark": 76, "recoil": 96, "spectrakill": 144, "peakslayer": 118, "masterfuse": 128, "flatline": 104, "transplant": 136}
     nodes, x = [], 50
     for p in PLUGINS:                                  # the site order is the chain order
         nodes.append((p["slug"], x, W.get(p["slug"], 100))); x += W.get(p["slug"], 100) + 28
