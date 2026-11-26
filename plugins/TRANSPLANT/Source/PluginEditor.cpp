@@ -13,6 +13,8 @@ namespace
     }
     juce::String hzText (double f) { return f >= 1000 ? juce::String (f / 1000.0, f >= 10000 ? 1 : 2) + " kHz" : juce::String (juce::roundToInt (f)) + " Hz"; }
     juce::String mmss (double s) { const int t = (int) s; return juce::String (t / 60) + ":" + juce::String (t % 60).paddedLeft ('0', 2); }
+    // what a section is matched to, for labels: "REF DROP 2", or the EDM balance
+    juce::String refName (const TransplantProcessor::View& v, bool edm) { return edm ? juce::String ("EDM BALANCE") : "REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false); }
     float tilt (int b) { return (float) ((b - tp::hzBin (1000.0)) * 4.5 / tp::kPerOct); }   // +4.5 dB/octave, so a typical mix reads flat
     bool isAudioFile (const juce::String& f)
     {
@@ -288,6 +290,50 @@ struct KeyDrawer : public Drawer, private juce::Timer
     std::unique_ptr<juce::ParameterAttachment> modeAtt;
 };
 
+// COPY TO: pick the sections that get this section's MATCH settings
+struct CopyPicker : public juce::Component
+{
+    CopyPicker (TransplantProcessor& p, TpLookAndFeel& l, juce::String from, juce::StringArray names) : proc (p), lnf (l), source (std::move (from))
+    {
+        for (auto& n : names)
+        {
+            auto* b = boxes.add (new juce::TextButton (n)); styleSeg (*b); b->setClickingTogglesState (true);
+            b->onClick = [this] { refresh(); }; addAndMakeVisible (b);
+        }
+        styleSeg (all); all.onClick = [this] { const bool on = ! allOn(); for (auto* b : boxes) b->setToggleState (on, juce::dontSendNotification); refresh(); };
+        addAndMakeVisible (all);
+        go.getProperties().set ("kind", "fill"); addAndMakeVisible (go);
+        go.onClick = [this]
+        {
+            juce::StringArray to; for (auto* b : boxes) if (b->getToggleState()) to.add (b->getButtonText());
+            if (to.isEmpty()) return;
+            proc.undo.beginNewTransaction(); proc.copyMatchTo (source, to);
+            if (auto* box = findParentComponentOfClass<juce::CallOutBox>()) box->dismiss();
+        };
+        setSize (220, 74 + boxes.size() * 30 + 44);
+        refresh();
+    }
+    bool allOn() const { for (auto* b : boxes) if (! b->getToggleState()) return false; return boxes.size() > 0; }
+    void refresh()
+    {
+        int n = 0; for (auto* b : boxes) n += b->getToggleState();
+        all.setButtonText (allOn() ? "NONE" : "ALL"); go.setEnabled (n > 0);
+        go.setButtonText (n == 0 ? juce::String ("COPY") : "COPY TO " + juce::String (n));
+    }
+    void resized() override
+    {
+        int y = 48; for (auto* b : boxes) { b->setBounds (12, y, getWidth() - 24, 26); y += 30; }
+        all.setBounds (12, y + 4, 70, 28); go.setBounds (88, y + 4, getWidth() - 100, 28);
+    }
+    void paint (juce::Graphics& g) override
+    {
+        g.setFont (lnf.title (11.0f, 0.16f)); g.setColour (tpc::cy); g.drawText ("COPY " + source + " TO", 12, 8, getWidth() - 24, 16, juce::Justification::centredLeft);
+        g.setFont (lnf.body (10.5f)); g.setColour (tpc::dim); g.drawText ("its MATCH settings (points stay)", 12, 25, getWidth() - 24, 14, juce::Justification::centredLeft);
+    }
+    TransplantProcessor& proc; TpLookAndFeel& lnf; juce::String source;
+    juce::OwnedArray<juce::TextButton> boxes; juce::TextButton all { "ALL" }, go { "COPY" };
+};
+
 struct MatchDrawer : public Drawer
 {
     MatchDrawer (TransplantProcessor& p, TpLookAndFeel& l, std::function<void()> resetFn)
@@ -305,8 +351,15 @@ struct MatchDrawer : public Drawer
             s.onValueChange = [this, k, &s, kn = ks[k]] { kn->repaint(); if (! setting && view.isNotEmpty()) proc.setMatchValue (view, k, (float) s.getValue()); };
         }
         copyAll.getProperties().set ("kind", "plain"); addAndMakeVisible (copyAll);
-        copyAll.setTooltip ("Gives every section the settings of this one (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT). Your points stay.");
-        copyAll.onClick = [this] { if (view.isEmpty()) return; proc.undo.beginNewTransaction(); proc.copyMatchToAll (view); };
+        copyAll.setTooltip ("Copies the settings of this section (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT) to the sections you pick. Your points stay.");
+        copyAll.onClick = [this]
+        {
+            if (view.isEmpty()) return;
+            juce::StringArray names; for (auto& w : proc.snapshot().views) if (w.name != view) names.add (w.name);
+            auto* top = getTopLevelComponent();
+            auto picker = std::make_unique<CopyPicker> (proc, lnf, view, names);
+            juce::CallOutBox::launchAsynchronously (std::move (picker), top->getLocalArea (this, copyAll.getBounds()), top);
+        };
         amount.slider.setTooltip ("AMOUNT: how much of the analysed curve is applied. Points you moved or added keep their exact values.");
         smooth.slider.setTooltip ("SMOOTH: left = surgical (every 1/24 octave, many points). Right = broad strokes: fewer, wider points. Points you moved stay.");
         range.slider.setTooltip ("RANGE: the most the curve may boost or cut anywhere.");
@@ -364,7 +417,7 @@ struct MatchDrawer : public Drawer
                           getWidth() - 116, 110, 104, 30, juce::Justification::topLeft, 2);
     }
     TransplantProcessor& proc; Knob amount, smooth, range, from, to, out;
-    juce::TextButton phase[2], reset { "RESET POINTS" }, copyAll { "COPY TO ALL" };
+    juce::TextButton phase[2], reset { "RESET POINTS" }, copyAll { "COPY TO..." };
     std::unique_ptr<juce::ParameterAttachment> phAtt;
     int points = 0; juce::String view; bool setting = false;
 };
@@ -473,12 +526,12 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         using namespace juce;
         paintFrame (g);
         const auto& y = proc.meterYours; const auto& r = proc.meterRef;
-        const bool yv = y.valid.load(), rv = r.valid.load();
+        const bool yv = y.valid.load(), rv = r.valid.load() && ! edm;
         const int W = getWidth(), cY = W - 216, cR = W - 144, cD = W - 72, cw = 64;
         g.setFont (lnf.title (12.5f, 0.14f));
         g.setColour (dim); g.drawText (section, 100, 12, W - 118, 18, Justification::centredRight);
         g.setColour (text); g.drawText ("YOURS", cY, 42, cw, 16, Justification::centredRight);
-        g.setColour (co); g.drawText ("REF", cR, 42, cw, 16, Justification::centredRight);
+        g.setColour (edm ? faint : co); g.drawText ("REF", cR, 42, cw, 16, Justification::centredRight);
         g.setColour (dim); g.drawText ("DIFF", cD, 42, cw, 16, Justification::centredRight);
         int yy = 66;
         auto row = [&] (const String& name, const String& unit, float a, float b, bool okA, bool okB, int dec, bool showDiff = true)
@@ -504,7 +557,7 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         };
         const float ySec = y.sec.load(), rSec = r.sec.load(), yTp = y.tp.load(), rTp = r.tp.load();
         row ("SHORT-TERM", "LUFS, last 3 s", y.st.load(), r.st.load(), yv, rv, 1);
-        row ("THIS SECTION", "LUFS, integrated", ySec, rSec, ySec > -100, rSec > -100, 1);
+        row ("THIS SECTION", "LUFS, integrated", ySec, rSec, ySec > -100, rv && rSec > -100, 1);
         row ("TRUE PEAK MAX", "dBTP, this section", yTp, rTp, yv && yTp > -100, rv && rTp > -100, 1);
         row ("PLR", "true peak minus loudness", yTp - ySec, rTp - rSec, yv && ySec > -100, rv && rSec > -100, 1);
         row ("WIDTH", "% side, last 3 s", y.width.load(), r.width.load(), yv, rv, 0);
@@ -514,7 +567,7 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         {
             g.setFont (lnf.body (11.0f));
             float lx = (float) W - 18;
-            for (auto [col, t] : { std::pair<Colour, String> { co, "REF" }, { text, "YOURS" }, { you.withAlpha (0.55f), "BEFORE" }, { cy.withAlpha (0.5f), "EDM RANGE" } })
+            for (auto [col, t] : { std::pair<Colour, String> { co, edm ? "TARGET" : "REF" }, { text, "YOURS" }, { you.withAlpha (0.55f), "BEFORE" }, { cy.withAlpha (0.5f), "EDM RANGE" } })
             {
                 const float tw = GlyphArrangement::getStringWidth (lnf.body (11.0f), t);
                 lx -= tw; g.setColour (dim); g.drawText (t, (int) lx, yy + 27, (int) tw + 2, 16, Justification::centredLeft);
@@ -526,33 +579,20 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         balance (g, gr);
         yy += 172 + 18;
         g.setFont (lnf.body (11.0f)); g.setColour (dim);
-        g.drawFittedText ("The reference: its matching part, at its own level, playing along in sync. True peaks restart with each section, or click here.",
+        g.drawFittedText (edm ? String ("No reference: your track against the middle of the EDM range. True peaks restart with each section, or click here.")
+                              : String ("The reference: its matching part, at its own level, playing along in sync. True peaks restart with each section, or click here."),
                           18, yy + 6, W - 36, 34, Justification::topLeft, 2, 1.0f);
     }
     // the graph: 30 Hz - 20 kHz (log); levels as they are (falling with frequency), both tracks levelled the same way
     void balance (juce::Graphics& g, juce::Rectangle<float> r)
     {
         using namespace juce;
-        static const float fc[31] = { 20, 25, 31.5f, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000 };
-        // a broad range typical of loud electronic masters, given on a +4.5 dB/oct tilt (a guide, not a rule)
-        static const float lo[31] = { -36, -31, -25, -8, -2.5f, -1.5f, -2, -1.5f, -1.5f, -2, -4.5f, -5.5f, -5.5f, -4, -4, -3.5f, -3.5f, -3.5f, -3, -3, -3, -3, -3, -3, -3, -2.5f, -2.5f, -3, -4, -7, -14 };
-        static const float hi[31] = { 4, 8, 12, 15, 16, 16, 16, 16, 15.5f, 14, 10, 6, 3, 2, 1.5f, 2, 1.5f, 1.5f, 2, 2, 2, 2.5f, 3, 3, 3.5f, 5, 5.5f, 6, 5.5f, 4, 1 };
+        const float* lo = tp::edm::lo; const float* hi = tp::edm::hi;
         const double f0 = 30, f1 = 20000, yTop = 40, yBot = -30;
         auto untilt = [] (double f) { return -4.5 * std::log2 (f / 1000.0); };
         auto X = [&] (double f) { return r.getX() + r.getWidth() * (float) (std::log (f / f0) / std::log (f1 / f0)); };
         auto Y = [&] (double v) { return r.getY() + r.getHeight() * (float) ((yTop - jlimit (yBot, yTop, v)) / (yTop - yBot)); };
-        // the band, smoothly between the points (in log frequency)
-        auto bandAt = [&] (const float* t, double f)
-        {
-            const double lf = std::log2 (f);
-            int i = 0; while (i < 29 && std::log2 ((double) fc[i + 1]) < lf) ++i;
-            const double x0 = std::log2 ((double) fc[i]), x1 = std::log2 ((double) fc[i + 1]);
-            const double u = jlimit (0.0, 1.0, (lf - x0) / (x1 - x0));
-            const double m0 = i > 0 ? (t[i + 1] - t[i - 1]) / (x1 - std::log2 ((double) fc[i - 1])) * (x1 - x0) : t[i + 1] - t[i];
-            const double m1 = i < 29 ? (t[i + 2] - t[i]) / (std::log2 ((double) fc[i + 2]) - x0) * (x1 - x0) : t[i + 1] - t[i];
-            const double u2 = u * u, u3 = u2 * u;
-            return (2 * u3 - 3 * u2 + 1) * t[i] + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * t[i + 1] + (u3 - u2) * m1 + untilt (f);
-        };
+        auto bandAt = [&] (const float* t, double f) { return tp::edm::at (t, f) + untilt (f); };
         g.setColour (Colour (0xff0c1316)); g.fillRoundedRectangle (r.expanded (2), 4);
         // regions
         g.setFont (lnf.title (11.5f, 0.12f));
@@ -618,14 +658,29 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         line (yoursBefore, you.withAlpha (0.5f), 1.2f); line (refSpec, co, 1.6f); line (yoursAfter, text, 2.0f);
     }
     TransplantProcessor& proc; juce::String section;
-    tp::Spec yoursAfter {}, yoursBefore {}, refSpec {}; bool hasCurves = false;
+    tp::Spec yoursAfter {}, yoursBefore {}, refSpec {}; bool hasCurves = false, edm = false;
 };
 
 struct RefsDrawer : public Drawer
 {
     RefsDrawer (TransplantProcessor& p, TpLookAndFeel& l, std::function<void()> addFn)
-        : Drawer (l, "REFERENCES", "UP TO THREE, AVERAGED"), proc (p)
+        : Drawer (l, "REFERENCES", ""), proc (p)
     {
+        // match to: reference tracks, or the middle of the EDM tonal balance range
+        auto* tp_ = p.apvts.getParameter ("target");
+        styleSeg (useRef, true); styleSeg (useEdm);
+        for (auto* b : { &useRef, &useEdm }) addAndMakeVisible (*b);
+        useRef.onClick = [tp_] { tp_->setValueNotifyingHost (0.0f); };
+        useEdm.onClick = [tp_] { tp_->setValueNotifyingHost (1.0f); };
+        useRef.setTooltip ("Match to your reference tracks (up to three, averaged).");
+        useEdm.setTooltip ("No reference: match your track to the middle of the EDM tonal balance range (the shaded range on METERS). Your references are kept for when you switch back.");
+        tAtt = std::make_unique<juce::ParameterAttachment> (*tp_, [this] (float v)
+        {
+            edm = v > 0.5f; useRef.setToggleState (! edm, juce::dontSendNotification); useEdm.setToggleState (edm, juce::dontSendNotification);
+            for (int i = 0; i < 3; ++i) { del[i].setVisible (! edm && i < (int) refs.size()); lis[i].setVisible (! edm && i < (int) refs.size()); }
+            repaint();
+        });
+        tAtt->sendInitialUpdate();
         add.onClick = std::move (addFn); addAndMakeVisible (add);
         add.setTooltip ("Add a reference track (WAV, AIFF, FLAC, MP3, OGG). You can also drop files on the display.");
         for (int i = 0; i < 3; ++i)
@@ -643,7 +698,7 @@ struct RefsDrawer : public Drawer
         refs = s.refs;
         for (int i = 0; i < 3; ++i)
         {
-            del[i].setVisible (i < (int) refs.size()); lis[i].setVisible (i < (int) refs.size());
+            del[i].setVisible (! edm && i < (int) refs.size()); lis[i].setVisible (! edm && i < (int) refs.size());
             lis[i].setToggleState (i == proc.listenRef(), juce::dontSendNotification);
         }
         add.setEnabled (refs.size() < 3);
@@ -653,6 +708,7 @@ struct RefsDrawer : public Drawer
     {
         for (int i = 0; i < 3; ++i) { del[i].setBounds (getWidth() - 50, 44 + i * 34, 30, 26); lis[i].setBounds (getWidth() - 126, 44 + i * 34, 70, 26); }
         add.setBounds (18, getHeight() - 44, 170, 28);
+        useEdm.setBounds (getWidth() - 128, 9, 110, 24); useRef.setBounds (getWidth() - 222, 9, 92, 24);
     }
     void paint (juce::Graphics& g) override
     {
@@ -671,16 +727,35 @@ struct RefsDrawer : public Drawer
             }
             else { g.setFont (lnf.body (11.0f)); g.setColour (faint); g.drawText ("empty", 46, y, 200, 26, juce::Justification::centredLeft); }
         }
+        g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (dim);
+        g.drawText ("MATCH TO", getWidth() - 330, 9, 100, 24, juce::Justification::centredRight);
         g.setFont (lnf.body (10.5f)); g.setColour (dim);
         g.drawText ("Several references: each is moved into your key, then they're averaged.", 200, getHeight() - 44, getWidth() - 220, 28, juce::Justification::centredLeft);
+        if (edm)
+        {
+            auto r = juce::Rectangle<float> (14, 40, (float) getWidth() - 28, 108);
+            g.setColour (juce::Colour (0xf00f181c)); g.fillRoundedRectangle (r, 8);
+            g.setColour (cy.withAlpha (0.5f)); g.drawRoundedRectangle (r, 8, 1);
+            g.setFont (lnf.title (15.0f, 0.14f)); g.setColour (cy); g.drawText ("MATCHING TO THE EDM BALANCE", r.withTrimmedTop (18).withHeight (22).toNearestInt(), juce::Justification::centred);
+            g.setFont (lnf.body (11.5f)); g.setColour (dim);
+            g.drawFittedText ("No reference needed: each section of your track is matched to the middle of the EDM tonal balance range (the shaded range on METERS). Your references are kept for when you switch back to REFERENCE.",
+                              r.withTrimmedTop (46).reduced (30, 0).toNearestInt(), juce::Justification::centredTop, 3, 1.0f);
+        }
     }
     TransplantProcessor& proc;
     std::vector<TransplantProcessor::Snapshot::Ref> refs;
-    juce::TextButton add { "+ ADD REFERENCE" }, del[3], lis[3];
+    juce::TextButton add { "+ ADD REFERENCE" }, del[3], lis[3], useRef { "REFERENCE" }, useEdm { "EDM BALANCE" };
+    std::unique_ptr<juce::ParameterAttachment> tAtt; bool edm = false;
 };
 }
 
 //============================================================================== display
+std::unique_ptr<juce::Component> Display::createCopyPicker (const juce::String& from)
+{
+    juce::StringArray names; for (auto& w : proc.snapshot().views) if (w.name != from) names.add (w.name);
+    return std::make_unique<CopyPicker> (proc, lnf, from, names);
+}
+
 Display::Display (TransplantProcessor& p, TpLookAndFeel& l, TransplantContent& o) : proc (p), lnf (l), owner (o)
 {
     for (auto* t : { &keyTab, &secTab, &refTab }) { t->getProperties().set ("kind", "tab"); addAndMakeVisible (*t); }
@@ -714,6 +789,9 @@ Display::Display (TransplantProcessor& p, TpLookAndFeel& l, TransplantContent& o
     };
     pointX.setTooltip ("Remove this point.");
     addChildComponent (pointX);
+    edmBtn.getProperties().set ("kind", "plain"); addChildComponent (edmBtn);
+    edmBtn.setTooltip ("No reference? Match your track to the middle of the EDM tonal balance range instead. You can switch in REFERENCES.");
+    edmBtn.onClick = [this] { proc.apvts.getParameter ("target")->setValueNotifyingHost (1.0f); };
     // LISTEN: your track or the reference (its matching part), level-matched
     auto* lp = p.apvts.getParameter ("listen");
     styleSeg (yoursBtn); styleSeg (refBtn, true);
@@ -740,6 +818,7 @@ void Display::resized()
     const int W = getWidth(), H = getHeight();
     keyTab.setBounds (W / 2 - 190, 0, 80, 28); secTab.setBounds (W / 2 - 100, 0, 110, 28); refTab.setBounds (W / 2 + 20, 0, 130, 28);
     matchTab.setBounds (W / 2 - 55, H - 28, 110, 28);
+    edmBtn.setBounds (zoneDonor().withTrimmedTop (186).withHeight (30).reduced (24, 0).toNearestInt());
     yoursBtn.setBounds (W - 404, H - 30, 64, 24); refBtn.setBounds (W - 338, H - 30, 52, 24);
     matchBtn.setBounds (W - 276, H - 30, 108, 24);
     keyDrawer->setBounds (W / 2 - 300, 34, 600, 172);
@@ -800,7 +879,7 @@ juce::Path Display::specPath (const tp::Spec& raw, bool fill) const
     return path;
 }
 
-bool Display::emptyState() const { return snap.views.empty() || snap.refs.empty(); }
+bool Display::emptyState() const { return snap.views.empty() || (snap.refs.empty() && ! snap.edm); }
 juce::Rectangle<float> Display::zoneDonor() const { return juce::Rectangle<float> (360, 240).withCentre ({ getWidth() * 0.5f - 200, getHeight() * 0.48f }); }
 juce::Rectangle<float> Display::zonePatient() const { return juce::Rectangle<float> (360, 240).withCentre ({ getWidth() * 0.5f + 200, getHeight() * 0.48f }); }
 
@@ -822,10 +901,13 @@ void Display::update (const TransplantProcessor::Snapshot& s, int vi)
     static_cast<SectionsDrawer*> (secDrawer.get())->update (s);
     static_cast<RefsDrawer*> (refDrawer.get())->update (s);
     static_cast<MatchDrawer*> (matchDrawer.get())->points = (int) nodes.size();
+    for (auto* b : { &refBtn, &matchBtn }) b->setEnabled (! snap.edm);
+    edmBtn.setVisible (snap.refs.empty() && ! snap.edm);
     static_cast<MatchDrawer*> (matchDrawer.get())->setView (hasView && v.hasRef ? v.name : juce::String());
     {
         auto* md = static_cast<MetersDrawer*> (meterDrawer.get());
-        md->section = hasView ? (v.name + (v.hasRef ? "  VS  REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false) : juce::String())) : juce::String();
+        md->section = hasView ? (v.name + (v.hasRef ? "  VS  " + refName (v, snap.edm) : juce::String())) : juce::String();
+        md->edm = snap.edm;
         md->hasCurves = hasView && v.hasRef;
         if (md->hasCurves) { for (int b = 0; b < tp::kBins; ++b) md->yoursAfter[(size_t) b] = v.yours[(size_t) b] + v.curve[(size_t) b]; md->refSpec = v.refRaw; md->yoursBefore = v.yours; }
     }
@@ -954,7 +1036,7 @@ void Display::paint (juce::Graphics& g)
         // legend
         g.setFont (lnf.body (10.0f));
         float lx = p.getX() + 8;
-        for (auto [c, t] : { std::pair<Colour, String> { you, "YOUR TRACK" }, { co, "REFERENCE, IN YOUR KEY" }, { cy, "MATCH CURVE" }, { Colours::white.withAlpha (0.5f), "OUTPUT" } })
+        for (auto [c, t] : { std::pair<Colour, String> { you, "YOUR TRACK" }, { co, snap.edm ? "TARGET: MIDDLE OF THE EDM RANGE" : "REFERENCE, IN YOUR KEY" }, { cy, "MATCH CURVE" }, { Colours::white.withAlpha (0.5f), "OUTPUT" } })
         {
             if (! v.hasRef && c == co) continue;
             g.setColour (c); g.fillRect (lx, p.getY() + 1, 14.0f, 2.0f);
@@ -968,17 +1050,19 @@ void Display::paint (juce::Graphics& g)
         else if (listening && v.hasRef)
             g.drawText ("LISTENING: REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false), (int) p.getRight() - 360, (int) p.getY() - 7, 360, 16, Justification::centredRight);
         else
-        g.drawText (v.name + (v.hasRef ? String (juce::CharPointer_UTF8 ("  \xe2\x86\x92  ")) + "REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false) : String()),
+        g.drawText (v.name + (v.hasRef ? String (juce::CharPointer_UTF8 ("  \xe2\x86\x92  ")) + refName (v, snap.edm) : String()),
                     (int) p.getRight() - 360, (int) p.getY() - 7, 360, 16, Justification::centredRight);
     }
     // LISTEN
     {
-        const bool listen = proc.apvts.getRawParameterValue ("listen")->load() > 0.5f;
+        const bool listen = proc.apvts.getRawParameterValue ("listen")->load() > 0.5f && ! snap.edm;
         g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (listen ? co : dim);
         g.drawText ("LISTEN", getWidth() - 470, getHeight() - 30, 60, 24, Justification::centredRight);
         const float gdb = proc.refGainShown.load();
+        if (! snap.edm) {
         g.setFont (lnf.body (11.0f)); g.setColour (proc.apvts.getRawParameterValue ("levelMatch")->load() > 0.5f ? hot : faint);
         g.drawText ("REF " + signedDb (gdb), getWidth() - 162, getHeight() - 30, 150, 24, Justification::centredLeft);
+        }
         if (listen)
         {
             g.setColour (co.withAlpha (0.55f)); g.drawRoundedRectangle (r.reduced (1.5f), 12, 2.0f);
@@ -1047,7 +1131,9 @@ void Display::paintOverChildren (juce::Graphics& g)
             g.setFont (lnf.title (26.0f, 0.04f)); g.setColour (text); g.drawText (done ? String ("DONE") : big, z.withTrimmedTop (88).withHeight (34).toNearestInt(), Justification::centred);
             g.setFont (lnf.body (11.0f)); g.setColour (dim); g.drawFittedText (small, z.withTrimmedTop (130).withHeight (44).reduced (20, 0).toNearestInt(), Justification::centredTop, 3);
         };
-        zone (zoneDonor(), co, "1  THE DONOR", "DROP A REFERENCE", "click to browse, or drop a file here\nWAV  AIFF  FLAC  MP3  OGG", ! snap.refs.empty());
+        zone (zoneDonor(), co, "1  THE DONOR", snap.edm ? String ("EDM BALANCE") : String ("DROP A REFERENCE"),
+              snap.edm ? String ("no reference: your track is matched to the middle of the EDM tonal balance range")
+                       : String ("click to browse, or drop a file here\nWAV  AIFF  FLAC  MP3  OGG"), ! snap.refs.empty());
         zone (zonePatient(), cy, "2  THE PATIENT", "PRESS LEARN", "then play your track through once from the start.\nOr drop your own bounce here.", ! snap.views.empty());
     }
     if (msg.isNotEmpty())
@@ -1253,7 +1339,7 @@ void TransplantContent::mouseDown (const juce::MouseEvent& e)
 {
     if (e.eventComponent == this)
     {
-        if (refBox.contains (e.getPosition())) { if (proc.numRefs() >= 3) display.openDrawer (3); else chooseReference(); }
+        if (refBox.contains (e.getPosition())) { if (proc.numRefs() >= 3 || proc.edmActive.load()) display.openDrawer (3); else chooseReference(); }
         else if (mineBox.contains (e.getPosition())) mineMenu();
         else if (help) { help = false; helpBtn.setToggleState (false, juce::dontSendNotification); repaint(); }
     }
@@ -1322,8 +1408,9 @@ void TransplantContent::timerCallback()
             footerL = "LISTENING TO REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false) + " (FOR YOUR " + v.name + ")"
                       + (proc.apvts.getRawParameterValue ("levelMatch")->load() > 0.5f ? "     LEVEL MATCHED " + signedDb (proc.refGainShown.load()).toUpperCase() : juce::String ("     NOT LEVEL MATCHED"));
         else
-        if (v.hasRef) footerL += juce::String (juce::CharPointer_UTF8 (" \xe2\x86\x92 ")) + "REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false);
-        if (! snap.refs.empty())
+        if (v.hasRef) footerL += juce::String (juce::CharPointer_UTF8 (" \xe2\x86\x92 ")) + refName (v, snap.edm);
+        if (snap.edm) footerL += "     NO REFERENCE: MATCHING TO THE MIDDLE OF THE EDM RANGE";
+        else if (! snap.refs.empty())
         {
             const int sh = snap.refs[0].shift; const int mode = (int) proc.apvts.getRawParameterValue ("keyMode")->load();
             footerL += mode == 2 ? juce::String ("     KEY SHIFT OFF")
@@ -1394,7 +1481,8 @@ void TransplantContent::paint (juce::Graphics& g)
     };
     String rv = "drop a file or click", rk;
     if (! snap.refs.empty()) { rv = snap.refs[0].name; rk = snap.refs[0].key; if (snap.refs.size() > 1) rv += "  +" + String ((int) snap.refs.size() - 1); }
-    box (refBox, co, "REFERENCE", rv, rk);
+    if (snap.edm) box (refBox, cy, "TARGET", "EDM tonal balance", "middle");
+    else box (refBox, co, "REFERENCE", rv, rk);
     String mv = proc.isLearning() ? String ("learning...") : snap.views.empty() ? String ("not learned yet") : mmss (snap.mineLength), mk = snap.views.empty() ? String() : snap.mineKey;
     box (mineBox, you, "YOUR TRACK", mv, mk);
     g.setColour (line); g.fillRect (972, 17, 1, 24);

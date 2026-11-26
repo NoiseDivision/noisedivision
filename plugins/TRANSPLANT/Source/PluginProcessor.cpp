@@ -3,7 +3,7 @@
 
 namespace
 {
-    const char* const kParamIds[] = { "amount", "smooth", "range", "from", "to", "keyMode", "keyShift", "keyZone", "phase", "follow", "oneCurve", "out", "bypass" };
+    const char* const kParamIds[] = { "amount", "smooth", "range", "from", "to", "keyMode", "keyShift", "keyZone", "phase", "follow", "oneCurve", "out", "bypass", "target" };
     juce::String fmtPoints (const std::vector<tp::Node>& v)
     {
         juce::StringArray s; for (auto& n : v) s.add (juce::String (n.bin, 2) + ":" + juce::String (n.db, 2));
@@ -74,6 +74,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransplantProcessor::createL
     l.add (std::make_unique<juce::AudioParameterBool> (id ("bypass"), "Bypass", false));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("listen"), "Listen To Reference", false));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("levelMatch"), "Level Match", true));
+    l.add (std::make_unique<juce::AudioParameterChoice> (id ("target"), "Match To", juce::StringArray { "Reference", "EDM Balance" }, 0));
     return l;
 }
 
@@ -210,7 +211,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     wet.setTargetValue (apvts.getRawParameterValue ("bypass")->load() > 0.5f ? 0.0f : 1.0f);
     outGain.setTargetValue (juce::Decibels::decibelsToGain (outDb));
     // LISTEN: the reference (its matching part, level-matched), crossfaded with your track
-    const bool listen = apvts.getRawParameterValue ("listen")->load() > 0.5f;
+    const bool listen = apvts.getRawParameterValue ("listen")->load() > 0.5f && ! edmActive.load();
     xfade.setTargetValue (listen ? 1.0f : 0.0f);
     const bool refOn = listen || xfade.getCurrentValue() > 0.0f;
     // the moment you hear now is the latency behind the playhead: the reference follows that moment and its section
@@ -491,6 +492,7 @@ void TransplantProcessor::rebuild()
     { const juce::ScopedLock sl (modelLock); me = mine; rs = refs; mname = mineName; }
 
     Snapshot s;
+    const bool edm = P ("target") > 0.5; s.edm = edm; edmActive.store (edm);
     s.mineName = mname; s.mineLength = me.length;
     s.mineKey = me.valid() ? juce::String (tp::keyName (me.key)) : juce::String(); s.mineConf = me.key.confidence;
     std::vector<int> shifts;
@@ -533,7 +535,23 @@ void TransplantProcessor::rebuild()
         const EditData ed = it != edits.end() ? it->second : EditData();
         for (int k = 0; k < kMatchN; ++k) v.match[k] = ed.has[k] ? ed.m[k] : glob[k];
         const double amount = v.match[0], smooth = v.match[1], range = v.match[2], from = v.match[3], to = v.match[4];
-        if (! rs.empty())
+        if (edm)
+        {
+            // no reference: the middle of the EDM tonal balance range, for every section
+            v.ref = tp::edm::target();
+            {   // at your level in the mids, like a reference, so the two can be compared on the display
+                double m = 0; int n = 0;
+                for (int b = 0; b < tp::kBins; ++b) { const double f = tp::binHz (b); if (f > 100 && f < 6000) { m += v.yours[(size_t) b] - v.ref[(size_t) b]; ++n; } }
+                for (auto& x : v.ref) x += (float) (m / juce::jmax (1, n));
+            }
+            v.refRaw = v.ref; v.hasRef = true;
+            v.refLabel = "EDM BALANCE"; v.refT0 = v.refT1 = 0; v.matchDb = 0;
+            const auto target = tp::smoothCurve (tp::difference (tp::tame (v.yours, tp::hzBin (150.0) + 12.0), v.ref), smooth);
+            v.nodes = tp::mergeNodes (tp::extractNodes (target, smooth), ed.user, ed.removed, amount);
+            for (auto& n : v.nodes) n.db = (float) juce::jlimit (-range, range, (double) n.db);
+            v.curve = ed.bypass ? tp::Spec {} : tp::limitBand (tp::limitRange (tp::curveThrough (v.nodes), range), from, to);
+        }
+        else if (! rs.empty())
         {
             tp::Spec ref {}, raw {}; juce::String lbl;
             for (size_t i = 0; i < rs.size(); ++i)
@@ -605,6 +623,7 @@ void TransplantProcessor::handleAsyncUpdate() { setLatencySamples (wantLatency.l
 //============================================================================== actions
 void TransplantProcessor::loadReference (const juce::File& f)
 {
+    if (auto* t = apvts.getParameter ("target")) if (t->getValue() > 0.5f) t->setValueNotifyingHost (0.0f);   // a new reference: match to it
     { const juce::ScopedLock sl (jobLock); refJobs.add (f); }
     { const juce::ScopedLock sl (modelLock); busy = "ANALYSING " + f.getFileName().toUpperCase(); }
     notify();
@@ -704,11 +723,12 @@ void TransplantProcessor::setMatchValue (const juce::String& view, int k, float 
     auto* prm = apvts.getParameter (matchId (k));
     editsFor (view, true).setProperty (juce::String ("m_") + matchId (k), prm->convertFrom0to1 (prm->convertTo0to1 (value)), &undo);
 }
-void TransplantProcessor::copyMatchToAll (const juce::String& view)
+void TransplantProcessor::copyMatchTo (const juce::String& view, const juce::StringArray& to)
 {
     float v[kMatchN]; for (int k = 0; k < kMatchN; ++k) v[k] = matchValue (view, k);
-    for (auto& w : snapshot().views)
-        for (int k = 0; k < kMatchN; ++k) setMatchValue (w.name, k, v[k]);
+    for (auto& name : to)
+        if (name != view)
+            for (int k = 0; k < kMatchN; ++k) setMatchValue (name, k, v[k]);
 }
 
 // a copy of the edits the thread can read safely (the ValueTree belongs to the message thread)

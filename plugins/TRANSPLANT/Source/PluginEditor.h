@@ -88,6 +88,8 @@ public:
     std::unique_ptr<juce::Component> keyDrawer, secDrawer, refDrawer, matchDrawer, meterDrawer;
     void toggleMeters();
     juce::TextButton pointX { "X" };
+    juce::TextButton edmBtn { "NO REFERENCE? USE THE EDM BALANCE" };
+    std::unique_ptr<juce::Component> createCopyPicker (const juce::String& from);   // COPY TO (also for the test host's screenshots)
     juce::TextButton yoursBtn { "YOURS" }, refBtn { "REF" }, matchBtn { "LEVEL MATCH" };
     std::unique_ptr<juce::ParameterAttachment> listenAtt;
     std::unique_ptr<juce::ButtonParameterAttachment> matchAtt;

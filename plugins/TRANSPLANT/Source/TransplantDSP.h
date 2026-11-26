@@ -787,4 +787,35 @@ private:
 
 // FIR length for a sample rate (about 0.34 s: enough for 1/24-octave detail down to ~60 Hz)
 inline int firLength (double fs) { return fs > 140000 ? 65536 : fs > 70000 ? 32768 : 16384; }
+
+// ---- the EDM tonal balance range: where loud electronic masters usually sit (a guide, not a rule).
+// Given in 1/3 octaves on a +4.5 dB/oct tilt, levelled on the 100 Hz - 5 kHz mean.
+namespace edm
+{
+    inline const float fc[31] = { 20, 25, 31.5f, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000 };
+    inline const float lo[31] = { -36, -31, -25, -8, -2.5f, -1.5f, -2, -1.5f, -1.5f, -2, -4.5f, -5.5f, -5.5f, -4, -4, -3.5f, -3.5f, -3.5f, -3, -3, -3, -3, -3, -3, -3, -2.5f, -2.5f, -3, -4, -7, -14 };
+    inline const float hi[31] = { 4, 8, 12, 15, 16, 16, 16, 16, 15.5f, 14, 10, 6, 3, 2, 1.5f, 2, 1.5f, 1.5f, 2, 2, 2, 2.5f, 3, 3, 3.5f, 5, 5.5f, 6, 5.5f, 4, 1 };
+    inline double untilt (double f) { return -4.5 * std::log2 (f / 1000.0); }
+    // a smooth curve through one of the tables (cubic Hermite in log frequency), still tilted
+    inline double at (const float* t, double f)
+    {
+        f = std::clamp (f, (double) fc[0], (double) fc[30]);
+        const double lf = std::log2 (f);
+        int i = 0; while (i < 29 && std::log2 ((double) fc[i + 1]) < lf) ++i;
+        const double x0 = std::log2 ((double) fc[i]), x1 = std::log2 ((double) fc[i + 1]);
+        const double u = std::clamp ((lf - x0) / (x1 - x0), 0.0, 1.0);
+        const double m0 = i > 0 ? (t[i + 1] - t[i - 1]) / (x1 - std::log2 ((double) fc[i - 1])) * (x1 - x0) : t[i + 1] - t[i];
+        const double m1 = i < 29 ? (t[i + 2] - t[i]) / (std::log2 ((double) fc[i + 2]) - x0) * (x1 - x0) : t[i + 1] - t[i];
+        const double u2 = u * u, u3 = u2 * u;
+        return (2 * u3 - 3 * u2 + 1) * t[i] + (u3 - 2 * u2 + u) * m0 + (-2 * u3 + 3 * u2) * t[i + 1] + (u3 - u2) * m1;
+    }
+    inline double middle (double f) { return 0.5 * (at (lo, f) + at (hi, f)); }
+    // the middle of the range as a spectrum (dB per 1/24-octave bin), to match to instead of a reference
+    inline Spec target()
+    {
+        Spec s {};
+        for (int b = 0; b < kBins; ++b) { const double f = binHz (b); s[(size_t) b] = (float) (middle (f) + untilt (std::clamp (f, 20.0, 20000.0))); }
+        return s;
+    }
+}
 }

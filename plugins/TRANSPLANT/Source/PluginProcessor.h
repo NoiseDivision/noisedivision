@@ -55,6 +55,7 @@ public:
         juce::String mineName, mineKey; double mineLength = 0; float mineConf = 0;
         struct Ref { juce::String name, key, path; float conf = 0; int shift = 0; juce::StringArray sections; double length = 0; bool fileOk = true; };
         std::vector<Ref> refs;
+        bool edm = false;                  // matching to the middle of the EDM tonal balance range, not a reference
         int version = 0;
     };
     Snapshot snapshot() const { const juce::ScopedLock sl (modelLock); return snap; }
@@ -85,7 +86,8 @@ public:
     static const char* matchId (int k);
     float matchValue (const juce::String& view, int k) const;
     void setMatchValue (const juce::String& view, int k, float value);
-    void copyMatchToAll (const juce::String& view);     // every section gets this section's settings
+    void copyMatchTo (const juce::String& view, const juce::StringArray& to);   // these sections get this section's settings
+    std::atomic<bool> edmActive { false };
     bool sectionBypassed (const juce::String& view) const;
 
     // listening to the reference (LISTEN: YOURS / REF)

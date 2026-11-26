@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.22)
 # for macOS 10.13 and newer. (Ignored on Windows.) Must be set before project().
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Mac architectures")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Oldest macOS supported")
-project(TRANSPLANT VERSION 1.1.0)
+project(TRANSPLANT VERSION 1.2.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
