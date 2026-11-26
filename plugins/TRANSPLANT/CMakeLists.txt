@@ -1,0 +1,63 @@
+cmake_minimum_required(VERSION 3.22)
+
+# macOS: one "universal" build that runs natively on Apple Silicon and Intel Macs,
+# for macOS 10.13 and newer. (Ignored on Windows.) Must be set before project().
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Mac architectures")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Oldest macOS supported")
+project(TRANSPLANT VERSION 1.0.0)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Windows: build the Microsoft C++ runtime into the plugin, so it runs on PCs
+# without Visual Studio or the VC++ Redistributable.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+include(FetchContent)
+FetchContent_Declare(JUCE
+    GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+    GIT_TAG 8.0.4
+    GIT_SHALLOW TRUE)
+FetchContent_MakeAvailable(JUCE)
+
+juce_add_plugin(TRANSPLANT
+    COMPANY_NAME "Noise Division"                    # shown as the vendor in FL Studio and other hosts
+    COMPANY_COPYRIGHT "Copyright 2026 Noise Division"
+    BUNDLE_ID com.noisedivision.transplant
+    PLUGIN_MANUFACTURER_CODE Nsdv                    # the same for all Noise Division plugins
+    PLUGIN_CODE Trpl
+    FORMATS VST3 AU                                  # AU is built on macOS only (Logic, GarageBand). No standalone: it lives in a DAW.
+    IS_SYNTH FALSE
+    NEEDS_MIDI_INPUT FALSE
+    NEEDS_MIDI_OUTPUT FALSE
+    IS_MIDI_EFFECT FALSE
+    VST3_CATEGORIES Fx EQ Mastering                  # "Fx" = effect
+    PRODUCT_NAME "TRANSPLANT")
+
+# Fonts are compiled into the plugin.
+# Oswald and Montserrat are licensed under the SIL Open Font License (see Assets/*-OFL.txt).
+juce_add_binary_data(TrplAssets SOURCES
+    Assets/Oswald-SemiBold.ttf
+    Assets/Montserrat-Medium.ttf)
+
+target_sources(TRANSPLANT PRIVATE
+    Source/PluginProcessor.cpp
+    Source/PluginEditor.cpp)
+
+target_compile_definitions(TRANSPLANT PUBLIC
+    JUCE_WEB_BROWSER=0
+    JUCE_USE_CURL=0
+    JUCE_USE_MP3AUDIOFORMAT=1                        # references can be MP3s (decoding only)
+    JUCE_VST3_CAN_REPLACE_VST2=0)
+
+target_link_libraries(TRANSPLANT
+    PRIVATE
+        TrplAssets
+        juce::juce_audio_utils
+        juce::juce_audio_formats
+        juce::juce_dsp
+    PUBLIC
+        juce::juce_recommended_config_flags
+        juce::juce_recommended_lto_flags)
+

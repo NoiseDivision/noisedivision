@@ -15,7 +15,7 @@ import sys
 from playwright.sync_api import sync_playwright
 from pypdf import PdfReader, PdfWriter
 
-from content import (SITE, PLUGINS, INSTALL_WIN, INSTALL_MAC, REQUIREMENTS, DAW_RESCAN, TROUBLE_COMMON)
+from content import (SITE, PLUGINS, INSTALL_WIN, INSTALL_MAC, REQUIREMENTS, DAW_RESCAN, TROUBLE_COMMON, for_plugin)
 
 HERE = pathlib.Path(__file__).resolve().parent
 DOCS = HERE.parents[1] / "docs"
@@ -39,7 +39,7 @@ def key_list(items):
     return f"<ol class='key{' two' if len(items) > 8 else ''}'>{li}</ol>"
 
 # light-page versions of the accents (the bone and pale colours vanish on white paper)
-PRINT_ACCENT = {"flatline": "#14995a", "recoil": "#e2561e", "spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c"}
+PRINT_ACCENT = {"flatline": "#14995a", "recoil": "#e2561e", "spectrakill": "#9a1b22", "masterfuse": "#d9661c", "shrapnel": "#e2561e", "dark": "#a3121c", "transplant": "#0e8f86"}
 
 FONT_CSS = f"""
 @font-face {{ font-family: "Chakra Petch"; src: url("{FONTS}/chakra-petch-semibold.woff2"); font-weight: 600; }}
@@ -79,7 +79,7 @@ h1 {{ font-family: "Chakra Petch"; font-weight: 700; font-size: 56pt; line-heigh
 <div class="top"><div>NOISE <b>DIVISION</b></div><span>Version {p.get('version', SITE['version'])}</span></div>
 <div class="title"><div class="kind">{esc(p['kind'])}</div><h1>{p['name']}</h1><div class="sub">User manual</div><div class="bar"></div></div>
 <div class="shot"><img src="{IMG}/{jpg(p)}"></div>
-<div class="foot"><span>VST3 · AU · Standalone · Windows &amp; macOS</span><span>noisedivision.net</span></div>
+<div class="foot"><span>{"VST3 · AU · Standalone" if p.get("standalone", True) else "VST3 · AU"} · Windows &amp; macOS</span><span>noisedivision.net</span></div>
 </body></html>"""
 
 
@@ -92,9 +92,9 @@ def body_html(p):
     uses = ", ".join(u[0].lower() + u[1:] if not u[:3].isupper() else u for u in p["uses"])
     secs.append(("Introduction", f"{intro}<h3>Highlights</h3><ul class='feat'>{feats}</ul><p class='muted'><b>Good for:</b> {esc(uses)}.</p>"))
 
-    win = "".join(f"<li><b>{a}.</b> {b}</li>" for a, b in INSTALL_WIN)
-    mac = "".join(f"<li><b>{a}.</b> {b}</li>" for a, b in INSTALL_MAC)
-    req = "".join(f"<tr><th>{a}</th><td>{b}</td></tr>" for a, b in REQUIREMENTS)
+    win = "".join(f"<li><b>{a}.</b> {b}</li>" for a, b in for_plugin(p, INSTALL_WIN))
+    mac = "".join(f"<li><b>{a}.</b> {b}</li>" for a, b in for_plugin(p, INSTALL_MAC))
+    req = "".join(f"<tr><th>{a}</th><td>{b}</td></tr>" for a, b in for_plugin(p, REQUIREMENTS))
     daw = "".join(f"<tr><th>{a}</th><td>{b}</td></tr>" for a, b in DAW_RESCAN)
     secs.append(("Installation", f"""
 <p>Download the installer for your system from <b>noisedivision.net/plugins/{p['slug']}/</b>.</p>
@@ -134,7 +134,13 @@ def body_html(p):
     if p.get("visuals"):
         v = ""
         for title, img, lead, items in p["visuals"]:
-            v += f"<div class='vis'><h3>{esc(title)}</h3><p>{esc(lead)}</p><figure class='annot'><img src='{MANUAL_IMG}/{img}'></figure></div>{key_list(items)}"
+            from PIL import Image as _I
+            TWO, ONE = "class='key two'", "class='key'"
+            w, h = _I.open(DOCS / "img" / "manual" / img).size
+            if h > w:   # a tall picture (a drawer): the key beside it, not under it
+                v += f"<div class='vis side'><div><h3>{esc(title)}</h3><p>{esc(lead)}</p><figure class='annot'><img src='{MANUAL_IMG}/{img}'></figure></div><div class='sidekey'>{key_list(items).replace(TWO, ONE)}</div></div>"
+            else:
+                v += f"<div class='vis'><h3>{esc(title)}</h3><p>{esc(lead)}</p><figure class='annot'><img src='{MANUAL_IMG}/{img}'></figure></div>{key_list(items)}"
         secs.append(("Reading the display", "<p>The numbers on each picture match the list under it.</p>" + v))
 
     if p.get("chain"):
@@ -181,7 +187,7 @@ def body_html(p):
     tips = "".join(f"<li>{t}</li>" for t in p["tips"])
     secs.append(("Tips", f"<ul class='tips'>{tips}</ul>"))
 
-    tr = "".join(f"<tr><th>{q}</th><td>{a}</td></tr>" for q, a in p["trouble"] + TROUBLE_COMMON)
+    tr = "".join(f"<tr><th>{q}</th><td>{a}</td></tr>" for q, a in p["trouble"] + for_plugin(p, TROUBLE_COMMON))
     secs.append(("Troubleshooting", f"<table class='kv wide'>{tr}</table>"))
 
     secs.append(("Support and contact", f"""
@@ -192,7 +198,7 @@ def body_html(p):
 <p class="muted">{p['name']} is free to use in commercial and personal music. It is provided as is, without warranty of any kind. VST is a trademark of Steinberg Media Technologies GmbH. Audio Units, macOS and Logic Pro are trademarks of Apple Inc. All other product names are trademarks of their respective owners.</p>"""))
 
     toc = "".join(f"<li><span>{i + 1:02d}</span>{esc(t)}</li>" for i, (t, _) in enumerate(secs))
-    body = "".join(f"<section class='{"brk" if t in ("Controls reference", "Installation") or (t == "Reading the display" and p["slug"] != "flatline") or (t == "The interface" and p.get("overview")) or t == p.get("spotlight", {}).get("title") else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "How it works", "Styles") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
+    body = "".join(f"<section class='{"brk" if t == "Installation" or (t == "Controls reference" and p["slug"] != "transplant") or (t == "Reading the display" and p["slug"] not in ("flatline", "transplant")) or (t == "The interface" and p.get("overview")) or t == p.get("spotlight", {}).get("title") else ""}{" keep" if t in ("Quick start", "Latency", "Tips", "Sidechain", "Styles") or (t == "How it works" and p["slug"] != "transplant") else ""}'><h2><span>{i + 1:02d}</span>{esc(t)}</h2>{h}</section>" for i, (t, h) in enumerate(secs))
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>{FONT_CSS}
 @page {{ size: A4; margin: 18mm 17mm 20mm; }}
 body {{ margin: 0; font-family: Montserrat, sans-serif; font-size: 9.6pt; line-height: 1.55; color: #1b1c1f; }}
@@ -234,10 +240,12 @@ div.facts3 {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5mm; font-
 div.facts3 p {{ margin: 1mm 0 0; }}
 p.cap {{ font-size: 8pt; color: #6a6d74; margin: -1mm 0 4mm; line-height: 1.45; }}
 .vis {{ break-inside: avoid; margin-top: 6mm; }}
+.vis.side {{ display: grid; grid-template-columns: 46% 1fr; gap: 7mm; align-items: start; }}
+.vis.side .sidekey {{ padding-top: 14mm; }}
 ol.key {{ list-style: none; padding: 0; margin: 0 0 4mm; }}
 ol.key.two {{ columns: 2; column-gap: 8mm; }}
 ol.key li {{ position: relative; padding-left: 8mm; margin-bottom: 1.8mm; break-inside: avoid; font-size: 9pt; line-height: 1.45; }}
-ol.key li span {{ position: absolute; left: 0; top: .1mm; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: {"#46f08f" if p["slug"] == "flatline" else "#ff7a3d"}; color: #111214; font-family: "Chakra Petch"; font-weight: 700; font-size: 8pt; display: flex; align-items: center; justify-content: center; }}
+ol.key li span {{ position: absolute; left: 0; top: .1mm; width: 5.4mm; height: 5.4mm; border-radius: 50%; background: {dict(flatline="#46f08f", transplant="#2ee6d6").get(p["slug"], "#ff7a3d")}; color: #111214; font-family: "Chakra Petch"; font-weight: 700; font-size: 8pt; display: flex; align-items: center; justify-content: center; }}
 ol.key li b {{ font-family: "Chakra Petch"; font-weight: 700; letter-spacing: .04em; margin-right: 1mm; }}
 img.ui {{ max-width: 100%; border-radius: 1.5mm; }}
 img.ui.tall {{ max-height: 128mm; }}

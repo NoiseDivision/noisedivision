@@ -1,5 +1,7 @@
 # The plugins: CMake target name, product name (file names), Audio Unit subtype code.
-PLUGINS="KRUSH:KRUSH:Krsh PeakSlayer:PEAKSLAYER:Pksl MASTERFUSE:MASTERFUSE:Tknb SPECTRAKILL:SPECTRAKILL:Spkl DARK:DARK:Dark SHRAPNEL:SHRAPNEL:Shrp RECOIL:RECOIL:Rcol PYRE:PYRE:Pyre FLATLINE:FLATLINE:Flat"
+PLUGINS="KRUSH:KRUSH:Krsh PeakSlayer:PEAKSLAYER:Pksl MASTERFUSE:MASTERFUSE:Tknb SPECTRAKILL:SPECTRAKILL:Spkl DARK:DARK:Dark SHRAPNEL:SHRAPNEL:Shrp RECOIL:RECOIL:Rcol PYRE:PYRE:Pyre FLATLINE:FLATLINE:Flat TRANSPLANT:TRANSPLANT:Trpl"
 AU_MANUFACTURER="Nsdv"
 # Plugins that take MIDI input (RECOIL: MIDI notes can be its trigger) are Audio Unit "music effects" (aumf), not "aufx".
 AU_MUSIC_EFFECTS="RECOIL"
+# Plugins that are built without a standalone app (they only make sense inside a DAW).
+NO_STANDALONE="TRANSPLANT"

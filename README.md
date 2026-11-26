@@ -1,10 +1,10 @@
 # Noise Division
 
 Free audio plugins: **PEAKSLAYER** (soft clipper), **KRUSH** (multiband distortion),
-**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map), **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling) and **FLATLINE** (clean loudness: a clipper whose MASK mode hides its distortion under the music, an upward compressor and a lookahead limiter for the master, with LEARN to hit a LUFS target). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS.
+**MASTERFUSE** (one-knob mastering), **SPECTRAKILL** (spectral compressor), **DARK** (one-knob darkener for drums and bass), **SHRAPNEL** (spectral distortion), **RECOIL** (the sidechain weapon: zero-latency ducking with a song map), **PYRE** (harmonic loudness: leads and synths as dense as a saw, driven into a soft ceiling), **TRANSPLANT** (a match EQ that matches each section of your track to the same section of a reference, with the reference's bass notes moved into your key first) and **FLATLINE** (clean loudness: a clipper whose MASK mode hides its distortion under the music, an upward compressor and a lookahead limiter for the master, with LEARN to hit a LUFS target). VST3 and Standalone on Windows; AU, VST3 and Standalone on macOS (TRANSPLANT is VST3 and AU only: it needs a DAW).
 
 ```
-plugins/            the nine JUCE projects (each builds on its own with CMake)
+plugins/            the ten JUCE projects (each builds on its own with CMake)
 docs/               the website (GitHub Pages serves this folder)
 scripts/            packaging: Windows .zip and macOS .pkg installers
 .github/workflows/  builds everything on GitHub's Windows and Mac machines
@@ -32,11 +32,13 @@ scripts/            packaging: Windows .zip and macOS .pkg installers
    | RECOIL     | `RECOIL-Windows.zip`     | `RECOIL-macOS.pkg`     |
    | PYRE       | `PYRE-Windows.zip`       | `PYRE-macOS.pkg`       |
    | FLATLINE   | `FLATLINE-Windows.zip`   | `FLATLINE-macOS.pkg`   |
+   | TRANSPLANT | `TRANSPLANT-Windows.zip` | `TRANSPLANT-macOS.pkg` |
    | Full suite | `NoiseDivision-Suite-Windows.zip` | `NoiseDivision-Suite-macOS.pkg` |
 
    The suite holds every plugin: on Windows one folder per plugin, on macOS one installer where
    Customize lets people untick any plugin. To add a plugin, add it to `scripts/plugins.sh` and the
-   workflow's build list; both suites pick it up automatically.
+   workflow's build list; both suites pick it up automatically. A plugin without a standalone app
+   (TRANSPLANT) is also listed in `NO_STANDALONE` in `scripts/plugins.sh`.
 
    Only the plugins that changed are compiled, on Windows and macOS alike. Each plugin's finished
    build is kept on a hidden pre-release called **build-cache**, named after the fingerprint of its

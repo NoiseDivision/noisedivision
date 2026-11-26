@@ -3,7 +3,7 @@
 # (Customize in the installer lets you leave some out). The installers put:
 #   the Audio Unit  in /Library/Audio/Plug-Ins/Components   (Logic, GarageBand, ...)
 #   the VST3        in /Library/Audio/Plug-Ins/VST3         (Ableton, FL Studio, Reaper, ...)
-#   the standalone  in /Applications
+#   the standalone  in /Applications   (not for the plugins in NO_STANDALONE)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 source scripts/plugins.sh
@@ -15,17 +15,19 @@ for entry in $PLUGINS; do
   art="build/$target/${target}_artefacts/Release"
   id="com.noisedivision.$(echo "$product" | tr '[:upper:]' '[:lower:]')"
   work="stage/$product"; root="$work/root"
-  mkdir -p "$root/Library/Audio/Plug-Ins/VST3" "$root/Library/Audio/Plug-Ins/Components" "$root/Applications" "$work/scripts" "$work/packages"
+  app=true; [[ " $NO_STANDALONE " == *" $product "* ]] && app=false
+  mkdir -p "$root/Library/Audio/Plug-Ins/VST3" "$root/Library/Audio/Plug-Ins/Components" "$work/scripts" "$work/packages"
 
   ditto "$art/VST3/$product.vst3"     "$root/Library/Audio/Plug-Ins/VST3/$product.vst3"
   ditto "$art/AU/$product.component"  "$root/Library/Audio/Plug-Ins/Components/$product.component"
-  ditto "$art/Standalone/$product.app" "$root/Applications/$product.app"
+  if $app; then mkdir -p "$root/Applications"; ditto "$art/Standalone/$product.app" "$root/Applications/$product.app"; fi
 
   # Apple Silicon Macs only run signed code. Without a paid Apple Developer ID this is an
   # "ad-hoc" signature: enough for the plugins to load once the installer has run.
   for bundle in "$root/Library/Audio/Plug-Ins/VST3/$product.vst3" \
                 "$root/Library/Audio/Plug-Ins/Components/$product.component" \
                 "$root/Applications/$product.app"; do
+    [ -e "$bundle" ] || continue
     codesign --force --deep --sign - "$bundle"
   done
   echo "$product architectures:"; lipo -info "$root/Library/Audio/Plug-Ins/Components/$product.component/Contents/MacOS/$product"
@@ -60,8 +62,9 @@ for entry in $PLUGINS; do
   IFS=: read -r target product code <<< "$entry"
   id="com.noisedivision.$(echo "$product" | tr '[:upper:]' '[:lower:]')"
   cp "stage/$product/packages/$product.pkg" stage/suite/packages/
+  what="Audio Unit, VST3 and the standalone app"; [[ " $NO_STANDALONE " == *" $product "* ]] && what="Audio Unit and VST3"
   lines="$lines    <line choice=\"$id.choice\"/>\n"
-  choices="$choices  <choice id=\"$id.choice\" title=\"$product\" description=\"$product: Audio Unit, VST3 and the standalone app.\"><pkg-ref id=\"$id\"/></choice>\n"
+  choices="$choices  <choice id=\"$id.choice\" title=\"$product\" description=\"$product: $what.\"><pkg-ref id=\"$id\"/></choice>\n"
   refs="$refs  <pkg-ref id=\"$id\" version=\"$version\" onConclusion=\"none\">$product.pkg</pkg-ref>\n"
 done
 printf '%b' "<?xml version=\"1.0\" encoding=\"utf-8\"?>

@@ -40,6 +40,22 @@ TROUBLE_COMMON = [
     ("The window is too big or too small", "Drag the bottom-right corner. Every plugin scales from 60% to 200% and remembers the size."),
 ]
 
+def for_plugin(p, rows):
+    """The shared install, requirement and troubleshooting rows, without the standalone app for plugins that have none."""
+    if p.get("standalone", True):
+        return rows
+    swap = [(" and a standalone app.", "."), (", the VST3 and the standalone app.", " and the VST3."),
+            (" VST3 host or the standalone app.", " VST3 host."), (" AU or VST3 host, or the standalone app.", " AU or VST3 host.")]
+    out = []
+    for a, b in rows:
+        if "standalone app" in b and not any(x in b for x, _ in swap):
+            continue   # a row only about the standalone app
+        for x, y in swap:
+            b = b.replace(x, y)
+        out.append((a, b))
+    return out
+
+
 PLUGINS = [
 # ---------------------------------------------------------------------------------------------
 {
@@ -1137,9 +1153,198 @@ PLUGINS = [
         ("The sound dips for a moment when I switch MASK", "Expected: MASK changes FLATLINE's latency, so it fades out and back in (about 40 ms) while your DAW re-aligns. Set the mode before you bounce, not during."),
     ],
 },
+# ---------------------------------------------------------------------------------------------
+{
+    "slug": "transplant", "name": "TRANSPLANT", "title": "Transplant", "kind": "Match EQ", "tagline": "Section-aware match EQ",
+    "version": "1.0.0",
+    "badge": "New plugin",
+    "standalone": False,
+    "accent": "#2ee6d6",
+    "img": "transplant.webp", "w": 2200, "h": 1430, "shape": "wide",
+    "alt": "TRANSPLANT: a dark surgical interface with a large display showing your track's spectrum in grey, a reference track in coral and a cyan match curve with editable points, a timeline of the song's sections under it, and an open METERS drawer comparing loudness, true peak, width and the tonal balance of both tracks inside a shaded EDM range",
+    "card": "A match EQ that knows your song. Your drop is matched to the reference's drop, the bass notes are moved into your key first, and you can hear both, level-matched.",
+    "tags": ["Match EQ", "Section by section", "Key-aware low end"],
+    "meta": "TRANSPLANT, a section-aware match EQ: a free VST3 and AU plugin for Windows and macOS. It matches each part of your track to the same part of a reference (drop to drop), moves the reference's bass notes into your key before comparing, and lets you edit the curve, hear the reference level-matched and compare both on meters.",
+    "pitch": "Match EQ, done properly. TRANSPLANT matches your drop to the reference's drop and your break to its break, not one average to another. It moves the reference's bass notes into your key before comparing, so the curve doesn't boost its notes and cut yours. Then it gives you the curve as points you can drag, and the reference to listen to, level-matched, at the same moment of the song.",
+    "intro": [
+        "An ordinary match EQ averages a whole reference and a whole track and draws the difference. That's rarely what you want: an intro and a drop sound nothing alike, and two songs in different keys have their bass notes at different frequencies, so the curve ends up boosting the reference's notes and cutting yours. TRANSPLANT reads the structure of both songs (intro, build, drop, break, outro) and their keys. Each section of yours is matched to the same kind of section in the reference, and below KEY ZONE the reference's low end is moved into your key before anything is compared.",
+        "The result is a curve made of points: precise by default, with SMOOTH to turn it into broad strokes (fewer, wider points). Drag any point, add your own, and the ones you've touched stay put. Press REF to hear the matching part of the reference at the same moment, turned to your track's loudness, and open METERS to compare loudness, true peak, width and tonal balance side by side.",
+    ],
+    "features": [
+        "<b>Section by section</b>: your drop matched to its drop, your break to its break. The curve follows the song as it plays",
+        "<b>Key-aware low end</b>: the reference's bass notes moved into your key before comparing",
+        "<b>Points you can edit</b>: drag, add, remove. SMOOTH from surgical (1/24 octave) to broad strokes",
+        "<b>LISTEN</b> to the reference's matching part at the same moment, <b>LEVEL MATCHED</b> to your track",
+        "<b>METERS</b>: LUFS, true peak, PLR, width and tonal balance of both tracks, inside an EDM range",
+        "<b>Linear or natural phase</b>, up to three references, A/B and undo",
+    ],
+    "uses": ["Master bus", "Pre-masters", "Matching a reference", "Finding what your mix lacks", "Low-end balance"],
+    "latency": "About 176 ms with LINEAR phase (192 ms at 44.1 kHz), compensated by your DAW; about 5 ms with NATURAL",
+    "quick": [
+        "Put TRANSPLANT on your master bus, after your mix processing and before the limiter.",
+        "Drop a reference track (WAV, AIFF, FLAC, MP3 or OGG) on the display, or click <b>REFERENCE</b>.",
+        "Press <b>LEARN</b>, play your track once from the start, then press <b>STOP</b>. (Or load a bounce of your track from <b>YOUR TRACK</b>.)",
+        "Play your song. The curve follows the section that's playing. Start with the <b>Gentle Polish</b> preset, or lower <b>AMOUNT</b>.",
+        "Click <b>REF</b> (bottom right) to hear the reference at the same moment and the same loudness, then <b>YOURS</b> to come back.",
+    ],
+    "workflow_title": "Matching a track",
+    "workflow_lead": "TRANSPLANT needs to hear both songs once. After that, the curve is yours to shape.",
+    "workflow": [
+        "<b>Choose a reference</b> in the same genre and at a similar tempo, ideally a finished master you'd like yours to sit next to. Up to three can be loaded; they're moved into your key and averaged.",
+        "<b>Let it learn your track.</b> Press LEARN and play the song through once from the very start, then STOP. TRANSPLANT finds your sections and your key. It keeps them with the project, so this is a one-time step (do it again after big changes to the mix).",
+        "<b>Check the match.</b> Open SECTIONS: each of your sections shows which part of the reference it's matched to. AUTO picks the same kind (a drop to a drop); pick another part from the list if you like, or BYPASS a section to leave it flat. Open KEY to check both keys and the shift.",
+        "<b>Shape the curve.</b> Start with Gentle Polish (AMOUNT 50%, broad, ±6 dB). SMOOTH to the right for broad strokes, to the left for detail. Drag a point to change it (Shift: gain only), double-click to add or remove one. Points you touched are white and stay put.",
+        "<b>Listen.</b> Flip between YOURS and REF while the song plays: the reference plays from the matching section, at the same moment, level-matched. Then BYPASS TRANSPLANT to hear what the curve did.",
+        "<b>Compare on the meters.</b> Open METERS: loudness, true peak, punch (PLR), width and the tonal balance of both, with the range typical of loud electronic masters behind them.",
+    ],
+    "overview": ("transplant-overview.jpg", [
+        ("Presets", "How the curve is made: Default, Surgical, Broad Strokes, Gentle Polish, Low End Only, Top End Only, Natural Phase."),
+        ("REFERENCE", "The reference track and its key. Click to add one, or drop files on the display."),
+        ("YOUR TRACK", "How much of your track TRANSPLANT has heard, and its key. Click for LEARN, loading a bounce, or forgetting it."),
+        ("LEARN", "Press, play your track from the start, press again (STOP)."),
+        ("A · B · Undo", "Two versions of the settings and points (right-click to copy), undo and redo."),
+        ("BYPASS · ?", "The original sound, at the same latency; and how TRANSPLANT works."),
+        ("Legend", "Your track, the reference (in your key), the match curve and the output."),
+        ("Your track", "The spectrum of the section shown, in grey."),
+        ("Reference", "The matching part of the reference, in coral, in your key and level-matched in the mids."),
+        ("Match curve", "The EQ, as points. Drag, double-click to add or remove, right-click for more."),
+        ("Section shown", "Which section of yours, matched to which part of the reference."),
+        ("METERS", "Opens the meter drawer: both tracks side by side."),
+        ("Your sections", "Your song's sections. Click one to see its curve."),
+        ("Playhead", "Where your DAW is. The curve follows the section that's playing."),
+        ("MATCH", "Opens AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT and PHASE."),
+        ("LISTEN", "YOURS or REF: hear the reference's matching part at the same moment."),
+        ("LEVEL MATCH", "Turns the reference to your track's loudness, section by section. The gain shows beside it."),
+        ("Info", "What's playing, the key shift, the phase, the latency and the sample rate."),
+    ]),
+    "visuals": [
+        ("KEY", "transplant-key.jpg", "Both keys, and how far the reference's low end is moved.", [
+            ("Your track", "Your key, and how sure the reading is."),
+            ("Reference", "The reference's key."),
+            ("Shift", "How many semitones the reference's low end is moved, the shorter way round."),
+            ("KEY ZONE", "Up to where the low end is moved. Above it (plus half an octave to fade), the reference is compared as it is."),
+            ("AUTO · MANUAL · OFF", "Read the keys, set the shift yourself, or don't move anything."),
+        ]),
+        ("MATCH", "transplant-match.jpg", "How the curve is made.", [
+            ("AMOUNT", "How much of the analysed curve is applied."),
+            ("SMOOTH", "Surgical (left) to broad strokes (right): fewer, wider points."),
+            ("RANGE", "The most the curve may boost or cut."),
+            ("FROM", "No matching below this frequency."),
+            ("TO", "No matching above this frequency."),
+            ("OUTPUT", "The level after the EQ."),
+            ("PHASE", "LINEAR (no phase shift) or NATURAL (like an analogue EQ, almost no latency)."),
+            ("RESET POINTS", "Puts the section's points back to the analysis."),
+        ]),
+        ("SECTIONS", "transplant-sections.jpg", "Which part of the reference each part of your track is matched to.", [
+            ("Your sections", "In song order."),
+            ("Match", "AUTO, or any part of the reference."),
+            ("Matched to", "What AUTO chose: the same kind, or the nearest stand-in."),
+            ("BYPASS", "Leaves this section flat."),
+            ("FOLLOW PLAYHEAD", "The curve changes with the section that's playing, crossfaded. Off: the section you click is used for the whole song."),
+            ("ONE CURVE FOR ALL", "Forget the sections: one curve from the whole track against the whole reference."),
+        ]),
+        ("REFERENCES", "transplant-refs.jpg", "Up to three references, moved into your key and averaged.", [
+            ("Reference", "Its name, key, length and how many sections it has."),
+            ("LISTEN", "The reference you hear with REF."),
+            ("Remove", "Takes it out."),
+            ("Empty slots", "Room for two more."),
+            ("ADD REFERENCE", "WAV, AIFF, FLAC, MP3 or OGG. You can also drop files on the display."),
+        ]),
+        ("METERS", "transplant-meters.jpg", "Your track after TRANSPLANT and the reference's matching part, measured side by side while your DAW plays.", [
+            ("Section", "Which section of yours, against which part of the reference. Click the drawer to restart the true peak maxima."),
+            ("Columns", "YOURS, REF and the difference. The reference is measured at its own level."),
+            ("SHORT-TERM", "Loudness over the last 3 seconds, LUFS."),
+            ("THIS SECTION", "Loudness of the section so far, LUFS integrated."),
+            ("TRUE PEAK MAX", "The highest true peak in this section, dBTP."),
+            ("PLR", "True peak minus loudness: how much punch is left."),
+            ("WIDTH", "How much of the sound is in the sides, over the last 3 seconds."),
+            ("Tonal balance", "Both tracks in 1/3 octaves: yours after TRANSPLANT (white), before (grey) and the reference (coral)."),
+            ("EDM range", "Where loud electronic masters usually sit, brightest in the middle. A guide, not a rule."),
+        ]),
+    ],
+    "controls": [
+        ("Getting started", [
+            ("REFERENCE", "up to 3 tracks", "The track to match. WAV, AIFF, FLAC, MP3 or OGG. Several are moved into your key and averaged. TRANSPLANT keeps its analysis with your project; the file itself is only needed for listening."),
+            ("LEARN", "", "Press it, play your track once from the start, press again (STOP). TRANSPLANT hears its spectrum, sections and key. Or load a bounce of your track from YOUR TRACK."),
+            ("Presets", "7 factory presets", "Set how the curve is made (smoothing, range, from/to, phase). They don't touch your references, your track or your points."),
+        ]),
+        ("Match", [
+            ("AMOUNT", "0 – 150% · default 100%", "How much of the analysed curve is applied. Points you moved or added keep their exact values."),
+            ("SMOOTH", "1/24 – 1.4 oct · default 1/7 oct", "Left: surgical, every 1/24 octave, many points. Right: broad strokes, fewer and wider points. Points you moved stay."),
+            ("RANGE", "±3 – ±24 dB · default ±12 dB", "The most the curve may boost or cut anywhere."),
+            ("FROM", "20 Hz – 2 kHz · default 20 Hz", "No matching below this frequency (it fades in over a third of an octave)."),
+            ("TO", "200 Hz – 20 kHz · default 20 kHz", "No matching above this frequency. Around 250 Hz matches only the low end."),
+            ("OUTPUT", "−12 – +12 dB · default 0 dB", "The level after the EQ. The curve is level-matched in the mids, so this is for fine matching. Also in the header: drag, or double-click for 0 dB."),
+            ("PHASE", "Linear · Natural · default Linear", "LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use."),
+            ("RESET POINTS", "", "Puts the points of the section you're looking at back to the analysis."),
+        ]),
+        ("Key", [
+            ("KEY MODE", "Auto · Manual · Off · default Auto", "AUTO reads both keys and moves the reference's low end the shorter way round. MANUAL: you set the shift. OFF: the low end is compared as it is, like an ordinary match EQ."),
+            ("SHIFT", "−6 – +6 semitones", "With MANUAL: how far the reference's low end is moved."),
+            ("KEY ZONE", "80 Hz – 1 kHz · default 300 Hz", "Up to where the low end is moved. Above it (plus half an octave to fade) the reference is compared as it is."),
+        ]),
+        ("Sections", [
+            ("Match per section", "Auto or a part of the reference", "Which part of the reference each section of yours is matched to. AUTO: the same kind (a drop to a drop), the nearest stand-in if the reference has none."),
+            ("BYPASS (per section)", "On / Off", "No EQ in this section."),
+            ("FOLLOW PLAYHEAD", "On / Off · default On", "The curve changes with the section that's playing, by song position, crossfaded. Off: the section you click on the timeline is used for the whole song."),
+            ("ONE CURVE FOR ALL", "On / Off · default Off", "Forget the sections: one curve from the whole track (its loudest half) against the whole reference."),
+        ]),
+        ("The curve", [
+            ("Drag a point", "", "Moves it. Hold Shift to change only its gain."),
+            ("Double-click", "", "On the curve: adds a point. On a point: removes it."),
+            ("Right-click", "", "Remove a point, put it back to the analysis, or reset all points in this section or in every section."),
+            ("White points", "", "Points you moved or added. They keep their values when SMOOTH, AMOUNT or the analysis changes."),
+        ]),
+        ("Listening and comparing", [
+            ("YOURS · REF", "default YOURS", "REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays."),
+            ("LEVEL MATCH", "On / Off · default On", "Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays."),
+            ("METERS", "", "Short-term and section loudness, true peak, PLR, width and tonal balance, for your track and the reference."),
+            ("BYPASS", "On / Off", "The original sound, with the same latency, so A/B is fair."),
+            ("A · B", "", "Two versions of the settings and points. Right-click to copy one to the other."),
+            ("Undo · Redo", "", "For every change to the curve and the settings."),
+        ]),
+    ],
+    "chain_lead": "What happens to the sound, and how the curve is made.",
+    "chain": [
+        ("Analysis", "Both songs are cut into half-second slices: their spectrum (1/24 octave), loudness and notes. From these come the sections (by changes in loudness) and the keys."),
+        ("Key", "Below KEY ZONE, the reference's spectrum is moved by the key shift, so its bass notes land where yours are."),
+        ("Difference", "Section against matching section: the reference minus yours, level-matched in the mids, with narrow peaks and notches tamed. Nothing is boosted where your track has nothing."),
+        ("Points", "SMOOTH sets how detailed the curve is; points are picked where it bends. Your own points are merged in."),
+        ("EQ", "The curve becomes a linear phase (or minimum phase, NATURAL) filter, crossfaded when it changes."),
+        ("Output", "OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded."),
+    ],
+    "modes": None,
+    "presets": [
+        ("Default", "Precise curve (1/7 octave), ±12 dB, full range, linear phase"),
+        ("Surgical", "Every detail, up to ±18 dB"),
+        ("Broad Strokes", "Wide, gentle shapes, ±9 dB"),
+        ("Gentle Polish", "Half the curve, broad, ±6 dB: a safe start on a finished mix"),
+        ("Low End Only", "Matches below 300 Hz only"),
+        ("Top End Only", "Matches above 2 kHz only"),
+        ("Natural Phase", "The Default curve with almost no latency"),
+    ],
+    "presets_note": "Presets only change how the curve is made. Your references, your track and the points you've moved stay. Everything is saved with the project.",
+    "tips": [
+        "Start gentle: Gentle Polish, or AMOUNT 30–60%. A match EQ shows you where to go; you rarely need all the way.",
+        "Low end in a different key? Leave KEY MODE on AUTO. If the reading is wrong (check KEY), set the shift with MANUAL.",
+        "Only want the bass balance? Use Low End Only, or set TO to about 250 Hz.",
+        "Flip YOURS and REF on the loudest part of the song. With LEVEL MATCH on, any difference you hear is tone, not volume.",
+        "Use the tonal balance on METERS to check yours against the range, not only against one reference.",
+        "Learned the track, then changed the mix a lot? Press LEARN again, or the curve will correct things that are already fixed.",
+        "TRANSPLANT has about 0.18 s of latency in LINEAR phase. Your DAW compensates on playback; for recording, switch to NATURAL or bypass it.",
+    ],
+    "trouble": [
+        ("The curve doesn't change between sections", "FOLLOW PLAYHEAD (in SECTIONS) must be on, and the song has to start where it started when TRANSPLANT learned it: the sections are found by song position. If you moved the song, press LEARN again."),
+        ("It boosts or cuts too much", "Lower AMOUNT or RANGE, or turn SMOOTH to the right. Gentle Polish is a good start."),
+        ("The low end sounds wrong", "Check the keys in KEY. If one is misread, choose MANUAL and set the shift, or OFF to compare the low end as it is."),
+        ("REF is silent or says FILE MISSING", "The reference file has moved or been renamed. Load it again from REFERENCES. The analysis is kept with the project, so the curve doesn't change."),
+        ("No curve, only an empty display", "TRANSPLANT needs both: a reference, and your track (press LEARN and play it from the start, or load a bounce)."),
+        ("It's late against the other tracks", "Your DAW should compensate the latency (about 0.18 s in LINEAR). If it doesn't (some live or low-latency modes), switch PHASE to NATURAL."),
+    ],
+},
 ]
 
 # site order = a sensible signal chain in a DAW, IN -> OUT: sound sources and tone first, then the bass bus and the
 # mix buses, the master last. The home page's chain and the plugin grid both follow it.
-ORDER = ["pyre", "krush", "shrapnel", "dark", "recoil", "spectrakill", "peakslayer", "masterfuse", "flatline"]
+ORDER = ["pyre", "krush", "shrapnel", "dark", "recoil", "spectrakill", "peakslayer", "transplant", "masterfuse", "flatline"]
 PLUGINS.sort(key=lambda p: ORDER.index(p["slug"]))

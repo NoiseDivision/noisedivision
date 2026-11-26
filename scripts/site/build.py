@@ -14,7 +14,7 @@ import html
 import json
 import pathlib
 
-from content import (SITE, PLUGINS, INSTALL_WIN, INSTALL_MAC, REQUIREMENTS, DAW_RESCAN, TROUBLE_COMMON)
+from content import (SITE, PLUGINS, INSTALL_WIN, INSTALL_MAC, REQUIREMENTS, DAW_RESCAN, TROUBLE_COMMON, for_plugin)
 
 # before/after audio, written by tools/render/demos.py (pages build without it, just with no player)
 _demos_file = pathlib.Path(__file__).resolve().parent / "demos.json"
@@ -302,7 +302,7 @@ def build_home():
     words = {6: "Six", 7: "Seven", 8: "Eight", 9: "Nine", 10: "Ten"}.get(n, str(n))
     # how each plugin reads inside a sentence ("a ... , a ... and a ..."): some kind labels are tags, not nouns
     prose = {"one-knob mastering": "one-knob mastering chain", "harmonic loudness for leads": "harmonic exciter for leads",
-             "sidechain ducking": "sidechain ducker"}
+             "sidechain ducking": "sidechain ducker", "match eq": "match EQ"}
     kinds = [prose.get(p["kind"].lower(), p["kind"].lower()) for p in PLUGINS]
     kinds_txt = ", ".join("a " + k for k in kinds[:-1]) + " and a " + kinds[-1]
     ld = {"@context": "https://schema.org", "@graph": [
@@ -365,7 +365,7 @@ def build_home():
   <section class="facts" aria-label="What you get">
     <div class="wrap">
       <div class="f"><h3>Free, for real</h3><p>No account, no licence key, no trial. Use them in commercial and personal music.</p></div>
-      <div class="f"><h3>Windows &amp; <span class="kc">macOS</span></h3><p>VST3 and standalone on Windows; AU, VST3 and standalone on Mac, Apple Silicon and Intel.</p></div>
+      <div class="f"><h3>Windows &amp; <span class="kc">macOS</span></h3><p>VST3 on Windows; AU and VST3 on Mac, Apple Silicon and Intel. Most come as a standalone app too.</p></div>
       <div class="f"><h3>Full manuals</h3><p>Every plugin comes with a PDF manual covering every control, mode and preset.</p></div>
     </div>
   </section>
@@ -543,7 +543,7 @@ def build_plugin(p):
         {f'<a class="new-link" href="#{p["spotlight"]["id"]}">{esc(p["spotlight"]["label"])}: {esc(p["spotlight"]["nav_long"])} <span aria-hidden="true">→</span></a>' if p.get("spotlight") else ""}
         <p class="pitch">{p['pitch']}</p>
         {download_buttons(p)}
-        <p class="dl-note" data-note="{s}">{DL_NOTE}</p>
+        <p class="dl-note" data-note="{s}">{DL_NOTE if p.get("standalone", True) else DL_NOTE.replace(" and the app", "").replace("AU, VST3", "AU and VST3")}</p>
         <a class="manual-link" href="{R}manuals/{manual_file(p)}">{ICON_PDF} User manual (PDF)</a>
         <a class="suite-link" href="{R}#suite">Want them all? Get the full suite of {len(PLUGINS)} <span aria-hidden="true">→</span></a>
       </div>
@@ -574,7 +574,7 @@ def build_plugin(p):
         </div>
       </div>
       <dl class="specs">
-        <div><dt>Format</dt><dd>VST3, AU, Standalone</dd></div>
+        <div><dt>Format</dt><dd>{"VST3, AU, Standalone" if p.get("standalone", True) else "VST3, AU"}</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
         <div><dt>Latency</dt><dd>{esc(p['latency'])}</dd></div>
         <div><dt>Version · Price</dt><dd>{p.get('version', SITE['version'])} · Free</dd></div>
@@ -677,9 +677,9 @@ def build_plugin(p):
   </section>
 """
     tips = "\n        ".join(f"<li>{t}</li>" for t in p["tips"])
-    win = "\n            ".join(f"<li><h3>{a}</h3><p>{b}</p></li>" for a, b in INSTALL_WIN)
-    mac = "\n            ".join(f"<li><h3>{a}</h3><p>{b}</p></li>" for a, b in INSTALL_MAC)
-    faq = "\n      ".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in p["trouble"] + TROUBLE_COMMON + [(f"Something else is wrong", f'E-mail <a href="mailto:{SITE["email"]}">{SITE["email"]}</a> with the plugin name, version, your DAW and your operating system.')])
+    win = "\n            ".join(f"<li><h3>{a}</h3><p>{b}</p></li>" for a, b in for_plugin(p, INSTALL_WIN))
+    mac = "\n            ".join(f"<li><h3>{a}</h3><p>{b}</p></li>" for a, b in for_plugin(p, INSTALL_MAC))
+    faq = "\n      ".join(f"<details><summary>{q}</summary><p>{a}</p></details>" for q, a in p["trouble"] + for_plugin(p, TROUBLE_COMMON) + [(f"Something else is wrong", f'E-mail <a href="mailto:{SITE["email"]}">{SITE["email"]}</a> with the plugin name, version, your DAW and your operating system.')])
     others = "\n        ".join(card(R, o, small=True) for o in PLUGINS if o["slug"] != s)
     body += f"""
   <section class="sec" id="tips" aria-labelledby="tp-title">
@@ -702,14 +702,14 @@ def build_plugin(p):
           <ol class="steps">
             {win}
           </ol>
-          <p class="reqs">{REQUIREMENTS[0][1]}</p>
+          <p class="reqs">{for_plugin(p, REQUIREMENTS)[0][1]}</p>
         </div>
         <div class="os-col">
           <h3 class="os-title"><span class="kc">macOS</span></h3>
           <ol class="steps">
             {mac}
           </ol>
-          <p class="reqs">{REQUIREMENTS[1][1]}</p>
+          <p class="reqs">{for_plugin(p, REQUIREMENTS)[1][1]}</p>
         </div>
       </div>
       <div class="manual-box">

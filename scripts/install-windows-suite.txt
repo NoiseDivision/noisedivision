@@ -11,8 +11,8 @@ INSTALL THE PLUGINS (VST3)
    They are listed under the vendor "Noise Division".
 
 STANDALONE APPS
-Each folder also has the plugin as a standalone .exe that runs without a DAW.
-Put them anywhere you like.
+Most folders also have the plugin as a standalone .exe that runs without a DAW.
+Put them anywhere you like. (TRANSPLANT works inside a DAW only.)
 
 Manuals: https://noisedivision.net
 Needs Windows 10 or 11, 64-bit.

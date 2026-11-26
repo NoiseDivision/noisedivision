@@ -18,6 +18,7 @@ const FILES = {
   recoil:      { win: "RECOIL-Windows.zip",      mac: "RECOIL-macOS.pkg" },
   pyre:        { win: "PYRE-Windows.zip",        mac: "PYRE-macOS.pkg" },
   flatline:    { win: "FLATLINE-Windows.zip",    mac: "FLATLINE-macOS.pkg" },
+  transplant:  { win: "TRANSPLANT-Windows.zip",  mac: "TRANSPLANT-macOS.pkg" },
   // every plugin in one download
   suite:       { win: "NoiseDivision-Suite-Windows.zip", mac: "NoiseDivision-Suite-macOS.pkg" },
 };
