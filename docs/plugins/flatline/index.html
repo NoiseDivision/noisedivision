@@ -22,7 +22,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111214'/%3E%3Crect x='8' y='11' width='16' height='10' fill='none' stroke='%23c6c8cc' stroke-width='2'/%3E%3Cline x1='2' y1='16' x2='30' y2='16' stroke='%23ff3038' stroke-width='2.4'/%3E%3C/svg%3E">
 <link rel="preload" href="../../assets/fonts/chakra-petch-bold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="../../assets/fonts/montserrat-var.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="../../assets/site.css?v=f602e978">
+<link rel="stylesheet" href="../../assets/site.css?v=2c6a2d15">
 <style>:root { --accent: #46f08f; --on-accent: #0c0d0f; }</style>
 <script type="application/ld+json">
 {
@@ -159,17 +159,16 @@
       <h2 id="ov-title">What it does</h2>
       <div class="two">
         <div class="prose">
-            <p>FLATLINE is a mastering limiter built for loudness. A plain limiter does all the work in one place, and pushed hard it starts to pump and smear. FLATLINE spreads the work: TRANSIENTS sharpens the attacks first, the CLIPPER shaves the very tips of the peaks (in MASK mode it hides its own distortion under the music, band by band), so the limiter behind it only has to catch what's left, and UPWARD lifts the quiet parts without touching the peaks. Each stage works a little, so the whole can go much further.</p>
+            <p>FLATLINE is a mastering limiter built for loudness. A plain limiter does all the work in one place, and pushed hard it starts to pump and smear. FLATLINE spreads the work: TRANSIENTS sharpens the attacks first, the CLIPPER shaves the very tips of the peaks (MASK hides its distortion under the music), so the limiter behind it only has to catch what's left, and UPWARD lifts the quiet parts without touching the peaks. Each stage works a little, so the whole can go much further.</p>
             <p>The display shows where the work happens: the output with the gain reduction hanging from the top, the clipped peaks marked on the ceiling, and the upward lift rising from the bottom. On the right, the loudness in LUFS, the highest true peak, how much punch is left and how clean the result is, plus how far Spotify, Apple Music, YouTube, Tidal and Deezer would turn the song down. Set a TARGET, let the loudest part play and press LEARN: FLATLINE sets the GAIN for you.</p>
         </div>
         <div style="display:grid;gap:28px;align-content:start">
           <ul class="features">
-            <li><span><b>MASK clipping</b> (new in 1.1): the clipping distortion is moved, band by band, to where the music covers it, so a master can get much louder before it sounds distorted</span></li>
-            <li><span><b>Clipper into limiter</b>: SOFT, HARD or MASK takes the peaks first, so the limiter has less to do</span></li>
+            <li><span><b>MASK clipping</b> (new in 1.1): the clipper hides its distortion under the music. SOFT and HARD too</span></li>
             <li><span><b>Four STYLES</b> (Transparent, Punch, Dense, Safe) with an AUTO release that follows the music, or set it from 1 ms to 10 s</span></li>
             <li><span><b>UPWARD</b> lifts the quiet parts and <b>TRANSIENTS</b> keeps the drums' snap</span></li>
             <li><span><b>LEARN</b>: play the loud part, click, and GAIN lands on your LUFS TARGET</span></li>
-            <li><span><b>Meters</b>: short-term and integrated LUFS, true peak max, punch left (PLR), CLEAN and what streaming would turn down</span></li>
+            <li><span><b>Meters</b>: LUFS, true peak, punch left (PLR), CLEAN and what streaming would turn down</span></li>
             <li><span><b>BYPASS level-matched</b> and <b>DELTA</b>, so you hear what it does, not just that it's louder</span></li>
           </ul>
           <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Master bus</span><span class="chip">Club and DJ masters</span><span class="chip">Streaming masters</span><span class="chip">Loud bass music</span><span class="chip">Stems and pre-masters</span></div></div>
@@ -204,9 +203,9 @@
           <li><span><b>Don't judge it by CLEAN.</b> CLEAN counts every change equally, including the distortion MASK has hidden, so MASK reads lower than SOFT while sounding cleaner. DELTA and your ears tell the truth.</span></li>
       </ol>
       <dl class="spot-facts">
-          <div><dt>Latency</dt><dd>MASK adds 1024 samples (about 21 ms at 48 kHz) while it's on: about 28 ms in all. Your DAW is told and compensates. Switching MASK on or off fades out and in (about 40 ms) while it re-aligns.</dd></div>
-          <div><dt>CPU</dt><dd>More than SOFT or HARD, most while it's clipping hard: roughly two to three times FLATLINE's usual load on one core. One instance on the master is no problem.</dd></div>
-          <div><dt>When to use SOFT or HARD</dt><dd>For the sound of clipping itself (HARD's crunch on drums), for the lowest latency, or when FLATLINE runs live.</dd></div>
+          <div><dt>Latency</dt><dd>About 21 ms more while MASK is on (28 ms in all), compensated by your DAW. Switching it fades out and back in.</dd></div>
+          <div><dt>CPU</dt><dd>Two to three times FLATLINE's usual load while it clips hard. No problem for one instance on the master.</dd></div>
+          <div><dt>When to use SOFT or HARD</dt><dd>For the sound of clipping itself (HARD on drums), the lowest latency, or live use.</dd></div>
       </dl>
     </div>
   </section>
