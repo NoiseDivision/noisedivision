@@ -46,6 +46,8 @@ public:
         bool hasRef = false;
         // for listening: the matching part of the reference you listen to, and the gain that levels it with yours
         double refT0 = 0, refT1 = 0; float matchDb = 0;
+        // this section's MATCH settings (its own, or the plugin-wide ones it hasn't changed): amount, smooth, range, from, to, out
+        float match[6] { 1.0f, 0.4f, 12.0f, 20.0f, 20000.0f, 0.0f };
     };
     struct Snapshot
     {
@@ -78,6 +80,12 @@ public:
     void setSectionTarget (const juce::String& view, const juce::String& refSection); // "AUTO", "WHOLE TRACK", "DROP 1"...
     juce::String sectionTarget (const juce::String& view) const;
     void setSectionBypass (const juce::String& view, bool bypassed);
+    // MATCH settings per section: AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT. A section that hasn't set one uses the parameter's value.
+    static constexpr int kMatchN = 6;
+    static const char* matchId (int k);
+    float matchValue (const juce::String& view, int k) const;
+    void setMatchValue (const juce::String& view, int k, float value);
+    void copyMatchToAll (const juce::String& view);     // every section gets this section's settings
     bool sectionBypassed (const juce::String& view) const;
 
     // listening to the reference (LISTEN: YOURS / REF)
@@ -129,7 +137,8 @@ private:
     void valueTreeRedirected (juce::ValueTree&) override { treeChanged(); }
     void treeChanged();
     void cacheEdits();
-    struct EditData { std::vector<tp::Node> user; std::vector<float> removed; juce::String target; bool bypass = false; };
+    struct EditData { std::vector<tp::Node> user; std::vector<float> removed; juce::String target; bool bypass = false;
+                      float m[6] {}; bool has[6] {}; };
     std::map<juce::String, EditData> editCache;
     juce::CriticalSection editLock;
     void handleAsyncUpdate() override;                     // latency changes
@@ -174,7 +183,7 @@ private:
         bool linear = true;
         std::vector<tp::Convolver::Filter> filters;   // one per view (sections, then whole track); bypassed sections: flat
         std::vector<double> t0, t1;
-        std::vector<double> vt0, rt0, rt1; std::vector<float> mdb;   // per view: its start, the reference's matching part, level match
+        std::vector<double> vt0, rt0, rt1; std::vector<float> mdb, outDb;   // per view: its start, the reference's matching part, level match, OUTPUT
         std::vector<tp::Spec> curves;                 // what each filter was made from (to reuse unchanged ones)
         int whole = 0;
     };

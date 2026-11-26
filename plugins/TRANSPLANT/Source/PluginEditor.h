@@ -32,7 +32,8 @@ public:
 class Knob : public juce::Component
 {
 public:
-    Knob (TransplantProcessor&, const juce::String& paramId, const juce::String& label, TpLookAndFeel&);
+    // attach = false: the knob takes the parameter's range and text, but its value is set from outside (per-section settings)
+    Knob (TransplantProcessor&, const juce::String& paramId, const juce::String& label, TpLookAndFeel&, bool attach = true);
     void paint (juce::Graphics&) override;
     void resized() override;
     juce::Slider slider;

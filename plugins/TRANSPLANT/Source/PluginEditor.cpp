@@ -168,12 +168,22 @@ void TpLookAndFeel::drawTooltip (juce::Graphics& g, const juce::String& t, int w
 }
 
 //============================================================================== knob, drag box
-Knob::Knob (TransplantProcessor& p, const juce::String& id, const juce::String& l, TpLookAndFeel& lf) : lnf (lf), label (l)
+Knob::Knob (TransplantProcessor& p, const juce::String& id, const juce::String& l, TpLookAndFeel& lf, bool attach) : lnf (lf), label (l)
 {
     slider.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
     slider.setRotaryParameters (juce::MathConstants<float>::pi * 1.25f, juce::MathConstants<float>::pi * 2.75f, true);
     slider.setTextBoxStyle (juce::Slider::NoTextBox, true, 0, 0);
-    att = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (p.apvts, id, slider);
+    if (attach) att = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment> (p.apvts, id, slider);
+    else if (auto* prm = p.apvts.getParameter (id))
+    {
+        const auto r = prm->getNormalisableRange();
+        slider.setNormalisableRange ({ (double) r.start, (double) r.end,
+            [r] (double, double, double v) { return (double) r.convertFrom0to1 ((float) v); },
+            [r] (double, double, double v) { return (double) r.convertTo0to1 ((float) v); },
+            [r] (double, double, double v) { return (double) r.snapToLegalValue ((float) v); } });
+        slider.textFromValueFunction = [prm] (double v) { return prm->getText (prm->convertTo0to1 ((float) v), 0); };
+        slider.setValue (prm->convertFrom0to1 (prm->getValue()), juce::dontSendNotification);
+    }
     if (auto* prm = p.apvts.getParameter (id)) slider.setDoubleClickReturnValue (true, prm->convertFrom0to1 (prm->getDefaultValue()));
     slider.onValueChange = [this] { repaint(); };
     addAndMakeVisible (slider);
@@ -282,10 +292,21 @@ struct MatchDrawer : public Drawer
 {
     MatchDrawer (TransplantProcessor& p, TpLookAndFeel& l, std::function<void()> resetFn)
         : Drawer (l, "MATCH", "HOW THE CURVE IS MADE"), proc (p),
-          amount (p, "amount", "AMOUNT", l), smooth (p, "smooth", "SMOOTH", l), range (p, "range", "RANGE", l),
-          from (p, "from", "FROM", l), to (p, "to", "TO", l), out (p, "out", "OUTPUT", l)
+          amount (p, "amount", "AMOUNT", l, false), smooth (p, "smooth", "SMOOTH", l, false), range (p, "range", "RANGE", l, false),
+          from (p, "from", "FROM", l, false), to (p, "to", "TO", l, false), out (p, "out", "OUTPUT", l, false)
     {
-        for (auto* k : { &amount, &smooth, &range, &from, &to, &out }) addAndMakeVisible (*k);
+        // the knobs show and change the section on the display; each section keeps its own settings
+        Knob* ks[6] = { &amount, &smooth, &range, &from, &to, &out };
+        for (int k = 0; k < 6; ++k)
+        {
+            addAndMakeVisible (*ks[k]);
+            auto& s = ks[k]->slider;
+            s.onDragStart = [this] { proc.undo.beginNewTransaction(); };
+            s.onValueChange = [this, k, &s, kn = ks[k]] { kn->repaint(); if (! setting && view.isNotEmpty()) proc.setMatchValue (view, k, (float) s.getValue()); };
+        }
+        copyAll.getProperties().set ("kind", "plain"); addAndMakeVisible (copyAll);
+        copyAll.setTooltip ("Gives every section the settings of this one (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT). Your points stay.");
+        copyAll.onClick = [this] { if (view.isEmpty()) return; proc.undo.beginNewTransaction(); proc.copyMatchToAll (view); };
         amount.slider.setTooltip ("AMOUNT: how much of the analysed curve is applied. Points you moved or added keep their exact values.");
         smooth.slider.setTooltip ("SMOOTH: left = surgical (every 1/24 octave, many points). Right = broad strokes: fewer, wider points. Points you moved stay.");
         range.slider.setTooltip ("RANGE: the most the curve may boost or cut anywhere.");
@@ -314,6 +335,23 @@ struct MatchDrawer : public Drawer
         out.setBounds (x + 14, 40, 86, 92);
         phase[0].setBounds (getWidth() - 214, 50, 90, 26); phase[1].setBounds (getWidth() - 214, 80, 90, 26);
         reset.setBounds (getWidth() - 116, 50, 100, 26);
+        copyAll.setBounds (getWidth() - 116, 80, 100, 26);
+    }
+    // the section the knobs belong to
+    void setView (const juce::String& name)
+    {
+        view = name;
+        sub = name.isEmpty() ? juce::String ("HOW THE CURVE IS MADE") : "SETTINGS FOR " + name;
+        Knob* ks[6] = { &amount, &smooth, &range, &from, &to, &out };
+        setting = true;
+        for (int k = 0; k < 6; ++k)
+            if (! ks[k]->slider.isMouseButtonDown())
+                ks[k]->slider.setValue (proc.matchValue (name, k), juce::dontSendNotification);
+        setting = false;
+        for (auto* k : ks) k->repaint();
+        for (auto* k : ks) k->setEnabled (name.isNotEmpty());
+        copyAll.setEnabled (name.isNotEmpty());
+        repaint();
     }
     void paint (juce::Graphics& g) override
     {
@@ -322,13 +360,13 @@ struct MatchDrawer : public Drawer
         g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (dim);
         g.drawText ("PHASE", getWidth() - 214, 34, 90, 14, juce::Justification::centredLeft);
         g.setFont (lnf.body (10.5f));
-        g.drawFittedText (juce::String (points) + " points. Drag to move, double-click to add or remove, right-click for more.",
-                          getWidth() - 116, 82, 104, 56, juce::Justification::topLeft, 4);
+        g.drawFittedText (juce::String (points) + " points. Drag, double-click, right-click.",
+                          getWidth() - 116, 110, 104, 30, juce::Justification::topLeft, 2);
     }
     TransplantProcessor& proc; Knob amount, smooth, range, from, to, out;
-    juce::TextButton phase[2], reset { "RESET POINTS" };
+    juce::TextButton phase[2], reset { "RESET POINTS" }, copyAll { "COPY TO ALL" };
     std::unique_ptr<juce::ParameterAttachment> phAtt;
-    int points = 0;
+    int points = 0; juce::String view; bool setting = false;
 };
 
 struct SectionsDrawer : public Drawer
@@ -436,33 +474,33 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         paintFrame (g);
         const auto& y = proc.meterYours; const auto& r = proc.meterRef;
         const bool yv = y.valid.load(), rv = r.valid.load();
-        const int W = getWidth(), cY = W - 186, cR = W - 124, cD = W - 62, cw = 54;
-        g.setFont (lnf.title (10.0f, 0.18f));
-        g.setColour (dim); g.drawText (section, 90, 12, W - 108, 18, Justification::centredRight);
-        g.setColour (text); g.drawText ("YOURS", cY, 40, cw, 14, Justification::centredRight);
-        g.setColour (co); g.drawText ("REF", cR, 40, cw, 14, Justification::centredRight);
-        g.setColour (dim); g.drawText ("DIFF", cD, 40, cw, 14, Justification::centredRight);
-        int yy = 62;
+        const int W = getWidth(), cY = W - 216, cR = W - 144, cD = W - 72, cw = 64;
+        g.setFont (lnf.title (12.5f, 0.14f));
+        g.setColour (dim); g.drawText (section, 100, 12, W - 118, 18, Justification::centredRight);
+        g.setColour (text); g.drawText ("YOURS", cY, 42, cw, 16, Justification::centredRight);
+        g.setColour (co); g.drawText ("REF", cR, 42, cw, 16, Justification::centredRight);
+        g.setColour (dim); g.drawText ("DIFF", cD, 42, cw, 16, Justification::centredRight);
+        int yy = 66;
         auto row = [&] (const String& name, const String& unit, float a, float b, bool okA, bool okB, int dec, bool showDiff = true)
         {
-            g.setColour (line); g.fillRect (18, yy + 26, W - 36, 1);
-            g.setFont (lnf.title (11.0f, 0.14f)); g.setColour (text); g.drawText (name, 18, yy, 120, 26, Justification::centredLeft);
-            g.setFont (lnf.body (9.0f)); g.setColour (faint); g.drawText (unit, 18, yy + 15, 120, 12, Justification::centredLeft);
+            g.setColour (line); g.fillRect (18, yy + 34, W - 36, 1);
+            g.setFont (lnf.title (13.5f, 0.12f)); g.setColour (text); g.drawText (name, 18, yy + 1, 180, 16, Justification::centredLeft);
+            g.setFont (lnf.body (11.0f)); g.setColour (dim); g.drawText (unit, 18, yy + 18, 180, 14, Justification::centredLeft);
             auto fmt = [dec] (float v)
             {
                 const float q = dec == 0 ? (float) roundToInt (v) : std::round (v * 10.0f) / 10.0f;
                 return (q < 0 ? String (CharPointer_UTF8 ("\xe2\x88\x92")) : String()) + (dec == 0 ? String (std::abs (roundToInt (q))) : String (std::abs (q), 1));
             };
-            g.setFont (lnf.title (15.0f, 0.02f));
-            g.setColour (okA ? text : faint); g.drawText (okA ? fmt (a) : String ("--"), cY, yy, cw, 26, Justification::centredRight);
-            g.setColour (okB ? co : faint); g.drawText (okB ? fmt (b) : String ("--"), cR, yy, cw, 26, Justification::centredRight);
+            g.setFont (lnf.title (19.0f, 0.02f));
+            g.setColour (okA ? text : faint); g.drawText (okA ? fmt (a) : String ("--"), cY, yy, cw, 34, Justification::centredRight);
+            g.setColour (okB ? co : faint); g.drawText (okB ? fmt (b) : String ("--"), cR, yy, cw, 34, Justification::centredRight);
             if (showDiff && okA && okB)
             {
                 const float d = a - b;
                 g.setColour (std::abs (d) < (dec ? 0.5f : 3.0f) ? dim : hot);
-                g.drawText ((d > 0 ? "+" : "") + fmt (d), cD, yy, cw, 26, Justification::centredRight);
+                g.drawText ((d > 0 ? "+" : "") + fmt (d), cD, yy, cw, 34, Justification::centredRight);
             }
-            yy += 32;
+            yy += 40;
         };
         const float ySec = y.sec.load(), rSec = r.sec.load(), yTp = y.tp.load(), rTp = r.tp.load();
         row ("SHORT-TERM", "LUFS, last 3 s", y.st.load(), r.st.load(), yv, rv, 1);
@@ -471,25 +509,25 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         row ("PLR", "true peak minus loudness", yTp - ySec, rTp - rSec, yv && ySec > -100, rv && rSec > -100, 1);
         row ("WIDTH", "% side, last 3 s", y.width.load(), r.width.load(), yv, rv, 0);
         // ---- TONAL BALANCE: both tracks (1/3 octave, tilted +4.5 dB/oct, levelled over 100 Hz - 5 kHz) inside a guide range
-        g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (cy); g.drawText ("TONAL BALANCE", 18, yy + 4, 200, 16, Justification::centredLeft);
-        g.setFont (lnf.body (9.0f)); g.setColour (faint); g.drawText ("this section, 1/3 octave", 120, yy + 4, 200, 16, Justification::centredLeft);
+        g.setFont (lnf.title (13.5f, 0.16f)); g.setColour (cy); g.drawText ("TONAL BALANCE", 18, yy + 6, 200, 18, Justification::centredLeft);
+        g.setFont (lnf.body (11.0f)); g.setColour (dim); g.drawText ("this section, 1/3 octave", 150, yy + 6, 220, 18, Justification::centredLeft);
         {
-            g.setFont (lnf.body (9.0f));
+            g.setFont (lnf.body (11.0f));
             float lx = (float) W - 18;
             for (auto [col, t] : { std::pair<Colour, String> { co, "REF" }, { text, "YOURS" }, { you.withAlpha (0.55f), "BEFORE" }, { cy.withAlpha (0.5f), "EDM RANGE" } })
             {
-                const float tw = GlyphArrangement::getStringWidth (lnf.body (9.0f), t);
-                lx -= tw; g.setColour (dim); g.drawText (t, (int) lx, yy + 21, (int) tw + 2, 14, Justification::centredLeft);
-                lx -= 16; g.setColour (col); g.fillRect (lx, (float) yy + 27, 11.0f, 2.0f); lx -= 12;
+                const float tw = GlyphArrangement::getStringWidth (lnf.body (11.0f), t);
+                lx -= tw; g.setColour (dim); g.drawText (t, (int) lx, yy + 27, (int) tw + 2, 16, Justification::centredLeft);
+                lx -= 18; g.setColour (col); g.fillRect (lx, (float) yy + 34, 13.0f, 2.5f); lx -= 14;
             }
         }
-        yy += 42;
-        const auto gr = Rectangle<float> (18, (float) yy, (float) W - 36, 190);
+        yy += 52;
+        const auto gr = Rectangle<float> (18, (float) yy, (float) W - 36, 172);
         balance (g, gr);
-        yy += 212;
-        g.setFont (lnf.body (9.5f)); g.setColour (dim);
+        yy += 172 + 18;
+        g.setFont (lnf.body (11.0f)); g.setColour (dim);
         g.drawFittedText ("The reference: its matching part, at its own level, playing along in sync. True peaks restart with each section, or click here.",
-                          18, yy + 14, W - 36, 34, Justification::topLeft, 3);
+                          18, yy + 6, W - 36, 34, Justification::topLeft, 2, 1.0f);
     }
     // the graph: 30 Hz - 20 kHz (log); levels as they are (falling with frequency), both tracks levelled the same way
     void balance (juce::Graphics& g, juce::Rectangle<float> r)
@@ -517,17 +555,17 @@ struct MetersDrawer : public Drawer, public juce::SettableTooltipClient, private
         };
         g.setColour (Colour (0xff0c1316)); g.fillRoundedRectangle (r.expanded (2), 4);
         // regions
-        g.setFont (lnf.title (9.5f, 0.12f));
+        g.setFont (lnf.title (11.5f, 0.12f));
         const double edges[5] = { f0, 250, 2000, 6000, f1 };
         const char* names[4] = { "LOW", "LOW-MID", "HIGH-MID", "HIGH" };
         for (int k = 0; k < 4; ++k)
         {
             if (k > 0) { g.setColour (Colour (0xff22323a)); g.fillRect (X (edges[k]), r.getY(), 1.0f, r.getHeight()); }
-            g.setColour (dim); g.drawText (names[k], Rectangle<float> (X (edges[k]), r.getY() + 3, X (edges[k + 1]) - X (edges[k]), 12).toNearestInt(), Justification::centred);
+            g.setColour (dim); g.drawText (names[k], Rectangle<float> (X (edges[k]), r.getY() + 4, X (edges[k + 1]) - X (edges[k]), 14).toNearestInt(), Justification::centred);
         }
-        g.setFont (lnf.body (8.5f)); g.setColour (faint);
+        g.setFont (lnf.body (10.5f)); g.setColour (dim);
         for (double f : { 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0 })
-            g.drawText (f >= 1000 ? String ((int) (f / 1000)) + "k" : String ((int) f), (int) X (f) - 14, (int) r.getBottom() + 3, 28, 11, Justification::centred);
+            g.drawText (f >= 1000 ? String ((int) (f / 1000)) + "k" : String ((int) f), (int) X (f) - 16, (int) r.getBottom() + 4, 32, 13, Justification::centred);
         // the range: layers that narrow towards its middle, so it glows where a track usually sits
         const int N = 120;
         std::vector<float> bl (N + 1), bh (N + 1), bx (N + 1);
@@ -657,7 +695,7 @@ Display::Display (TransplantProcessor& p, TpLookAndFeel& l, TransplantContent& o
     keyTab.setTooltip ("KEY: your key, the reference's key, and how its low end is moved into yours.");
     secTab.setTooltip ("SECTIONS: which part of the reference each part of your track is matched to.");
     refTab.setTooltip ("REFERENCES: add or remove reference tracks (up to three).");
-    matchTab.setTooltip ("MATCH: amount, smoothing, range, phase.");
+    matchTab.setTooltip ("MATCH: amount, smoothing, range, from/to, output and phase. Each section keeps its own settings.");
     keyDrawer = std::make_unique<KeyDrawer> (p, l);
     secDrawer = std::make_unique<SectionsDrawer> (p, l);
     refDrawer = std::make_unique<RefsDrawer> (p, l, [this] { owner.chooseReference(); });
@@ -709,7 +747,7 @@ void Display::resized()
     refDrawer->setBounds (W / 2 - 300, 34, 600, 196);
     matchDrawer->setBounds (W / 2 - 400, H - 28 - 150, 800, 148);
     meterTab.setBounds (W - 28, H / 2 - 120, 28, 110);
-    meterDrawer->setBounds (W - 28 - 370, 36, 370, 530);
+    meterDrawer->setBounds (W - 28 - 430, 36, 430, 552);
 }
 
 void Display::openDrawer (int which)
@@ -737,12 +775,12 @@ float Display::xOfBin (double b) const { const auto p = plot(); return p.getX() 
 double Display::binOfX (float x) const { const auto p = plot(); return (x - p.getX()) / p.getWidth() * tp::kBins - 0.5; }
 float Display::yOfCurve (double db) const
 {
-    const auto p = plot(); const double sc = juce::jmax (12.0, (double) proc.apvts.getRawParameterValue ("range")->load()) * 1.5;
+    const auto p = plot(); const double sc = juce::jmax (12.0, (double) (double) v.match[2]) * 1.5;
     return p.getCentreY() - (float) (db / sc) * p.getHeight() * 0.5f;
 }
 double Display::curveOfY (float y) const
 {
-    const auto p = plot(); const double sc = juce::jmax (12.0, (double) proc.apvts.getRawParameterValue ("range")->load()) * 1.5;
+    const auto p = plot(); const double sc = juce::jmax (12.0, (double) (double) v.match[2]) * 1.5;
     return (p.getCentreY() - y) / (p.getHeight() * 0.5) * sc;
 }
 float Display::yOfSpec (double db) const { const auto p = plot(); return p.getY() + p.getHeight() * 0.32f + (float) (specTop - db) * p.getHeight() * 0.86f / 66.0f; }
@@ -784,6 +822,7 @@ void Display::update (const TransplantProcessor::Snapshot& s, int vi)
     static_cast<SectionsDrawer*> (secDrawer.get())->update (s);
     static_cast<RefsDrawer*> (refDrawer.get())->update (s);
     static_cast<MatchDrawer*> (matchDrawer.get())->points = (int) nodes.size();
+    static_cast<MatchDrawer*> (matchDrawer.get())->setView (hasView && v.hasRef ? v.name : juce::String());
     {
         auto* md = static_cast<MetersDrawer*> (meterDrawer.get());
         md->section = hasView ? (v.name + (v.hasRef ? "  VS  REF " + v.refLabel.fromFirstOccurrenceOf ("AUTO: ", false, false) : juce::String())) : juce::String();
@@ -835,7 +874,7 @@ void Display::paint (juce::Graphics& g)
         g.setColour (Colour (0xff1c2a30)); g.fillRect (x, p.getY(), 1.0f, p.getHeight());
         g.setColour (Colour (0xff5f6b71)); g.drawText (f >= 1000 ? String ((int) (f / 1000)) + "k" : String ((int) f), (int) x - 20, (int) p.getBottom() + 6, 40, 14, Justification::centred);
     }
-    const double sc = jmax (12.0, (double) proc.apvts.getRawParameterValue ("range")->load()) * 1.5;
+    const double sc = jmax (12.0, (double) (double) v.match[2]) * 1.5;
     for (double d = -std::floor (sc / 6) * 6; d <= sc; d += 6)
     {
         const float y = yOfCurve (d);
@@ -865,8 +904,8 @@ void Display::paint (juce::Graphics& g)
         tp::Spec c = curve;
         if (dragging >= 0)
         {
-            const double range = proc.apvts.getRawParameterValue ("range")->load();
-            c = tp::limitBand (tp::limitRange (tp::curveThrough (nodes), range), proc.apvts.getRawParameterValue ("from")->load(), proc.apvts.getRawParameterValue ("to")->load());
+            const double range = (double) v.match[2];
+            c = tp::limitBand (tp::limitRange (tp::curveThrough (nodes), range), v.match[3], v.match[4]);
         }
         if (v.hasRef)
         {
@@ -1082,7 +1121,7 @@ void Display::mouseDrag (const juce::MouseEvent& e)
     if (! dragMoved && e.getDistanceFromDragStart() < 3) return;
     dragMoved = true;
     auto& n = nodes[(size_t) dragging];
-    const double range = proc.apvts.getRawParameterValue ("range")->load();
+    const double range = (double) v.match[2];
     float bin = (float) juce::jlimit (0.0, tp::kBins - 1.0, binOfX (e.position.x));
     float db = (float) juce::jlimit (-range, range, curveOfY (e.position.y));
     if (e.mods.isShiftDown()) { bin = n.bin; }                          // Shift: gain only
@@ -1110,7 +1149,7 @@ void Display::mouseDoubleClick (const juce::MouseEvent& e)
     if (n >= 0) { proc.removePoint (v.name, nodes[(size_t) n].bin, nodes[(size_t) n].user); selected = -1; }
     else
     {
-        const double range = proc.apvts.getRawParameterValue ("range")->load();
+        const double range = (double) v.match[2];
         proc.setUserPoint (v.name, -1, (float) juce::jlimit (0.0, tp::kBins - 1.0, binOfX (e.position.x)), (float) juce::jlimit (-range, range, curveOfY (e.position.y)));
     }
 }
@@ -1177,7 +1216,7 @@ TransplantContent::TransplantContent (TransplantProcessor& p, TpLookAndFeel& l)
     helpBtn.setClickingTogglesState (true);
     helpBtn.onClick = [this] { help = helpBtn.getToggleState(); repaint(); };
     // tooltips
-    presetBox.setTooltip ("Presets set how the curve is made (smoothing, range, from/to, phase). They don't touch your references, your track or your points.");
+    presetBox.setTooltip ("Presets set how the curve is made (smoothing, range, from/to, phase), for every section. They don't touch your references, your track or your points.");
     learnBtn.setTooltip ("LEARN: press it, then play your track through once from the start. TRANSPLANT hears its spectrum, sections and key. Press again (STOP) when done.");
     aBtn.setTooltip ("A/B: two versions of the settings and points. Right-click to copy one to the other.");
     bBtn.setTooltip (aBtn.getTooltip());

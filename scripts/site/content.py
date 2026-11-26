@@ -1156,7 +1156,7 @@ PLUGINS = [
 # ---------------------------------------------------------------------------------------------
 {
     "slug": "transplant", "name": "TRANSPLANT", "title": "Transplant", "kind": "Match EQ", "tagline": "Section-aware match EQ",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "badge": "New plugin",
     "standalone": False,
     "accent": "#2ee6d6",
@@ -1168,12 +1168,12 @@ PLUGINS = [
     "pitch": "Match EQ, done properly. TRANSPLANT matches your drop to the reference's drop and your break to its break, not one average to another. It moves the reference's bass notes into your key before comparing, so the curve doesn't boost its notes and cut yours. Then it gives you the curve as points you can drag, and the reference to listen to, level-matched, at the same moment of the song.",
     "intro": [
         "An ordinary match EQ averages a whole reference and a whole track and draws the difference. That's rarely what you want: an intro and a drop sound nothing alike, and two songs in different keys have their bass notes at different frequencies, so the curve ends up boosting the reference's notes and cutting yours. TRANSPLANT reads the structure of both songs (intro, build, drop, break, outro) and their keys. Each section of yours is matched to the same kind of section in the reference, and below KEY ZONE the reference's low end is moved into your key before anything is compared.",
-        "The result is a curve made of points: precise by default, with SMOOTH to turn it into broad strokes (fewer, wider points). Drag any point, add your own, and the ones you've touched stay put. Press REF to hear the matching part of the reference at the same moment, turned to your track's loudness, and open METERS to compare loudness, true peak, width and tonal balance side by side.",
+        "The result is a curve made of points: precise by default, with SMOOTH to turn it into broad strokes (fewer, wider points). Drag any point, add your own, and the ones you've touched stay put. Each section keeps its own points and its own MATCH settings, so an intro can get a light touch while the drop gets the full match. Press REF to hear the matching part of the reference at the same moment, turned to your track's loudness, and open METERS to compare loudness, true peak, width and tonal balance side by side.",
     ],
     "features": [
         "<b>Section by section</b>: your drop matched to its drop, your break to its break. The curve follows the song as it plays",
         "<b>Key-aware low end</b>: the reference's bass notes moved into your key before comparing",
-        "<b>Points you can edit</b>: drag, add, remove. SMOOTH from surgical (1/24 octave) to broad strokes",
+        "<b>Points you can edit</b>: drag, add, remove. Each section keeps its own points and MATCH settings",
         "<b>LISTEN</b> to the reference's matching part at the same moment, <b>LEVEL MATCHED</b> to your track",
         "<b>METERS</b>: LUFS, true peak, PLR, width and tonal balance of both tracks, inside an EDM range",
         "<b>Linear or natural phase</b>, up to three references, A/B and undo",
@@ -1193,7 +1193,7 @@ PLUGINS = [
         "<b>Choose a reference</b> in the same genre and at a similar tempo, ideally a finished master you'd like yours to sit next to. Up to three can be loaded; they're moved into your key and averaged.",
         "<b>Let it learn your track.</b> Press LEARN and play the song through once from the very start, then STOP. TRANSPLANT finds your sections and your key. It keeps them with the project, so this is a one-time step (do it again after big changes to the mix).",
         "<b>Check the match.</b> Open SECTIONS: each of your sections shows which part of the reference it's matched to. AUTO picks the same kind (a drop to a drop); pick another part from the list if you like, or BYPASS a section to leave it flat. Open KEY to check both keys and the shift.",
-        "<b>Shape the curve.</b> Start with Gentle Polish (AMOUNT 50%, broad, ±6 dB). SMOOTH to the right for broad strokes, to the left for detail. Drag a point to change it (Shift: gain only), double-click to add or remove one. Points you touched are white and stay put.",
+        "<b>Shape the curve.</b> Start with Gentle Polish (AMOUNT 50%, broad, ±6 dB). SMOOTH to the right for broad strokes, to the left for detail. Drag a point to change it (Shift: gain only), double-click to add or remove one. Points you touched are white and stay put. The MATCH knobs belong to the section on the display, so each section can have its own AMOUNT, SMOOTH and so on (COPY TO ALL gives every section the same).",
         "<b>Listen.</b> Flip between YOURS and REF while the song plays: the reference plays from the matching section, at the same moment, level-matched. Then BYPASS TRANSPLANT to hear what the curve did.",
         "<b>Compare on the meters.</b> Open METERS: loudness, true peak, punch (PLR), width and the tonal balance of both, with the range typical of loud electronic masters behind them.",
     ],
@@ -1225,7 +1225,7 @@ PLUGINS = [
             ("KEY ZONE", "Up to where the low end is moved. Above it (plus half an octave to fade), the reference is compared as it is."),
             ("AUTO · MANUAL · OFF", "Read the keys, set the shift yourself, or don't move anything."),
         ]),
-        ("MATCH", "transplant-match.jpg", "How the curve is made.", [
+        ("MATCH", "transplant-match.jpg", "How the curve is made, for the section on the display (named top right). Each section keeps its own.", [
             ("AMOUNT", "How much of the analysed curve is applied."),
             ("SMOOTH", "Surgical (left) to broad strokes (right): fewer, wider points."),
             ("RANGE", "The most the curve may boost or cut."),
@@ -1234,6 +1234,7 @@ PLUGINS = [
             ("OUTPUT", "The level after the EQ."),
             ("PHASE", "LINEAR (no phase shift) or NATURAL (like an analogue EQ, almost no latency)."),
             ("RESET POINTS", "Puts the section's points back to the analysis."),
+            ("COPY TO ALL", "Gives every section this section's settings. Your points stay."),
         ]),
         ("SECTIONS", "transplant-sections.jpg", "Which part of the reference each part of your track is matched to.", [
             ("Your sections", "In song order."),
@@ -1266,17 +1267,19 @@ PLUGINS = [
         ("Getting started", [
             ("REFERENCE", "up to 3 tracks", "The track to match. WAV, AIFF, FLAC, MP3 or OGG. Several are moved into your key and averaged. TRANSPLANT keeps its analysis with your project; the file itself is only needed for listening."),
             ("LEARN", "", "Press it, play your track once from the start, press again (STOP). TRANSPLANT hears its spectrum, sections and key. Or load a bounce of your track from YOUR TRACK."),
-            ("Presets", "7 factory presets", "Set how the curve is made (smoothing, range, from/to, phase). They don't touch your references, your track or your points."),
+            ("Presets", "7 factory presets", "Set how the curve is made (smoothing, range, from/to, phase), for every section. They don't touch your references, your track or your points."),
         ]),
-        ("Match", [
+        ("Match (per section)", [
+            ("Which section", "", "These settings belong to the section on the display, named at the top right of the drawer. Each section keeps its own; pick another section on the timeline to see and change its settings. A preset sets them for every section."),
             ("AMOUNT", "0 – 150% · default 100%", "How much of the analysed curve is applied. Points you moved or added keep their exact values."),
             ("SMOOTH", "1/24 – 1.4 oct · default 1/7 oct", "Left: surgical, every 1/24 octave, many points. Right: broad strokes, fewer and wider points. Points you moved stay."),
             ("RANGE", "±3 – ±24 dB · default ±12 dB", "The most the curve may boost or cut anywhere."),
             ("FROM", "20 Hz – 2 kHz · default 20 Hz", "No matching below this frequency (it fades in over a third of an octave)."),
             ("TO", "200 Hz – 20 kHz · default 20 kHz", "No matching above this frequency. Around 250 Hz matches only the low end."),
             ("OUTPUT", "−12 – +12 dB · default 0 dB", "The level after the EQ. The curve is level-matched in the mids, so this is for fine matching. Also in the header: drag, or double-click for 0 dB."),
-            ("PHASE", "Linear · Natural · default Linear", "LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use."),
+            ("PHASE", "Linear · Natural · default Linear", "LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use. One setting for the whole song."),
             ("RESET POINTS", "", "Puts the points of the section you're looking at back to the analysis."),
+            ("COPY TO ALL", "", "Gives every section the settings of the one on the display (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT). Your points stay."),
         ]),
         ("Key", [
             ("KEY MODE", "Auto · Manual · Off · default Auto", "AUTO reads both keys and moves the reference's low end the shorter way round. MANUAL: you set the shift. OFF: the low end is compared as it is, like an ordinary match EQ."),
@@ -1323,10 +1326,11 @@ PLUGINS = [
         ("Top End Only", "Matches above 2 kHz only"),
         ("Natural Phase", "The Default curve with almost no latency"),
     ],
-    "presets_note": "Presets only change how the curve is made. Your references, your track and the points you've moved stay. Everything is saved with the project.",
+    "presets_note": "Presets set how the curve is made, for every section. Your references, your track and the points you've moved stay. Everything is saved with the project.",
     "tips": [
         "Start gentle: Gentle Polish, or AMOUNT 30–60%. A match EQ shows you where to go; you rarely need all the way.",
         "Low end in a different key? Leave KEY MODE on AUTO. If the reading is wrong (check KEY), set the shift with MANUAL.",
+        "Give intros and breaks a lighter AMOUNT than the drops: each section keeps its own MATCH settings.",
         "Only want the bass balance? Use Low End Only, or set TO to about 250 Hz.",
         "Flip YOURS and REF on the loudest part of the song. With LEVEL MATCH on, any difference you hear is tone, not volume.",
         "Use the tonal balance on METERS to check yours against the range, not only against one reference.",
@@ -1336,6 +1340,7 @@ PLUGINS = [
     "trouble": [
         ("The curve doesn't change between sections", "FOLLOW PLAYHEAD (in SECTIONS) must be on, and the song has to start where it started when TRANSPLANT learned it: the sections are found by song position. If you moved the song, press LEARN again."),
         ("It boosts or cuts too much", "Lower AMOUNT or RANGE, or turn SMOOTH to the right. Gentle Polish is a good start."),
+        ("Turning AMOUNT changes only one section", "That's on purpose: the MATCH settings belong to the section on the display. Click COPY TO ALL to give every section the same settings, or pick a preset."),
         ("The low end sounds wrong", "Check the keys in KEY. If one is misread, choose MANUAL and set the shift, or OFF to compare the low end as it is."),
         ("REF is silent or says FILE MISSING", "The reference file has moved or been renamed. Load it again from REFERENCES. The analysis is kept with the project, so the curve doesn't change."),
         ("No curve, only an empty display", "TRANSPLANT needs both: a reference, and your track (press LEARN and play it from the start, or load a bounce)."),

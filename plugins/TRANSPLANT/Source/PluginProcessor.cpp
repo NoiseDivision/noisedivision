@@ -176,7 +176,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     Program* p = live_.load();
     inUse.store (p);
     const tp::Convolver::Filter* f = nullptr;
-    bool linear = true;
+    bool linear = true; float outDb = apvts.getRawParameterValue ("out")->load();
     if (p != nullptr && ! p->filters.empty())
     {
         linear = p->linear;
@@ -199,6 +199,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
         }
         activeView.store (idx == p->whole ? -1 : idx);
         f = &p->filters[(size_t) idx];
+        if (idx < (int) p->outDb.size()) outDb = p->outDb[(size_t) idx];
     }
     // keep the input for the bypass path (the convolver works in place)
     for (int i = 0; i < n; ++i) { const int k = (dryPos + i) % dryLen; dryL[(size_t) k] = l[i]; dryR[(size_t) k] = r ? r[i] : l[i]; }
@@ -207,7 +208,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     // bypass (crossfaded, latency kept) and output
     const int lat = linear ? L / 2 + B : B;
     wet.setTargetValue (apvts.getRawParameterValue ("bypass")->load() > 0.5f ? 0.0f : 1.0f);
-    outGain.setTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("out")->load()));
+    outGain.setTargetValue (juce::Decibels::decibelsToGain (outDb));
     // LISTEN: the reference (its matching part, level-matched), crossfaded with your track
     const bool listen = apvts.getRawParameterValue ("listen")->load() > 0.5f;
     xfade.setTargetValue (listen ? 1.0f : 0.0f);
@@ -233,7 +234,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     if (refAudio.load() != measuredRef) { for (auto& m : rMeter) m.reset(); measuredRef = refAudio.load(); }
     {
         float md = 0;
-        if (p != nullptr && idxNow >= 0 && idxNow < (int) p->mdb.size()) md = p->mdb[(size_t) idxNow] + apvts.getRawParameterValue ("out")->load();
+        if (p != nullptr && idxNow >= 0 && idxNow < (int) p->mdb.size()) md = p->mdb[(size_t) idxNow] + (idxNow < (int) p->outDb.size() ? p->outDb[(size_t) idxNow] : 0.0f);
         // once both have been heard for 2 s in this section, the measured difference takes over from the estimate
         if (idxNow >= 0 && idxNow < kMaxViews && yMeter[idxNow].valid() && rMeter[idxNow].valid())
             md = (float) juce::jlimit (-30.0, 30.0, yMeter[idxNow].db() - rMeter[idxNow].db());
@@ -481,7 +482,8 @@ void TransplantProcessor::analyseFile (const juce::File& file, bool asMine)
 void TransplantProcessor::rebuild()
 {
     auto P = [this] (const char* id) { return (double) apvts.getRawParameterValue (id)->load(); };
-    const double amount = P ("amount"), smooth = P ("smooth"), range = P ("range"), from = P ("from"), to = P ("to"), zone = P ("keyZone");
+    const double zone = P ("keyZone");
+    float glob[kMatchN]; for (int k = 0; k < kMatchN; ++k) glob[k] = (float) P (matchId (k));
     const int keyMode = (int) P ("keyMode"), manual = (int) std::lround (P ("keyShift"));
     std::map<juce::String, EditData> edits;
     { const juce::ScopedLock sl (editLock); edits = editCache; }
@@ -529,6 +531,8 @@ void TransplantProcessor::rebuild()
         v.yours = tp::toDbSpec (sec->pow);
         const auto it = edits.find (v.name);
         const EditData ed = it != edits.end() ? it->second : EditData();
+        for (int k = 0; k < kMatchN; ++k) v.match[k] = ed.has[k] ? ed.m[k] : glob[k];
+        const double amount = v.match[0], smooth = v.match[1], range = v.match[2], from = v.match[3], to = v.match[4];
         if (! rs.empty())
         {
             tp::Spec ref {}, raw {}; juce::String lbl;
@@ -578,7 +582,7 @@ void TransplantProcessor::buildProgram (bool)
         {
             const auto& v = s.views[i];
             if (i + 1 < s.views.size()) { p->t0.push_back (v.t0); p->t1.push_back (v.t1); }
-            p->vt0.push_back (i + 1 < s.views.size() ? v.t0 : 0.0); p->rt0.push_back (v.refT0); p->rt1.push_back (v.refT1); p->mdb.push_back (v.matchDb);
+            p->vt0.push_back (i + 1 < s.views.size() ? v.t0 : 0.0); p->rt0.push_back (v.refT0); p->rt1.push_back (v.refT1); p->mdb.push_back (v.matchDb); p->outDb.push_back (v.match[5]);
             p->curves.push_back (v.curve);
             bool reused = false;
             if (prev != nullptr && prev->linear == linear)
@@ -680,6 +684,33 @@ bool TransplantProcessor::sectionBypassed (const juce::String& view) const
     auto it = editCache.find (view); return it != editCache.end() && it->second.bypass;
 }
 
+const char* TransplantProcessor::matchId (int k)
+{
+    static const char* const ids[kMatchN] = { "amount", "smooth", "range", "from", "to", "out" };
+    return ids[juce::jlimit (0, kMatchN - 1, k)];
+}
+float TransplantProcessor::matchValue (const juce::String& view, int k) const
+{
+    {
+        const juce::ScopedLock sl (editLock);
+        auto it = editCache.find (view);
+        if (it != editCache.end() && it->second.has[k]) return it->second.m[k];
+    }
+    return apvts.getRawParameterValue (matchId (k))->load();
+}
+void TransplantProcessor::setMatchValue (const juce::String& view, int k, float value)
+{
+    if (view.isEmpty()) return;
+    auto* prm = apvts.getParameter (matchId (k));
+    editsFor (view, true).setProperty (juce::String ("m_") + matchId (k), prm->convertFrom0to1 (prm->convertTo0to1 (value)), &undo);
+}
+void TransplantProcessor::copyMatchToAll (const juce::String& view)
+{
+    float v[kMatchN]; for (int k = 0; k < kMatchN; ++k) v[k] = matchValue (view, k);
+    for (auto& w : snapshot().views)
+        for (int k = 0; k < kMatchN; ++k) setMatchValue (w.name, k, v[k]);
+}
+
 // a copy of the edits the thread can read safely (the ValueTree belongs to the message thread)
 void TransplantProcessor::cacheEdits()
 {
@@ -688,6 +719,11 @@ void TransplantProcessor::cacheEdits()
     {
         EditData e; e.user = parsePoints (c["user"].toString()); e.removed = parseList (c["removed"].toString());
         e.target = c["target"].toString(); e.bypass = (bool) c["bypass"];
+        for (int k = 0; k < kMatchN; ++k)
+        {
+            const juce::Identifier id (juce::String ("m_") + matchId (k));
+            if (c.hasProperty (id)) { e.has[k] = true; e.m[k] = (float) c[id]; }
+        }
         m[c["name"].toString()] = e;
     }
     const juce::ScopedLock sl (editLock); editCache = m;
@@ -729,6 +765,9 @@ void TransplantProcessor::loadPreset (int index)
         if (auto* p = apvts.getParameter (id)) p->setValueNotifyingHost (p->getDefaultValue());
     for (auto& v : presets[(size_t) index])
         if (auto* p = apvts.getParameter (v.id)) p->setValueNotifyingHost (p->convertTo0to1 (v.v));
+    // a preset sets the MATCH settings of every section
+    for (auto c : apvts.state.getChildWithName ("EDITS"))
+        for (int k = 0; k < kMatchN; ++k) c.removeProperty (juce::Identifier (juce::String ("m_") + matchId (k)), &undo);
     currentPreset = index;
 }
 
