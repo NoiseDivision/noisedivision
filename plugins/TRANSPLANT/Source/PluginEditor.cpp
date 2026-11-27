@@ -210,8 +210,21 @@ void DragBox::paint (juce::Graphics& g)
     auto r = getLocalBounds().toFloat().reduced (0.5f);
     g.setColour (panel); g.fillRoundedRectangle (r, 7);
     g.setColour (isMouseOverOrDragging() ? line.brighter (0.3f) : line); g.drawRoundedRectangle (r, 7, 1);
-    g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (dim); g.drawText (label, 10, 0, 40, getHeight(), juce::Justification::centredLeft);
-    g.setFont (lnf.body (12.0f)); g.setColour (text); g.drawText (prm.getCurrentValueAsText(), 30, 0, getWidth() - 38, getHeight(), juce::Justification::centredRight);
+    // a small knob: the arc from 0 dB (top) to the value
+    {
+        const float d = (float) getHeight() - 6.0f, cx = 5.0f + d / 2, cy = getHeight() / 2.0f, rad = d / 2 - 1.5f;
+        const auto rng = prm.getNormalisableRange();
+        const float a0 = juce::MathConstants<float>::pi * 1.25f, span = juce::MathConstants<float>::pi * 2.5f;
+        const float norm = rng.convertTo0to1 (value), zero = rng.convertTo0to1 (juce::jlimit (rng.start, rng.end, 0.0f));
+        juce::Path bgArc; bgArc.addCentredArc (cx, cy, rad, rad, 0, -a0, -a0 + span, true);
+        g.setColour (line.brighter (0.2f)); g.strokePath (bgArc, juce::PathStrokeType (2.0f));
+        juce::Path arc; arc.addCentredArc (cx, cy, rad, rad, 0, -a0 + span * juce::jmin (zero, norm), -a0 + span * juce::jmax (zero, norm), true);
+        g.setColour (tpc::cy); g.strokePath (arc, juce::PathStrokeType (2.2f, juce::PathStrokeType::curved, juce::PathStrokeType::rounded));
+        const float ang = -a0 + span * norm;
+        g.setColour (text); g.drawLine (cx, cy, cx + std::sin (ang) * (rad - 3), cy - std::cos (ang) * (rad - 3), 1.6f);
+    }
+    g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (dim); g.drawText (label, getHeight() + 6, 0, 40, getHeight(), juce::Justification::centredLeft);
+    g.setFont (lnf.body (12.0f)); g.setColour (text); g.drawText (prm.getCurrentValueAsText(), getHeight() + 24, 0, getWidth() - getHeight() - 32, getHeight(), juce::Justification::centredRight);
 }
 void DragBox::mouseDown (const juce::MouseEvent&) { start = value; att.beginGesture(); }
 void DragBox::mouseDrag (const juce::MouseEvent& e)
@@ -339,7 +352,7 @@ struct MatchDrawer : public Drawer
     MatchDrawer (TransplantProcessor& p, TpLookAndFeel& l, std::function<void()> resetFn)
         : Drawer (l, "MATCH", "HOW THE CURVE IS MADE"), proc (p),
           amount (p, "amount", "AMOUNT", l, false), smooth (p, "smooth", "SMOOTH", l, false), range (p, "range", "RANGE", l, false),
-          from (p, "from", "FROM", l, false), to (p, "to", "TO", l, false), out (p, "out", "OUTPUT", l, false), full (p, "fullness", "FULLNESS", l, false)
+          from (p, "from", "FROM", l, false), to (p, "to", "TO", l, false), out (p, "out", "GAIN", l, false), full (p, "fullness", "FULLNESS", l, false)
     {
         // the knobs show and change the section on the display; each section keeps its own settings
         Knob* ks[7] = { &amount, &smooth, &range, &from, &to, &out, &full };
@@ -352,7 +365,7 @@ struct MatchDrawer : public Drawer
             s.onValueChange = [this, k, &s, kn = ks[k]] { kn->repaint(); if (! setting && view.isNotEmpty()) proc.setMatchValue (view, k, (float) s.getValue()); };
         }
         copyAll.getProperties().set ("kind", "plain"); addAndMakeVisible (copyAll);
-        copyAll.setTooltip ("Copies the settings of this section (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT) to the sections you pick. Your points stay.");
+        copyAll.setTooltip ("Copies the settings of this section (AMOUNT, SMOOTH, RANGE, FROM, TO, FULLNESS, GAIN) to the sections you pick. Your points stay.");
         copyAll.onClick = [this]
         {
             if (view.isEmpty()) return;
@@ -366,7 +379,7 @@ struct MatchDrawer : public Drawer
         range.slider.setTooltip ("RANGE: the most the curve may boost or cut anywhere.");
         from.slider.setTooltip ("FROM: no matching below this frequency (fades in over a third of an octave).");
         to.slider.setTooltip ("TO: no matching above this frequency. Set it low (around 250 Hz) to match only the low end.");
-        out.slider.setTooltip ("OUTPUT: level after the EQ. The curve is level-matched in the mids, so this is for fine A/B matching.");
+        out.slider.setTooltip ("GAIN: this section's level after the EQ. The curve is level-matched in the mids, so this is for fine matching. The whole song's INPUT and OUTPUT are at the bottom.");
         auto* ph = p.apvts.getParameter ("phase");
         const char* names[2] = { "LINEAR", "NATURAL" };
         for (int i = 0; i < 2; ++i)
@@ -1316,7 +1329,7 @@ void Display::filesDropped (const juce::StringArray& files, int x, int y)
 
 //============================================================================== content
 TransplantContent::TransplantContent (TransplantProcessor& p, TpLookAndFeel& l)
-    : proc (p), lnf (l), display (p, l, *this), outBox (*p.apvts.getParameter ("out"), "OUT", l)
+    : proc (p), lnf (l), display (p, l, *this), inBox (*p.apvts.getParameter ("inGain"), "IN", l), outBox (*p.apvts.getParameter ("outGain"), "OUT", l)
 {
     addAndMakeVisible (display);
     for (auto* b : { &prevBtn, &nextBtn, &learnBtn, &undoBtn, &redoBtn, &bypassBtn, &helpBtn }) addAndMakeVisible (*b);
@@ -1346,7 +1359,9 @@ TransplantContent::TransplantContent (TransplantProcessor& p, TpLookAndFeel& l)
     undoBtn.setTooltip ("Undo"); redoBtn.setTooltip ("Redo");
     bypassBtn.setTooltip ("BYPASS: the original sound (the latency stays the same, so A/B is fair).");
     helpBtn.setTooltip ("How TRANSPLANT works.");
-    outBox.setTooltip ("OUTPUT level. Drag up or down (Shift: fine), double-click for 0 dB.");
+    inBox.setTooltip ("INPUT: the level going into TRANSPLANT, for the whole song. Drag up or down (Shift: fine), double-click for 0 dB.");
+    outBox.setTooltip ("OUTPUT: the level coming out, for the whole song (each section's own GAIN is in MATCH). Drag up or down (Shift: fine), double-click for 0 dB.");
+    addAndMakeVisible (inBox); addAndMakeVisible (outBox);
     tooltips = std::make_unique<juce::TooltipWindow> (this, 600);
     addMouseListener (this, true);
     startTimerHz (30);
@@ -1368,7 +1383,7 @@ void TransplantContent::resized()
     aBtn.setBounds (980, 13, 26, 32); bBtn.setBounds (1006, 13, 26, 32);
     undoBtn.setBounds (1040, 13, 28, 32); redoBtn.setBounds (1070, 13, 28, 32);
     bypassBtn.setBounds (1106, 13, 62, 32); helpBtn.setBounds (1172, 13, 22, 32);
-    outBox.setVisible (false);
+    inBox.setBounds (kW / 2 - 112, kH - 31, 108, 28); outBox.setBounds (kW / 2 + 4, kH - 31, 108, 28);
     display.setBounds (12, 70, kW - 24, kH - 70 - 34);
 }
 
@@ -1525,8 +1540,8 @@ void TransplantContent::paint (juce::Graphics& g)
     g.setColour (line); g.fillRect (972, 17, 1, 24);
     // footer
     g.setFont (lnf.title (10.0f, 0.16f)); g.setColour (dim);
-    g.drawText (footerL, 18, kH - 30, kW / 2 + 100, 24, Justification::centredLeft);
-    g.drawText (footerR, kW / 2, kH - 30, kW / 2 - 18, 24, Justification::centredRight);
+    g.drawText (footerL, 18, kH - 30, kW / 2 - 136, 24, Justification::centredLeft);
+    g.drawText (footerR, kW / 2 + 120, kH - 30, kW / 2 - 138, 24, Justification::centredRight);
 }
 
 void TransplantContent::paintOverChildren (juce::Graphics& g)

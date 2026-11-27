@@ -1156,7 +1156,7 @@ PLUGINS = [
 # ---------------------------------------------------------------------------------------------
 {
     "slug": "transplant", "name": "TRANSPLANT", "title": "Transplant", "kind": "Match EQ", "tagline": "Section-aware match EQ",
-    "version": "1.3.1",
+    "version": "1.4.0",
     "badge": "New plugin",
     "standalone": False,
     "accent": "#2ee6d6",
@@ -1217,6 +1217,7 @@ PLUGINS = [
         ("LISTEN", "YOURS or REF: hear the reference's matching part at the same moment."),
         ("LEVEL MATCH", "Turns the reference to your track's loudness, section by section. The gain shows beside it."),
         ("Info", "What's playing, the key shift, the phase, the latency and the sample rate."),
+        ("IN · OUT", "INPUT and OUTPUT: the level into and out of TRANSPLANT, for the whole song."),
         ("HEAR ON", "Preview both tracks on a club system, in a car, on a laptop, phone or earbuds, quietly, or in mono. Never in a bounce."),
     ]),
     "visuals": [
@@ -1234,7 +1235,7 @@ PLUGINS = [
             ("FROM", "No matching below this frequency."),
             ("TO", "No matching above this frequency."),
             ("FULLNESS", "Gives back the bass and air the ear loses when this section is quieter. Dashed on the display."),
-            ("OUTPUT", "The level after the EQ."),
+            ("GAIN", "This section's level after the EQ."),
             ("PHASE", "LINEAR (no phase shift) or NATURAL (like an analogue EQ, almost no latency)."),
             ("RESET POINTS", "Puts the section's points back to the analysis."),
             ("COPY TO...", "Copies this section's settings to the sections you pick. Your points stay."),
@@ -1282,10 +1283,10 @@ PLUGINS = [
             ("FROM", "20 Hz – 2 kHz · default 20 Hz", "No matching below this frequency (it fades in over a third of an octave)."),
             ("TO", "200 Hz – 20 kHz · default 20 kHz", "No matching above this frequency. Around 250 Hz matches only the low end."),
             ("FULLNESS", "0 – 100% · default 0%", "Gives back what your ear stops hearing when music is quieter: low end first, a little air too (the equal-loudness curves of ISO 226). The quieter this section is than your loudest one, the more it gets, so a breakdown can feel as full as the drop. Below 30 Hz it adds nothing. With it on, the display shows the whole EQ as a dashed line (WITH FULLNESS), and LEVEL MATCH takes it into account."),
-            ("OUTPUT", "−12 – +12 dB · default 0 dB", "The level after the EQ. The curve is level-matched in the mids, so this is for fine matching. Also in the header: drag, or double-click for 0 dB."),
+            ("GAIN", "−12 – +12 dB · default 0 dB", "This section's level after the EQ. The curve is level-matched in the mids, so this is for fine matching. The whole song's level is OUTPUT, at the bottom."),
             ("PHASE", "Linear · Natural · default Linear", "LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use. One setting for the whole song."),
             ("RESET POINTS", "", "Puts the points of the section you're looking at back to the analysis."),
-            ("COPY TO...", "", "Copies the settings of the section on the display (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT) to the sections you pick, or ALL. Your points stay."),
+            ("COPY TO...", "", "Copies the settings of the section on the display (AMOUNT, SMOOTH, RANGE, FROM, TO, FULLNESS, GAIN) to the sections you pick, or ALL. Your points stay."),
         ]),
         ("Key", [
             ("KEY MODE", "Auto · Manual · Off · default Auto", "AUTO reads both keys and moves the reference's low end the shorter way round. MANUAL: you set the shift. OFF: the low end is compared as it is, like an ordinary match EQ."),
@@ -1305,6 +1306,7 @@ PLUGINS = [
             ("White points", "", "Points you moved or added. They keep their values when SMOOTH, AMOUNT or the analysis changes."),
         ]),
         ("Listening and comparing", [
+            ("INPUT · OUTPUT", "−24 – +24 dB · default 0 dB", "Bottom centre: the level into and out of TRANSPLANT, for the whole song. Drag (Shift: fine), double-click for 0 dB. BYPASS keeps both, so A/B compares only the EQ."),
             ("YOURS · REF", "default YOURS", "REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays."),
             ("LEVEL MATCH", "On / Off · default On", "Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays."),
             ("HEAR ON", "Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room · Mono", "Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level (a club at about 100 dB, a phone in mono). MONO folds everything to mono and changes nothing else. Levelled in the mids; if peaks would go over, an automatic TRIM turns the preview down. Never in a bounce, and back to Studio when a project opens. Typical systems, not measurements of any product."),
@@ -1322,7 +1324,7 @@ PLUGINS = [
         ("Points", "SMOOTH sets how detailed the curve is; points are picked where it bends. Your own points are merged in."),
         ("FULLNESS", "Per section: the difference between the equal-loudness curves at your loudest level and at this section's level, scaled by FULLNESS, added to the curve."),
         ("EQ", "The curve becomes a linear phase (or minimum phase, NATURAL) filter, crossfaded when it changes."),
-        ("Output", "OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded. Last, HEAR ON, only while you listen."),
+        ("Output", "The section's GAIN and OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded. Last, HEAR ON, only while you listen."),
     ],
     "modes": None,
     "presets": [
@@ -1340,7 +1342,7 @@ PLUGINS = [
         "Low end in a different key? Leave KEY MODE on AUTO. If the reading is wrong (check KEY), set the shift with MANUAL.",
         "Give intros and breaks a lighter AMOUNT than the drops: each section keeps its own MATCH settings.",
         "Breakdown sounds thin next to the drop? Try FULLNESS at 30–60% on it. It gives back what your ear loses at the lower level, without touching the drop.",
-        "Before you bounce, flip HEAR ON through Club, Car and Phone with REF: if your low end vanishes on the phone or booms in the car and the reference's doesn't, you know where to look.",
+        "Flip HEAR ON through Club, Car and Phone with REF: if your low end vanishes or booms where the reference's doesn't, you know where to look.",
         "No reference to hand? Choose EDM BALANCE in REFERENCES and start with Gentle Polish: each section moves towards the middle of the range on METERS.",
         "Only want the bass balance? Use Low End Only, or set TO to about 250 Hz.",
         "Flip YOURS and REF on the loudest part of the song. With LEVEL MATCH on, any difference you hear is tone, not volume.",

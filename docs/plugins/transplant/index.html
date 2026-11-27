@@ -44,7 +44,7 @@
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Audio plugin (Match EQ)",
    "operatingSystem": "Windows, macOS",
-   "softwareVersion": "1.3.1",
+   "softwareVersion": "1.4.0",
    "image": "https://noisedivision.net/img/transplant.webp",
    "author": {
     "@id": "https://noisedivision.net/#org"
@@ -178,7 +178,7 @@
         <div><dt>Format</dt><dd>VST3, AU</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
         <div><dt>Latency</dt><dd>About 176 ms with LINEAR phase (192 ms at 44.1 kHz), compensated by your DAW; about 5 ms with NATURAL</dd></div>
-        <div><dt>Version · Price</dt><dd>1.3.1 · Free</dd></div>
+        <div><dt>Version · Price</dt><dd>1.4.0 · Free</dd></div>
       </dl>
     </div>
   </section>
@@ -195,7 +195,7 @@
         <li><h3>Points</h3><p>SMOOTH sets how detailed the curve is; points are picked where it bends. Your own points are merged in.</p></li>
         <li><h3>FULLNESS</h3><p>Per section: the difference between the equal-loudness curves at your loudest level and at this section&#x27;s level, scaled by FULLNESS, added to the curve.</p></li>
         <li><h3>EQ</h3><p>The curve becomes a linear phase (or minimum phase, NATURAL) filter, crossfaded when it changes.</p></li>
-        <li><h3>Output</h3><p>OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded. Last, HEAR ON, only while you listen.</p></li>
+        <li><h3>Output</h3><p>The section&#x27;s GAIN and OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded. Last, HEAR ON, only while you listen.</p></li>
       </ol>
     </div>
   </section>
@@ -249,10 +249,10 @@
             <div class="ctl"><span class="n">FROM</span><span class="r">20 Hz – 2 kHz · default 20 Hz</span><p class="d">No matching below this frequency (it fades in over a third of an octave).</p></div>
             <div class="ctl"><span class="n">TO</span><span class="r">200 Hz – 20 kHz · default 20 kHz</span><p class="d">No matching above this frequency. Around 250 Hz matches only the low end.</p></div>
             <div class="ctl"><span class="n">FULLNESS</span><span class="r">0 – 100% · default 0%</span><p class="d">Gives back what your ear stops hearing when music is quieter: low end first, a little air too (the equal-loudness curves of ISO 226). The quieter this section is than your loudest one, the more it gets, so a breakdown can feel as full as the drop. Below 30 Hz it adds nothing. With it on, the display shows the whole EQ as a dashed line (WITH FULLNESS), and LEVEL MATCH takes it into account.</p></div>
-            <div class="ctl"><span class="n">OUTPUT</span><span class="r">−12 – +12 dB · default 0 dB</span><p class="d">The level after the EQ. The curve is level-matched in the mids, so this is for fine matching. Also in the header: drag, or double-click for 0 dB.</p></div>
+            <div class="ctl"><span class="n">GAIN</span><span class="r">−12 – +12 dB · default 0 dB</span><p class="d">This section's level after the EQ. The curve is level-matched in the mids, so this is for fine matching. The whole song's level is OUTPUT, at the bottom.</p></div>
             <div class="ctl"><span class="n">PHASE</span><span class="r">Linear · Natural · default Linear</span><p class="d">LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use. One setting for the whole song.</p></div>
             <div class="ctl"><span class="n">RESET POINTS</span><span class="r"></span><p class="d">Puts the points of the section you're looking at back to the analysis.</p></div>
-            <div class="ctl"><span class="n">COPY TO...</span><span class="r"></span><p class="d">Copies the settings of the section on the display (AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT) to the sections you pick, or ALL. Your points stay.</p></div>
+            <div class="ctl"><span class="n">COPY TO...</span><span class="r"></span><p class="d">Copies the settings of the section on the display (AMOUNT, SMOOTH, RANGE, FROM, TO, FULLNESS, GAIN) to the sections you pick, or ALL. Your points stay.</p></div>
           </div>
           <div class="ctl-group"><h3>Key</h3>
             <div class="ctl"><span class="n">KEY MODE</span><span class="r">Auto · Manual · Off · default Auto</span><p class="d">AUTO reads both keys and moves the reference's low end the shorter way round. MANUAL: you set the shift. OFF: the low end is compared as it is, like an ordinary match EQ.</p></div>
@@ -272,6 +272,7 @@
             <div class="ctl"><span class="n">White points</span><span class="r"></span><p class="d">Points you moved or added. They keep their values when SMOOTH, AMOUNT or the analysis changes.</p></div>
           </div>
           <div class="ctl-group"><h3>Listening and comparing</h3>
+            <div class="ctl"><span class="n">INPUT · OUTPUT</span><span class="r">−24 – +24 dB · default 0 dB</span><p class="d">Bottom centre: the level into and out of TRANSPLANT, for the whole song. Drag (Shift: fine), double-click for 0 dB. BYPASS keeps both, so A/B compares only the EQ.</p></div>
             <div class="ctl"><span class="n">YOURS · REF</span><span class="r">default YOURS</span><p class="d">REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays.</p></div>
             <div class="ctl"><span class="n">LEVEL MATCH</span><span class="r">On / Off · default On</span><p class="d">Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays.</p></div>
             <div class="ctl"><span class="n">HEAR ON</span><span class="r">Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room · Mono</span><p class="d">Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level (a club at about 100 dB, a phone in mono). MONO folds everything to mono and changes nothing else. Levelled in the mids; if peaks would go over, an automatic TRIM turns the preview down. Never in a bounce, and back to Studio when a project opens. Typical systems, not measurements of any product.</p></div>
@@ -311,7 +312,7 @@
         <li>Low end in a different key? Leave KEY MODE on AUTO. If the reading is wrong (check KEY), set the shift with MANUAL.</li>
         <li>Give intros and breaks a lighter AMOUNT than the drops: each section keeps its own MATCH settings.</li>
         <li>Breakdown sounds thin next to the drop? Try FULLNESS at 30–60% on it. It gives back what your ear loses at the lower level, without touching the drop.</li>
-        <li>Before you bounce, flip HEAR ON through Club, Car and Phone with REF: if your low end vanishes on the phone or booms in the car and the reference's doesn't, you know where to look.</li>
+        <li>Flip HEAR ON through Club, Car and Phone with REF: if your low end vanishes or booms where the reference's doesn't, you know where to look.</li>
         <li>No reference to hand? Choose EDM BALANCE in REFERENCES and start with Gentle Polish: each section moves towards the middle of the range on METERS.</li>
         <li>Only want the bass balance? Use Low End Only, or set TO to about 250 Hz.</li>
         <li>Flip YOURS and REF on the loudest part of the song. With LEVEL MATCH on, any difference you hear is tone, not volume.</li>

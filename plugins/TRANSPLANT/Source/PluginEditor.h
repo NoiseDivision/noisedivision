@@ -152,7 +152,7 @@ private:
     juce::TextButton prevBtn { "<" }, nextBtn { ">" }, learnBtn { "LEARN" }, aBtn { "A" }, bBtn { "B" }, undoBtn, redoBtn, bypassBtn { "BYPASS" }, helpBtn { "?" };
     juce::ComboBox presetBox;
     juce::Rectangle<int> refBox, mineBox;
-    DragBox outBox;
+    DragBox inBox, outBox;
     std::unique_ptr<juce::ButtonParameterAttachment> bypassAtt;
     std::unique_ptr<juce::TooltipWindow> tooltips;
     std::unique_ptr<juce::FileChooser> chooser;

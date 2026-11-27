@@ -70,7 +70,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransplantProcessor::createL
     l.add (std::make_unique<juce::AudioParameterChoice> (id ("phase"), "Phase", juce::StringArray { "Linear", "Natural" }, 0));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("follow"), "Follow Playhead", true));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("oneCurve"), "One Curve For All", false));
-    l.add (std::make_unique<F> (id ("out"), "Output", juce::NormalisableRange<float> (-12.0f, 12.0f, 0.1f), 0.0f, db));
+    l.add (std::make_unique<F> (id ("out"), "Section Gain", juce::NormalisableRange<float> (-12.0f, 12.0f, 0.1f), 0.0f, db));
+    l.add (std::make_unique<F> (id ("inGain"), "Input", juce::NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f, db));
+    l.add (std::make_unique<F> (id ("outGain"), "Output", juce::NormalisableRange<float> (-24.0f, 24.0f, 0.1f), 0.0f, db));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("bypass"), "Bypass", false));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("listen"), "Listen To Reference", false));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("levelMatch"), "Level Match", true));
@@ -110,6 +112,8 @@ void TransplantProcessor::prepareToPlay (double sampleRate, int blockSize)
     dryLen = L / 2 + B + 65536;   // the latency plus room for a whole host block written ahead
     dryL.assign ((size_t) dryLen, 0.0f); dryR.assign ((size_t) dryLen, 0.0f); dryPos = 0;
     outGain.reset (sampleRate, 0.05); outGain.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("out")->load()));
+    inTrim.reset (sampleRate, 0.03); inTrim.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("inGain")->load()));
+    outTrim.reset (sampleRate, 0.03); outTrim.setCurrentAndTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("outGain")->load()));
     wet.reset (sampleRate, 0.03); wet.setCurrentAndTargetValue (apvts.getRawParameterValue ("bypass")->load() > 0.5f ? 0.0f : 1.0f);
     lastFilter = nullptr;
     refL.assign (16384, 0.0f); refR.assign (16384, 0.0f);
@@ -154,6 +158,11 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     for (int c = nCh; c < getTotalNumOutputChannels(); ++c) buffer.clear (c, 0, n);
     float* l = buffer.getWritePointer (0);
     float* r = nCh > 1 ? buffer.getWritePointer (1) : nullptr;
+    // INPUT: before everything (what TRANSPLANT learns, filters and bypasses)
+    inTrim.setTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("inGain")->load()));
+    if (inTrim.isSmoothing() || std::abs (inTrim.getTargetValue() - 1.0f) > 1.0e-6f)
+        for (int i = 0; i < n; ++i) { const float gi = inTrim.getNextValue(); l[i] *= gi; if (r) r[i] *= gi; }
+    outTrim.setTargetValue (juce::Decibels::decibelsToGain (apvts.getRawParameterValue ("outGain")->load()));
 
     // where we are in the song
     double t = playTime.load(); bool isPlaying = false, hasTime = false;
@@ -243,7 +252,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     if (refAudio.load() != measuredRef) { for (auto& m : rMeter) m.reset(); measuredRef = refAudio.load(); }
     {
         float md = 0;
-        if (p != nullptr && idxNow >= 0 && idxNow < (int) p->mdb.size()) md = p->mdb[(size_t) idxNow] + (idxNow < (int) p->outDb.size() ? p->outDb[(size_t) idxNow] : 0.0f);
+        if (p != nullptr && idxNow >= 0 && idxNow < (int) p->mdb.size()) md = p->mdb[(size_t) idxNow] + (idxNow < (int) p->outDb.size() ? p->outDb[(size_t) idxNow] : 0.0f) + apvts.getRawParameterValue ("outGain")->load();
         // once both have been heard for 2 s in this section, the measured difference takes over from the estimate
         if (idxNow >= 0 && idxNow < kMaxViews && yMeter[idxNow].valid() && rMeter[idxNow].valid())
             md = (float) juce::jlimit (-30.0, 30.0, yMeter[idxNow].db() - rMeter[idxNow].db());
@@ -258,7 +267,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     int w = liveWrite.load();
     for (int i = 0; i < n; ++i)
     {
-        const float g = outGain.getNextValue(), m = wet.getNextValue();
+        const float g = outGain.getNextValue() * outTrim.getNextValue(), m = wet.getNextValue();
         const int rd = (dryPos - lat + dryLen * 4) % dryLen;
         float yl = l[i], yr = r ? r[i] : 0.0f;
         if (m < 1.0f) { yl = m * yl + (1 - m) * dryL[(size_t) rd]; if (r) yr = m * yr + (1 - m) * dryR[(size_t) rd]; }

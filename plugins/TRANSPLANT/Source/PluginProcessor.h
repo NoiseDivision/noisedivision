@@ -211,7 +211,7 @@ private:
     int B = 256, L = 16384;
     std::atomic<int> wantLatency { 0 };
     std::vector<float> dryL, dryR; int dryPos = 0, dryLen = 1;
-    juce::SmoothedValue<float> outGain, wet;
+    juce::SmoothedValue<float> outGain, wet, inTrim, outTrim;   // outGain: the section's GAIN; inTrim, outTrim: INPUT and OUTPUT
     const tp::Convolver::Filter* lastFilter = nullptr;
 
     // ---- the reference's audio (only the one you listen to), decoded into memory by the thread
