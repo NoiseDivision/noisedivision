@@ -387,6 +387,8 @@ void TransplantProcessor::loadHearOn()
     if (want > tp::place::off && want < tp::place::count)
     {
         auto spec = tp::place::curve (want);
+        float top = -100; for (float x : spec) top = juce::jmax (top, x);
+        hearBoost.store (top);
         const auto h = tp::designIR (spec, fs, 4096, false);
         juce::AudioBuffer<float> ir (1, (int) h.size());
         for (int i = 0; i < (int) h.size(); ++i) ir.setSample (0, i, h[(size_t) i]);
@@ -422,7 +424,8 @@ void TransplantProcessor::applyHearOn (juce::AudioBuffer<float>& buffer, int n)
         const float x = hearMix.getNextValue();
         const float a = x * l[i] + (1 - x) * hearDry.getSample (0, i), b = x * r[i] + (1 - x) * hearDry.getSample (1, i);
         const float pk = juce::jmax (std::abs (a), std::abs (b));
-        if (pk * hearTrim > ceiling) { hearTrim = ceiling / pk; hearHold = holdLen; }
+        if (hearBoost.load() <= 0.5f) hearTrim = 1.0f;          // nothing boosted (Mono): nothing to make room for, same level as the studio
+        else if (pk * hearTrim > ceiling) { hearTrim = ceiling / pk; hearHold = holdLen; }
         else if (hearHold > 0) --hearHold;
         else hearTrim = juce::jmin (1.0f, hearTrim * up);
         l[i] = a * hearTrim; r[i] = b * hearTrim;

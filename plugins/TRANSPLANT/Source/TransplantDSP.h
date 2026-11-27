@@ -863,10 +863,10 @@ inline Spec fullnessCurve (double quieterDb)
 // Approximations of typical systems, for checking a mix: not measurements of any product.
 namespace place
 {
-    enum { off, club, car, laptop, phone, earbuds, quiet, count };
-    inline const char* const names[count] = { "Studio", "Club", "Car", "Laptop", "Phone", "Earbuds", "Quiet room" };
-    inline const double level[count] = { 75, 100, 85, 70, 70, 80, 60 };      // typical listening level, dB SPL
-    inline const double mono[count]  = { 0, 0, 0, 0.7, 1.0, 0, 0 };          // how much the sides fold into the middle
+    enum { off, club, car, laptop, phone, earbuds, quiet, monoSum, count };
+    inline const char* const names[count] = { "Studio", "Club", "Car", "Laptop", "Phone", "Earbuds", "Quiet room", "Mono" };
+    inline const double level[count] = { 75, 100, 85, 70, 70, 80, 60, 75 };      // typical listening level, dB SPL
+    inline const double mono[count]  = { 0, 0, 0, 0.7, 1.0, 0, 0, 1.0 };          // how much the sides fold into the middle
     inline double hp (double f, double fc, int n) { return -10.0 * std::log10 (1.0 + std::pow (fc / f, 2.0 * n)); }
     inline double lp (double f, double fc, int n) { return -10.0 * std::log10 (1.0 + std::pow (f / fc, 2.0 * n)); }
     inline double bell (double f, double f0, double g, double oct) { const double x = std::log2 (f / f0) / oct; return g * std::exp (-0.5 * x * x); }

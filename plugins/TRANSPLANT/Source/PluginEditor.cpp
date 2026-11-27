@@ -792,7 +792,7 @@ Display::Display (TransplantProcessor& p, TpLookAndFeel& l, TransplantContent& o
     addChildComponent (pointX);
     for (int i = 0; i < tp::place::count; ++i) hearBox.addItem (tp::place::names[i], i + 1);
     hearAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (proc.apvts, "hearOn", hearBox);
-    hearBox.setTooltip ("HEAR ON: roughly how the track (and the reference, with REF) would sound on a club system, in a car, on a laptop, a phone or earbuds, or quietly, each at its usual level. For your ears only: never in a bounce. Typical systems, not measurements of any product.");
+    hearBox.setTooltip ("HEAR ON: roughly how the track (and the reference, with REF) would sound on a club system, in a car, on a laptop, a phone or earbuds, or quietly, each at its usual level. MONO folds everything to mono, as on a mono club system or a single speaker. For your ears only: never in a bounce. Typical systems, not measurements of any product.");
     hearBox.onChange = [this] { repaint(); };
     addAndMakeVisible (hearBox);
     edmBtn.getProperties().set ("kind", "plain"); addChildComponent (edmBtn);

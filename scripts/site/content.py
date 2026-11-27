@@ -1217,7 +1217,7 @@ PLUGINS = [
         ("LISTEN", "YOURS or REF: hear the reference's matching part at the same moment."),
         ("LEVEL MATCH", "Turns the reference to your track's loudness, section by section. The gain shows beside it."),
         ("Info", "What's playing, the key shift, the phase, the latency and the sample rate."),
-        ("HEAR ON", "Preview both tracks on a club system, in a car, on a laptop, phone or earbuds, or quietly. Never in a bounce."),
+        ("HEAR ON", "Preview both tracks on a club system, in a car, on a laptop, phone or earbuds, quietly, or in mono. Never in a bounce."),
     ]),
     "visuals": [
         ("KEY", "transplant-key.jpg", "Both keys, and how far the reference's low end is moved.", [
@@ -1307,7 +1307,7 @@ PLUGINS = [
         ("Listening and comparing", [
             ("YOURS · REF", "default YOURS", "REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays."),
             ("LEVEL MATCH", "On / Off · default On", "Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays."),
-            ("HEAR ON", "Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room", "Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level (a club at about 100 dB, a phone in mono). Levelled in the mids; if peaks would go over, an automatic TRIM turns the preview down. Never in a bounce, and back to Studio when a project opens. Typical systems, not measurements of any product."),
+            ("HEAR ON", "Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room · Mono", "Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level (a club at about 100 dB, a phone in mono). MONO folds everything to mono and changes nothing else. Levelled in the mids; if peaks would go over, an automatic TRIM turns the preview down. Never in a bounce, and back to Studio when a project opens. Typical systems, not measurements of any product."),
             ("METERS", "", "Short-term and section loudness, true peak, PLR, width and tonal balance, for your track and the reference."),
             ("BYPASS", "On / Off", "The original sound, with the same latency, so A/B is fair."),
             ("A · B", "", "Two versions of the settings and points. Right-click to copy one to the other."),
