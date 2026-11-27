@@ -132,7 +132,7 @@ PLUGINS = [
 {
     "slug": "krush", "name": "KRUSH", "title": "Krush", "kind": "Multiband distortion",
     "accent": "#ff3038",
-    "img": "krush.webp", "w": 2000, "h": 1232, "shape": "wide",
+    "img": "krush.webp", "w": 2000, "h": 1232, "shape": "xwide",
     "alt": "KRUSH: a dark multiband distortion interface with a spectrum split into three bands, gain faders, a transfer curve, a list of distortion modes and output meters",
     "card": "Split the sound into up to four bands and distort each one its own way.",
     "tags": ["4 bands", "11 modes", "Dynamics"],
@@ -291,7 +291,7 @@ PLUGINS = [
 {
     "slug": "spectrakill", "name": "SPECTRAKILL", "title": "Spectrakill", "kind": "Spectral compressor",
     "accent": "#e6dcc8",
-    "img": "spectrakill.webp", "w": 2080, "h": 1400, "shape": "wide",
+    "img": "spectrakill.webp", "w": 2080, "h": 1400, "shape": "xwide",
     "alt": "SPECTRAKILL: a bone-white interface with an X-ray style spectrum display, a red threshold line with a curve point at 3.5 kHz, blood dripping from the top where frequencies are cut, and bone-coloured knobs",
     "card": "A compressor for every frequency at once: harsh peaks and resonances pushed down only where they poke out.",
     "tags": ["Up & down", "Sidechain", "M/S"],
@@ -444,7 +444,7 @@ PLUGINS = [
 {
     "slug": "shrapnel", "name": "SHRAPNEL", "title": "Shrapnel", "kind": "Spectral distortion",
     "accent": "#ff7138",
-    "img": "shrapnel.webp", "w": 2200, "h": 1440, "shape": "wide",
+    "img": "shrapnel.webp", "w": 2200, "h": 1440, "shape": "xwide",
     "alt": "SHRAPNEL: a dark industrial interface with a large spectrum display showing a red-to-amber output curve in steps, amber dashed drive curve with diamond points, shards flying off the peaks, six mode buttons with CRUSH selected, split sliders and a large DRIVE knob",
     "card": "Distortion that works on every frequency on its own: harmonics, crush, smear, scramble and warp.",
     "tags": ["6 modes", "Drive curve", "No aliasing"],
@@ -538,7 +538,7 @@ PLUGINS = [
 {
     "slug": "recoil", "name": "RECOIL", "title": "Recoil", "kind": "Sidechain ducking", "tagline": "Precision sidechain", "version": "1.1.0",
     "accent": "#ff7a3d",
-    "img": "recoil.webp", "w": 2200, "h": 1440, "shape": "wide",
+    "img": "recoil.webp", "w": 2200, "h": 1440, "shape": "xwide",
     "alt": "RECOIL: a gunmetal interface with a waveform display showing a bass ducked under each kick, the removed part hatched in orange, the Punch-Through shape drawn on top, a 4 by 4 grid of shape tiles, and SHAPE, BAND, PHASE and OUTPUT panels",
     "card": "Shape-based sidechain ducking with zero latency: sync, MIDI, audio, a map of your whole drum bus or sample-by-sample RM, 20 shapes and a shape editor.",
     "tags": ["Zero latency", "Song map", "Shape editor"],
@@ -864,7 +864,7 @@ PLUGINS = [
     "slug": "pyre", "name": "PYRE", "title": "Pyre", "kind": "Harmonic loudness for leads", "tagline": "Harmonic loudness",
     "version": "1.0.1",
     "accent": "#ff6a1a",
-    "img": "pyre.webp", "w": 1840, "h": 1240, "shape": "wide",
+    "img": "pyre.webp", "w": 1840, "h": 1240, "shape": "xwide",
     "alt": "PYRE: a brushed steel interface with the logo cut by a molten seam, a sunken firebox where a lead's harmonics burn as orange and yellow flames over a grey ash line, a dashed line showing the slope HEAT aims for, embers rising, and forged steel knobs for IGNITE, HEAT, TILT and BURN with molten seams",
     "card": "Makes leads and synths as dense as a saw, then drives them into a soft ceiling: louder, brighter and bigger.",
     "tags": ["Leads & synths", "Harmonic flattener", "Soft ceiling"],

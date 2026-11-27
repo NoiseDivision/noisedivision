@@ -168,8 +168,8 @@ nav.links > a.hot:hover { color: var(--amber); }
 .p-hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--line); }
 .p-hero::after { content: ""; position: absolute; inset: auto -10% -45% 30%; height: 80%; background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 65%); pointer-events: none; }
 .p-hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 56px; align-items: center; padding-block: 40px 64px; }
-.p-hero.tall .wrap, .p-hero.square .wrap { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr); }
-/* dense interfaces (FLATLINE, TRANSPLANT): a wider hero, mostly picture */
+.p-hero.tall .wrap, .p-hero.square .wrap { grid-template-columns: minmax(0, 1fr) minmax(0, 0.95fr); }
+/* landscape interfaces: a wider hero, mostly picture */
 .p-hero.xwide .wrap { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.6fr); gap: 44px; }
 .p-hero.xwide .shot { margin-right: calc(-1 * clamp(0px, (100vw - 1180px) / 2 - 24px, 200px)); }   /* reaches into the right margin; the text stays in line */
 .crumbs { grid-column: 1 / -1; font-size: var(--step--1); color: var(--steel); }
@@ -189,7 +189,7 @@ nav.links > a.hot:hover { color: var(--amber); }
 .manual-link svg { color: var(--accent); }
 .shot { position: relative; margin: 0; min-width: 0; }
 .shot img { display: block; width: 100%; height: auto; border-radius: 6px; border: 1px solid #2c2e33; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
-.p-hero.tall .shot, .p-hero.square .shot { max-width: 440px; justify-self: center; width: 100%; }
+.p-hero.tall .shot, .p-hero.square .shot { max-width: 560px; justify-self: center; width: 100%; }
 .specs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; border: 1px solid var(--line); border-radius: 4px; background: var(--panel); }
 .specs div { padding: 12px 14px; border-left: 1px solid var(--line); min-width: 0; }
 .specs div:first-child { border-left: 0; }
