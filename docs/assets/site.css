@@ -169,6 +169,9 @@ nav.links > a.hot:hover { color: var(--amber); }
 .p-hero::after { content: ""; position: absolute; inset: auto -10% -45% 30%; height: 80%; background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--accent) 20%, transparent), transparent 65%); pointer-events: none; }
 .p-hero .wrap { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 56px; align-items: center; padding-block: 40px 64px; }
 .p-hero.tall .wrap, .p-hero.square .wrap { grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.85fr); }
+/* dense interfaces (FLATLINE, TRANSPLANT): a wider hero, mostly picture */
+.p-hero.xwide .wrap { grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.6fr); gap: 44px; }
+.p-hero.xwide .shot { margin-right: calc(-1 * clamp(0px, (100vw - 1180px) / 2 - 24px, 200px)); }   /* reaches into the right margin; the text stays in line */
 .crumbs { grid-column: 1 / -1; font-size: var(--step--1); color: var(--steel); }
 .crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .crumbs li + li::before { content: "/"; margin-right: 8px; color: var(--line-2); }
@@ -347,6 +350,7 @@ footer ul a, footer ul li { overflow-wrap: anywhere; min-width: 0; }
 footer .wrap > div { min-width: 0; }
 @media (max-width: 760px) { footer .wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); } footer .about { grid-column: 1 / -1; } }
 
+@media (max-width: 1120px) { .p-hero.xwide .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; } .p-hero.xwide .shot { margin-right: 0; } }
 @media (max-width: 960px) {
   .hero .wrap, .p-hero .wrap, .p-hero.tall .wrap, .p-hero.square .wrap { grid-template-columns: minmax(0, 1fr); gap: 36px; }
   .p-hero .wrap { padding-block: 28px 56px; }
