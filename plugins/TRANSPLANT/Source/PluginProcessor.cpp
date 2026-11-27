@@ -402,7 +402,7 @@ void TransplantProcessor::applyHearOn (juce::AudioBuffer<float>& buffer, int n)
     // never in a bounce: offline rendering always hears the studio
     const int on = isNonRealtime() ? 0 : hearLoaded.load();
     hearMix.setTargetValue (on > tp::place::off ? 1.0f : 0.0f);
-    if (on <= tp::place::off && ! hearMix.isSmoothing()) { if (hearMix.getCurrentValue() <= 0.0f) { hearActive = false; return; } }
+    if (on <= tp::place::off && ! hearMix.isSmoothing()) { if (hearMix.getCurrentValue() <= 0.0f) { hearActive = false; hearTrimDb.store (0.0f); return; } }
     if (buffer.getNumChannels() < 2) return;
     hearActive = true;
     hearDry.makeCopyOf (buffer, true);
@@ -411,16 +411,23 @@ void TransplantProcessor::applyHearOn (juce::AudioBuffer<float>& buffer, int n)
     for (int i = 0; i < n; ++i) { const float m = 0.5f * (l[i] + r[i]), s = 0.5f * (l[i] - r[i]) * (1.0f - mono); l[i] = m + s; r[i] = m - s; }
     juce::dsp::AudioBlock<float> blk (buffer.getArrayOfWritePointers(), 2, (size_t) n);
     hearConv.process (juce::dsp::ProcessContextReplacing<float> (blk));
+    // a boosted low end needs room: an automatic trim that steps down at once to keep peaks under -1 dBFS,
+    // holds for 3 s and comes back up at 1 dB a second. It never shapes the waveform, so nothing distorts.
+    const float ceiling = 0.891f;
+    const float up = (float) std::pow (10.0, 1.0 / 20.0 / rate.load());
+    const int holdLen = (int) (3.0 * rate.load());
+    if (on != hearTrimFor) { hearTrim = 1.0f; hearHold = 0; hearTrimFor = on; }
     for (int i = 0; i < n; ++i)
     {
         const float x = hearMix.getNextValue();
-        for (int c = 0; c < 2; ++c)
-        {
-            auto* d = buffer.getWritePointer (c);
-            const float v = x * d[i] + (1 - x) * hearDry.getSample (c, i);
-            d[i] = v > 0.95f || v < -0.95f ? std::tanh (v) : v;   // a monitor, not a master: no harsh overs
-        }
+        const float a = x * l[i] + (1 - x) * hearDry.getSample (0, i), b = x * r[i] + (1 - x) * hearDry.getSample (1, i);
+        const float pk = juce::jmax (std::abs (a), std::abs (b));
+        if (pk * hearTrim > ceiling) { hearTrim = ceiling / pk; hearHold = holdLen; }
+        else if (hearHold > 0) --hearHold;
+        else hearTrim = juce::jmin (1.0f, hearTrim * up);
+        l[i] = a * hearTrim; r[i] = b * hearTrim;
     }
+    hearTrimDb.store (juce::Decibels::gainToDecibels (hearTrim));
 }
 
 //============================================================================== the thread

@@ -97,6 +97,7 @@ public:
     // HEAR ON: a preview of other systems, for your ears only (never in a bounce)
     juce::dsp::Convolution hearConv; juce::AudioBuffer<float> hearDry; juce::LinearSmoothedValue<float> hearMix;
     std::atomic<int> hearLoaded { -1 }; std::atomic<bool> hearJob { false }; bool hearActive = false;
+    float hearTrim = 1.0f; int hearHold = 0, hearTrimFor = -1; std::atomic<float> hearTrimDb { 0.0f };   // the preview's automatic trim
     void loadHearOn();
     void applyHearOn (juce::AudioBuffer<float>&, int n);
     int listenRef() const { return listenIdx.load(); }

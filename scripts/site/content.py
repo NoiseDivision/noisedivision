@@ -1156,7 +1156,7 @@ PLUGINS = [
 # ---------------------------------------------------------------------------------------------
 {
     "slug": "transplant", "name": "TRANSPLANT", "title": "Transplant", "kind": "Match EQ", "tagline": "Section-aware match EQ",
-    "version": "1.3.0",
+    "version": "1.3.1",
     "badge": "New plugin",
     "standalone": False,
     "accent": "#2ee6d6",
@@ -1307,7 +1307,7 @@ PLUGINS = [
         ("Listening and comparing", [
             ("YOURS · REF", "default YOURS", "REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays."),
             ("LEVEL MATCH", "On / Off · default On", "Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays."),
-            ("HEAR ON", "Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room", "Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level: a club's big sub at about 100 dB, a car's boomy cabin, a laptop or a phone with no low end (in mono), earbuds, or a quiet room. Levelled in the mids so you compare tone, not volume. For your ears only: it is never in a bounce, and it goes back to Studio when a project opens. These are typical systems, not measurements of any product."),
+            ("HEAR ON", "Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room", "Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level (a club at about 100 dB, a phone in mono). Levelled in the mids; if peaks would go over, an automatic TRIM turns the preview down. Never in a bounce, and back to Studio when a project opens. Typical systems, not measurements of any product."),
             ("METERS", "", "Short-term and section loudness, true peak, PLR, width and tonal balance, for your track and the reference."),
             ("BYPASS", "On / Off", "The original sound, with the same latency, so A/B is fair."),
             ("A · B", "", "Two versions of the settings and points. Right-click to copy one to the other."),

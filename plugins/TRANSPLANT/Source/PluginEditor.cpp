@@ -1086,7 +1086,8 @@ void Display::paint (juce::Graphics& g)
         if (h > 0)
         {
             g.setFont (lnf.body (10.5f)); g.setColour (co);
-            g.drawText ("PREVIEW: NOT IN YOUR BOUNCE", 198, getHeight() - 30, 220, 24, Justification::centredLeft);
+            const float trim = proc.hearTrimDb.load();
+            g.drawText ("PREVIEW: NOT IN YOUR BOUNCE" + (trim < -0.1f ? "   TRIM " + String (trim, 1) + " dB" : String()), 198, getHeight() - 30, 320, 24, Justification::centredLeft);
         }
     }
     // LISTEN
