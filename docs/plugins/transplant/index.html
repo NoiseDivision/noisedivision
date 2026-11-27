@@ -44,7 +44,7 @@
    "applicationCategory": "MultimediaApplication",
    "applicationSubCategory": "Audio plugin (Match EQ)",
    "operatingSystem": "Windows, macOS",
-   "softwareVersion": "1.2.0",
+   "softwareVersion": "1.3.0",
    "image": "https://noisedivision.net/img/transplant.webp",
    "author": {
     "@id": "https://noisedivision.net/#org"
@@ -124,7 +124,7 @@
         <p class="label kind">Section-aware match EQ</p>
         <h1 id="p-title">TRANSPLANT</h1>
         
-        <p class="pitch">Match EQ, done properly. TRANSPLANT matches your drop to the reference's drop and your break to its break, not one average to another. It moves the reference's bass notes into your key before comparing, so the curve doesn't boost its notes and cut yours. Then it gives you the curve as points you can drag, and the reference to listen to, level-matched, at the same moment of the song. No reference to hand? It can match each section to the middle of the EDM tonal balance range instead.</p>
+        <p class="pitch">Match EQ, done properly. TRANSPLANT matches your drop to the reference's drop and your break to its break, not one average to another. It moves the reference's bass notes into your key before comparing, so the curve doesn't boost its notes and cut yours. Then it gives you the curve as points you can drag, and the reference to listen to, level-matched, at the same moment of the song. No reference to hand? It can match each section to the middle of the EDM tonal balance range instead. FULLNESS gives quiet sections the bass and air your ear loses at lower levels, and HEAR ON lets you check both tracks as they'd sound in a club, a car or on a phone.</p>
         <div class="ctas">
           <a class="btn primary" href="#" data-download="transplant" data-os="win"><svg width="15" height="15" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 2.6 6.6 1.8v5.5H1zM7.4 1.7 15 .6v6.7H7.4zM1 8.1h5.6v5.5L1 12.8zM7.4 8.1H15v6.8l-7.6-1.1z" fill="currentColor"/></svg> Transplant for Windows</a>
           <a class="btn mac" href="#" data-download="transplant" data-os="mac"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><path d="M11.6 8.5c0-2 1.6-2.9 1.7-3-1-1.4-2.4-1.6-2.9-1.6-1.2-.1-2.4.7-3 .7s-1.6-.7-2.6-.7C3.4 4 2.1 4.8 1.4 6c-1.5 2.6-.4 6.4 1.1 8.5.7 1 1.5 2.2 2.6 2.1 1-.1 1.4-.7 2.7-.7s1.6.7 2.7.6c1.1 0 1.8-1 2.5-2.1.8-1.2 1.1-2.3 1.1-2.4 0 0-2.5-.9-2.5-3.5zM9.6 2.5c.6-.7 1-1.6.9-2.5-.8 0-1.8.5-2.4 1.2-.5.6-1 1.6-.9 2.5.9.1 1.8-.5 2.4-1.2z" fill="currentColor"/></svg> Transplant for <span class="kc">macOS</span></a>
@@ -168,7 +168,7 @@
             <li><span><b>Points you can edit</b>: drag, add, remove. Each section keeps its own points and MATCH settings</span></li>
             <li><span><b>LISTEN</b> to the reference's matching part at the same moment, <b>LEVEL MATCHED</b> to your track</span></li>
             <li><span><b>METERS</b>: LUFS, true peak, PLR, width and tonal balance of both tracks, inside an EDM range</span></li>
-            <li><span><b>No reference?</b> Match to the middle of the EDM tonal balance range</span></li>
+            <li><span><b>FULLNESS</b> per section, <b>HEAR ON</b> club, car or phone, and no-reference <b>EDM BALANCE</b></span></li>
             <li><span><b>Linear or natural phase</b>, up to three references, A/B and undo</span></li>
           </ul>
           <div class="uses"><p class="label">Good for</p><div class="chips"><span class="chip">Master bus</span><span class="chip">Pre-masters</span><span class="chip">Matching a reference</span><span class="chip">Finding what your mix lacks</span><span class="chip">Low-end balance</span></div></div>
@@ -178,7 +178,7 @@
         <div><dt>Format</dt><dd>VST3, AU</dd></div>
         <div><dt>System</dt><dd>Windows, <span class="kc">macOS</span></dd></div>
         <div><dt>Latency</dt><dd>About 176 ms with LINEAR phase (192 ms at 44.1 kHz), compensated by your DAW; about 5 ms with NATURAL</dd></div>
-        <div><dt>Version · Price</dt><dd>1.2.0 · Free</dd></div>
+        <div><dt>Version · Price</dt><dd>1.3.0 · Free</dd></div>
       </dl>
     </div>
   </section>
@@ -193,8 +193,9 @@
         <li><h3>Key</h3><p>Below KEY ZONE, the reference&#x27;s spectrum is moved by the key shift, so its bass notes land where yours are.</p></li>
         <li><h3>Difference</h3><p>Section against matching section (or the middle of the EDM range, with EDM BALANCE): the reference minus yours, level-matched in the mids, with narrow peaks and notches tamed. Nothing is boosted where your track has nothing.</p></li>
         <li><h3>Points</h3><p>SMOOTH sets how detailed the curve is; points are picked where it bends. Your own points are merged in.</p></li>
+        <li><h3>FULLNESS</h3><p>Per section: the difference between the equal-loudness curves at your loudest level and at this section&#x27;s level, scaled by FULLNESS, added to the curve.</p></li>
         <li><h3>EQ</h3><p>The curve becomes a linear phase (or minimum phase, NATURAL) filter, crossfaded when it changes.</p></li>
-        <li><h3>Output</h3><p>OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded.</p></li>
+        <li><h3>Output</h3><p>OUTPUT, then BYPASS or the reference (with LISTEN), crossfaded. Last, HEAR ON, only while you listen.</p></li>
       </ol>
     </div>
   </section>
@@ -247,6 +248,7 @@
             <div class="ctl"><span class="n">RANGE</span><span class="r">±3 – ±24 dB · default ±12 dB</span><p class="d">The most the curve may boost or cut anywhere.</p></div>
             <div class="ctl"><span class="n">FROM</span><span class="r">20 Hz – 2 kHz · default 20 Hz</span><p class="d">No matching below this frequency (it fades in over a third of an octave).</p></div>
             <div class="ctl"><span class="n">TO</span><span class="r">200 Hz – 20 kHz · default 20 kHz</span><p class="d">No matching above this frequency. Around 250 Hz matches only the low end.</p></div>
+            <div class="ctl"><span class="n">FULLNESS</span><span class="r">0 – 100% · default 0%</span><p class="d">Gives back what your ear stops hearing when music is quieter: low end first, a little air too (the equal-loudness curves of ISO 226). The quieter this section is than your loudest one, the more it gets, so a breakdown can feel as full as the drop. Below 30 Hz it adds nothing. With it on, the display shows the whole EQ as a dashed line (WITH FULLNESS), and LEVEL MATCH takes it into account.</p></div>
             <div class="ctl"><span class="n">OUTPUT</span><span class="r">−12 – +12 dB · default 0 dB</span><p class="d">The level after the EQ. The curve is level-matched in the mids, so this is for fine matching. Also in the header: drag, or double-click for 0 dB.</p></div>
             <div class="ctl"><span class="n">PHASE</span><span class="r">Linear · Natural · default Linear</span><p class="d">LINEAR: no phase shift at all, the low end stays tight, about 0.18 s of latency. NATURAL: like an analogue or ordinary EQ, almost no latency, for tracking or live use. One setting for the whole song.</p></div>
             <div class="ctl"><span class="n">RESET POINTS</span><span class="r"></span><p class="d">Puts the points of the section you're looking at back to the analysis.</p></div>
@@ -272,6 +274,7 @@
           <div class="ctl-group"><h3>Listening and comparing</h3>
             <div class="ctl"><span class="n">YOURS · REF</span><span class="r">default YOURS</span><p class="d">REF plays the reference instead, from the part that matches what's playing, at the same moment (in your drop you hear its drop). It plays while your DAW plays.</p></div>
             <div class="ctl"><span class="n">LEVEL MATCH</span><span class="r">On / Off · default On</span><p class="d">Turns the reference to your track's loudness in each section, so you compare tone, not volume. It starts from the analysis and is fine-tuned as the song plays.</p></div>
+            <div class="ctl"><span class="n">HEAR ON</span><span class="r">Studio · Club · Car · Laptop · Phone · Earbuds · Quiet room</span><p class="d">Bottom left. Roughly how your track, and the reference with REF, would sound on that system at its usual level: a club's big sub at about 100 dB, a car's boomy cabin, a laptop or a phone with no low end (in mono), earbuds, or a quiet room. Levelled in the mids so you compare tone, not volume. For your ears only: it is never in a bounce, and it goes back to Studio when a project opens. These are typical systems, not measurements of any product.</p></div>
             <div class="ctl"><span class="n">METERS</span><span class="r"></span><p class="d">Short-term and section loudness, true peak, PLR, width and tonal balance, for your track and the reference.</p></div>
             <div class="ctl"><span class="n">BYPASS</span><span class="r">On / Off</span><p class="d">The original sound, with the same latency, so A/B is fair.</p></div>
             <div class="ctl"><span class="n">A · B</span><span class="r"></span><p class="d">Two versions of the settings and points. Right-click to copy one to the other.</p></div>
@@ -307,6 +310,8 @@
         <li>Start gentle: Gentle Polish, or AMOUNT 30–60%. A match EQ shows you where to go; you rarely need all the way.</li>
         <li>Low end in a different key? Leave KEY MODE on AUTO. If the reading is wrong (check KEY), set the shift with MANUAL.</li>
         <li>Give intros and breaks a lighter AMOUNT than the drops: each section keeps its own MATCH settings.</li>
+        <li>Breakdown sounds thin next to the drop? Try FULLNESS at 30–60% on it. It gives back what your ear loses at the lower level, without touching the drop.</li>
+        <li>Before you bounce, flip HEAR ON through Club, Car and Phone with REF: if your low end vanishes on the phone or booms in the car and the reference's doesn't, you know where to look.</li>
         <li>No reference to hand? Choose EDM BALANCE in REFERENCES and start with Gentle Polish: each section moves towards the middle of the range on METERS.</li>
         <li>Only want the bass balance? Use Low End Only, or set TO to about 250 Hz.</li>
         <li>Flip YOURS and REF on the loudest part of the song. With LEVEL MATCH on, any difference you hear is tone, not volume.</li>
@@ -357,6 +362,7 @@
       <details><summary>The curve doesn't change between sections</summary><p>FOLLOW PLAYHEAD (in SECTIONS) must be on, and the song has to start where it started when TRANSPLANT learned it: the sections are found by song position. If you moved the song, press LEARN again.</p></details>
       <details><summary>It boosts or cuts too much</summary><p>Lower AMOUNT or RANGE, or turn SMOOTH to the right. Gentle Polish is a good start.</p></details>
       <details><summary>Turning AMOUNT changes only one section</summary><p>That's on purpose: the MATCH settings belong to the section on the display. Click COPY TO... and pick the sections that should get the same settings, or pick a preset.</p></details>
+      <details><summary>My bounce sounds different from what I heard</summary><p>HEAR ON was probably on. It only changes what you hear: bounces (offline) never include it. Set it to Studio while mixing, and if your DAW bounces in real time, set it to Studio before the bounce too.</p></details>
       <details><summary>The low end sounds wrong</summary><p>Check the keys in KEY. If one is misread, choose MANUAL and set the shift, or OFF to compare the low end as it is.</p></details>
       <details><summary>REF is silent or says FILE MISSING</summary><p>The reference file has moved or been renamed. Load it again from REFERENCES. The analysis is kept with the project, so the curve doesn't change.</p></details>
       <details><summary>No curve, only an empty display</summary><p>TRANSPLANT needs both: a reference (or EDM BALANCE in REFERENCES), and your track (press LEARN and play it from the start, or load a bounce).</p></details>

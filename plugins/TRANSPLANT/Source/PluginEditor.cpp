@@ -339,11 +339,12 @@ struct MatchDrawer : public Drawer
     MatchDrawer (TransplantProcessor& p, TpLookAndFeel& l, std::function<void()> resetFn)
         : Drawer (l, "MATCH", "HOW THE CURVE IS MADE"), proc (p),
           amount (p, "amount", "AMOUNT", l, false), smooth (p, "smooth", "SMOOTH", l, false), range (p, "range", "RANGE", l, false),
-          from (p, "from", "FROM", l, false), to (p, "to", "TO", l, false), out (p, "out", "OUTPUT", l, false)
+          from (p, "from", "FROM", l, false), to (p, "to", "TO", l, false), out (p, "out", "OUTPUT", l, false), full (p, "fullness", "FULLNESS", l, false)
     {
         // the knobs show and change the section on the display; each section keeps its own settings
-        Knob* ks[6] = { &amount, &smooth, &range, &from, &to, &out };
-        for (int k = 0; k < 6; ++k)
+        Knob* ks[7] = { &amount, &smooth, &range, &from, &to, &out, &full };
+        full.slider.setTooltip ("FULLNESS: gives back the bass and treble your ear stops hearing when music is quieter (the equal-loudness curves). The quieter this section is than your loudest one, the more it gets: breakdowns feel as full as the drop. Each section keeps its own.");
+        for (int k = 0; k < 7; ++k)
         {
             addAndMakeVisible (*ks[k]);
             auto& s = ks[k]->slider;
@@ -384,8 +385,8 @@ struct MatchDrawer : public Drawer
     void resized() override
     {
         int x = 14;
-        for (auto* k : { &amount, &smooth, &range, &from, &to }) { k->setBounds (x, 40, 86, 92); x += 88; }
-        out.setBounds (x + 14, 40, 86, 92);
+        for (auto* k : { &amount, &smooth, &range, &from, &to, &full }) { k->setBounds (x, 40, 76, 92); x += 78; }
+        out.setBounds (x + 10, 40, 76, 92);
         phase[0].setBounds (getWidth() - 214, 50, 90, 26); phase[1].setBounds (getWidth() - 214, 80, 90, 26);
         reset.setBounds (getWidth() - 116, 50, 100, 26);
         copyAll.setBounds (getWidth() - 116, 80, 100, 26);
@@ -395,9 +396,9 @@ struct MatchDrawer : public Drawer
     {
         view = name;
         sub = name.isEmpty() ? juce::String ("HOW THE CURVE IS MADE") : "SETTINGS FOR " + name;
-        Knob* ks[6] = { &amount, &smooth, &range, &from, &to, &out };
+        Knob* ks[7] = { &amount, &smooth, &range, &from, &to, &out, &full };
         setting = true;
-        for (int k = 0; k < 6; ++k)
+        for (int k = 0; k < 7; ++k)
             if (! ks[k]->slider.isMouseButtonDown())
                 ks[k]->slider.setValue (proc.matchValue (name, k), juce::dontSendNotification);
         setting = false;
@@ -409,14 +410,14 @@ struct MatchDrawer : public Drawer
     void paint (juce::Graphics& g) override
     {
         paintFrame (g);
-        g.setColour (line); g.fillRect (14 + 88 * 5 + 6, 46, 1, 80);
+        g.setColour (line); g.fillRect (out.getX() - 7, 46, 1, 80);
         g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (dim);
         g.drawText ("PHASE", getWidth() - 214, 34, 90, 14, juce::Justification::centredLeft);
         g.setFont (lnf.body (10.5f));
         g.drawFittedText (juce::String (points) + " points. Drag, double-click, right-click.",
                           getWidth() - 116, 110, 104, 30, juce::Justification::topLeft, 2);
     }
-    TransplantProcessor& proc; Knob amount, smooth, range, from, to, out;
+    TransplantProcessor& proc; Knob amount, smooth, range, from, to, out, full;
     juce::TextButton phase[2], reset { "RESET POINTS" }, copyAll { "COPY TO..." };
     std::unique_ptr<juce::ParameterAttachment> phAtt;
     int points = 0; juce::String view; bool setting = false;
@@ -789,6 +790,11 @@ Display::Display (TransplantProcessor& p, TpLookAndFeel& l, TransplantContent& o
     };
     pointX.setTooltip ("Remove this point.");
     addChildComponent (pointX);
+    for (int i = 0; i < tp::place::count; ++i) hearBox.addItem (tp::place::names[i], i + 1);
+    hearAtt = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment> (proc.apvts, "hearOn", hearBox);
+    hearBox.setTooltip ("HEAR ON: roughly how the track (and the reference, with REF) would sound on a club system, in a car, on a laptop, a phone or earbuds, or quietly, each at its usual level. For your ears only: never in a bounce. Typical systems, not measurements of any product.");
+    hearBox.onChange = [this] { repaint(); };
+    addAndMakeVisible (hearBox);
     edmBtn.getProperties().set ("kind", "plain"); addChildComponent (edmBtn);
     edmBtn.setTooltip ("No reference? Match your track to the middle of the EDM tonal balance range instead. You can switch in REFERENCES.");
     edmBtn.onClick = [this] { proc.apvts.getParameter ("target")->setValueNotifyingHost (1.0f); };
@@ -819,6 +825,7 @@ void Display::resized()
     keyTab.setBounds (W / 2 - 190, 0, 80, 28); secTab.setBounds (W / 2 - 100, 0, 110, 28); refTab.setBounds (W / 2 + 20, 0, 130, 28);
     matchTab.setBounds (W / 2 - 55, H - 28, 110, 28);
     edmBtn.setBounds (zoneDonor().withTrimmedTop (186).withHeight (30).reduced (24, 0).toNearestInt());
+    hearBox.setBounds (74, H - 27, 116, 22);
     yoursBtn.setBounds (W - 404, H - 30, 64, 24); refBtn.setBounds (W - 338, H - 30, 52, 24);
     matchBtn.setBounds (W - 276, H - 30, 108, 24);
     keyDrawer->setBounds (W / 2 - 300, 34, 600, 172);
@@ -909,7 +916,7 @@ void Display::update (const TransplantProcessor::Snapshot& s, int vi)
         md->section = hasView ? (v.name + (v.hasRef ? "  VS  " + refName (v, snap.edm) : juce::String())) : juce::String();
         md->edm = snap.edm;
         md->hasCurves = hasView && v.hasRef;
-        if (md->hasCurves) { for (int b = 0; b < tp::kBins; ++b) md->yoursAfter[(size_t) b] = v.yours[(size_t) b] + v.curve[(size_t) b]; md->refSpec = v.refRaw; md->yoursBefore = v.yours; }
+        if (md->hasCurves) { for (int b = 0; b < tp::kBins; ++b) md->yoursAfter[(size_t) b] = v.yours[(size_t) b] + v.curve[(size_t) b] + v.full[(size_t) b]; md->refSpec = v.refRaw; md->yoursBefore = v.yours; }
     }
     if (top == 2) secDrawer->setBounds (secDrawer->getBounds().withHeight (secDrawer->getHeight()));
     pointX.setVisible (selected >= 0 && selected < (int) nodes.size());
@@ -1002,6 +1009,24 @@ void Display::paint (juce::Graphics& g)
             const bool byp = proc.sectionBypassed (v.name);
             g.setColour (cy.withAlpha (byp ? 0.08f : 0.22f)); g.strokePath (cp, PathStrokeType (7.0f, PathStrokeType::curved, PathStrokeType::rounded));
             g.setColour ((byp ? dim : hot).withAlpha (byp ? 0.5f : 1.0f)); g.strokePath (cp, PathStrokeType (2.2f, PathStrokeType::curved, PathStrokeType::rounded));
+            // with FULLNESS: what the EQ does in all
+            float fmax = 0; for (float x : v.full) fmax = jmax (fmax, std::abs (x));
+            if (fmax > 0.05f && ! byp)
+            {
+                Path tp_;
+                for (int b = 0; b < tp::kBins; ++b)
+                {
+                    const float x = xOfBin (b), y = yOfCurve (c[(size_t) b] + v.full[(size_t) b]);
+                    if (b == 0) tp_.startNewSubPath (p.getX(), y);
+                    tp_.lineTo (x, y);
+                    if (b == tp::kBins - 1) tp_.lineTo (p.getRight(), y);
+                }
+                Path dashed; const float dl[] = { 6, 4 };
+                PathStrokeType (1.6f).createDashedStroke (dashed, tp_, dl, 2);
+                g.setColour (hot.withAlpha (0.7f)); g.fillPath (dashed);
+                g.setFont (lnf.title (9.5f, 0.16f)); g.setColour (hot.withAlpha (0.8f));
+                g.drawText ("WITH FULLNESS", (int) xOfBin (tp::hzBin (35.0)), (int) yOfCurve (c[(size_t) tp::hzBin (35.0)] + v.full[(size_t) tp::hzBin (35.0)]) - 18, 110, 12, Justification::centredLeft);
+            }
             // the points
             const float rr = nodes.size() > 60 ? 3.2f : nodes.size() > 30 ? 4.0f : 5.0f;
             for (int i = 0; i < (int) nodes.size(); ++i)
@@ -1052,6 +1077,17 @@ void Display::paint (juce::Graphics& g)
         else
         g.drawText (v.name + (v.hasRef ? String (juce::CharPointer_UTF8 ("  \xe2\x86\x92  ")) + refName (v, snap.edm) : String()),
                     (int) p.getRight() - 360, (int) p.getY() - 7, 360, 16, Justification::centredRight);
+    }
+    // HEAR ON
+    {
+        const int h = (int) proc.apvts.getRawParameterValue ("hearOn")->load();
+        g.setFont (lnf.title (10.0f, 0.18f)); g.setColour (h > 0 ? co : dim);
+        g.drawText ("HEAR ON", 14, getHeight() - 30, 58, 24, Justification::centredLeft);
+        if (h > 0)
+        {
+            g.setFont (lnf.body (10.5f)); g.setColour (co);
+            g.drawText ("PREVIEW: NOT IN YOUR BOUNCE", 198, getHeight() - 30, 220, 24, Justification::centredLeft);
+        }
     }
     // LISTEN
     {

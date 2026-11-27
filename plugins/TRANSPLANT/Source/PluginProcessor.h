@@ -1,6 +1,7 @@
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_formats/juce_audio_formats.h>
+#include <juce_dsp/juce_dsp.h>
 #include "TransplantDSP.h"
 
 // TRANSPLANT: a match EQ that moves the reference's low end into your key and matches section to section.
@@ -47,7 +48,8 @@ public:
         // for listening: the matching part of the reference you listen to, and the gain that levels it with yours
         double refT0 = 0, refT1 = 0; float matchDb = 0;
         // this section's MATCH settings (its own, or the plugin-wide ones it hasn't changed): amount, smooth, range, from, to, out
-        float match[6] { 1.0f, 0.4f, 12.0f, 20.0f, 20000.0f, 0.0f };
+        float match[7] { 1.0f, 0.4f, 12.0f, 20.0f, 20000.0f, 0.0f, 0.0f };   // ... out, fullness
+        tp::Spec full {};                  // FULLNESS: the level compensation added to the curve (dB)
     };
     struct Snapshot
     {
@@ -82,7 +84,7 @@ public:
     juce::String sectionTarget (const juce::String& view) const;
     void setSectionBypass (const juce::String& view, bool bypassed);
     // MATCH settings per section: AMOUNT, SMOOTH, RANGE, FROM, TO, OUTPUT. A section that hasn't set one uses the parameter's value.
-    static constexpr int kMatchN = 6;
+    static constexpr int kMatchN = 7;
     static const char* matchId (int k);
     float matchValue (const juce::String& view, int k) const;
     void setMatchValue (const juce::String& view, int k, float value);
@@ -92,6 +94,11 @@ public:
 
     // listening to the reference (LISTEN: YOURS / REF)
     void setListenRef (int index);
+    // HEAR ON: a preview of other systems, for your ears only (never in a bounce)
+    juce::dsp::Convolution hearConv; juce::AudioBuffer<float> hearDry; juce::LinearSmoothedValue<float> hearMix;
+    std::atomic<int> hearLoaded { -1 }; std::atomic<bool> hearJob { false }; bool hearActive = false;
+    void loadHearOn();
+    void applyHearOn (juce::AudioBuffer<float>&, int n);
     int listenRef() const { return listenIdx.load(); }
     std::atomic<float> refGainShown { 0.0f };   // the gain on the reference now (level match), dB
     std::atomic<bool> refAudible { false };     // the reference is what's playing
@@ -140,7 +147,7 @@ private:
     void treeChanged();
     void cacheEdits();
     struct EditData { std::vector<tp::Node> user; std::vector<float> removed; juce::String target; bool bypass = false;
-                      float m[6] {}; bool has[6] {}; };
+                      float m[7] {}; bool has[7] {}; };
     std::map<juce::String, EditData> editCache;
     juce::CriticalSection editLock;
     void handleAsyncUpdate() override;                     // latency changes

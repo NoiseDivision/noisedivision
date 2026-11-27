@@ -89,6 +89,8 @@ public:
     void toggleMeters();
     juce::TextButton pointX { "X" };
     juce::TextButton edmBtn { "NO REFERENCE? USE THE EDM BALANCE" };
+    juce::ComboBox hearBox;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> hearAtt;
     std::unique_ptr<juce::Component> createCopyPicker (const juce::String& from);   // COPY TO (also for the test host's screenshots)
     juce::TextButton yoursBtn { "YOURS" }, refBtn { "REF" }, matchBtn { "LEVEL MATCH" };
     std::unique_ptr<juce::ParameterAttachment> listenAtt;

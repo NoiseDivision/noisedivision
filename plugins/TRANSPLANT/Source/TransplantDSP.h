@@ -818,4 +818,90 @@ namespace edm
         return s;
     }
 }
+
+// ---- how loud the ear hears each frequency: the equal-loudness contours of ISO 226:2003
+namespace iso226
+{
+    inline const double f[29]  = { 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500 };
+    inline const double af[29] = { 0.532, 0.506, 0.480, 0.455, 0.432, 0.409, 0.387, 0.367, 0.349, 0.330, 0.315, 0.301, 0.288, 0.276, 0.267, 0.259, 0.253, 0.250, 0.246, 0.244, 0.243, 0.243, 0.243, 0.242, 0.242, 0.245, 0.254, 0.271, 0.301 };
+    inline const double Lu[29] = { -31.6, -27.2, -23.0, -19.1, -15.9, -13.0, -10.3, -8.1, -6.2, -4.5, -3.1, -2.0, -1.1, -0.4, 0.0, 0.3, 0.5, 0.0, -2.7, -4.1, -1.0, 1.7, 2.5, 1.2, -2.1, -7.1, -11.2, -10.7, -3.1 };
+    inline const double Tf[29] = { 78.5, 68.7, 59.5, 51.1, 44.0, 37.5, 31.5, 26.5, 22.1, 17.9, 14.4, 11.4, 8.6, 6.2, 4.4, 3.0, 2.2, 2.4, 3.5, 1.7, -1.3, -4.2, -6.0, -5.4, -1.5, 6.0, 12.6, 13.9, 12.3 };
+    // the sound pressure level (dB SPL) at table point i that sounds as loud as `phon`
+    inline double splAt (int i, double phon)
+    {
+        const double Af = 4.47e-3 * (std::pow (10.0, 0.025 * phon) - 1.15) + std::pow (0.4 * std::pow (10.0, (Tf[i] + Lu[i]) / 10.0 - 9.0), af[i]);
+        return 10.0 / af[i] * std::log10 (Af) - Lu[i] + 94.0;
+    }
+    // the shape of a contour: how many dB louder than at 1 kHz a frequency must be to sound as loud, at `phon`
+    inline double shape (double hz, double phon)
+    {
+        const double lf = std::log2 (std::clamp (hz, f[0], f[28]));
+        int i = 0; while (i < 27 && std::log2 (f[i + 1]) < lf) ++i;
+        const double u = std::clamp ((lf - std::log2 (f[i])) / (std::log2 (f[i + 1]) - std::log2 (f[i])), 0.0, 1.0);
+        const double a = splAt (i, phon), b = splAt (i + 1, phon);
+        return a + (b - a) * u - splAt (17, phon);
+    }
+    // what the ear loses (+) at `quietPhon` compared with `loudPhon`: the EQ that makes the quieter level sound like the louder one
+    inline double lost (double hz, double loudPhon, double quietPhon) { return shape (hz, quietPhon) - shape (hz, loudPhon); }
+}
+
+// FULLNESS: the bass and treble the ear stops hearing when music is `quieterDb` below a loud drop (85 phon), given back
+inline Spec fullnessCurve (double quieterDb)
+{
+    Spec s {};
+    if (quieterDb <= 0) return s;
+    const double loud = 85.0, quiet = std::max (30.0, loud - quieterDb);
+    for (int b = 0; b < kBins; ++b)
+    {
+        const double f = binHz (b), below = 1.0 / (1.0 + std::pow (28.0 / f, 4.0));   // nothing for the rumble under 30 Hz
+        s[(size_t) b] = (float) (std::clamp (iso226::lost (f, loud, quiet), -3.0, 9.0) * below);
+    }
+    return s;
+}
+
+// HEAR ON: roughly how a track sounds through other systems at their usual levels, heard at your desk (about 75 dB SPL).
+// Approximations of typical systems, for checking a mix: not measurements of any product.
+namespace place
+{
+    enum { off, club, car, laptop, phone, earbuds, quiet, count };
+    inline const char* const names[count] = { "Studio", "Club", "Car", "Laptop", "Phone", "Earbuds", "Quiet room" };
+    inline const double level[count] = { 75, 100, 85, 70, 70, 80, 60 };      // typical listening level, dB SPL
+    inline const double mono[count]  = { 0, 0, 0, 0.7, 1.0, 0, 0 };          // how much the sides fold into the middle
+    inline double hp (double f, double fc, int n) { return -10.0 * std::log10 (1.0 + std::pow (fc / f, 2.0 * n)); }
+    inline double lp (double f, double fc, int n) { return -10.0 * std::log10 (1.0 + std::pow (f / fc, 2.0 * n)); }
+    inline double bell (double f, double f0, double g, double oct) { const double x = std::log2 (f / f0) / oct; return g * std::exp (-0.5 * x * x); }
+    inline double lowShelf (double f, double fc, double g) { return g / (1.0 + std::pow (f / fc, 2.0)); }
+    inline double system (int p, double f)
+    {
+        switch (p)
+        {
+            case club:    return lowShelf (f, 70, 4) + hp (f, 28, 4) + lp (f, 15000, 2) + bell (f, 250, -1.5, 0.7);
+            case car:     return lowShelf (f, 70, 7) + hp (f, 25, 2) + bell (f, 180, -3, 0.6) + lp (f, 11000, 2);
+            case laptop:  return hp (f, 220, 3) + bell (f, 1200, 4, 1.0) + bell (f, 4500, 2, 0.6) + lp (f, 13000, 2);
+            case phone:   return hp (f, 380, 4) + bell (f, 2600, 5, 0.8) + lp (f, 9500, 3);
+            case earbuds: return hp (f, 55, 2) + bell (f, 3200, 3, 0.7) + lp (f, 15000, 1);
+            default:      return 0.0;
+        }
+    }
+    // the whole picture, levelled at 1 kHz: the system's response, plus how the ear hears at that level against 75 dB SPL
+    inline Spec curve (int p)
+    {
+        Spec s {};
+        if (p <= off || p >= count) return s;
+        const double ref = system (p, 1000.0);
+        for (int b = 0; b < kBins; ++b)
+        {
+            const double f = binHz (b);
+            s[(size_t) b] = (float) std::clamp (system (p, f) - ref + iso226::lost (f, level[p], 75.0), -60.0, 10.0);
+        }
+        // levelled in the mids (250 Hz - 4 kHz), where the ear judges loudness, so switching compares tone, not level
+        double a = 0; int n = 0;
+        for (int b = 0; b < kBins; ++b) { const double f = binHz (b); if (f >= 250 && f <= 4000) { a += s[(size_t) b]; ++n; } }
+        float top = 0; for (int b = 0; b < kBins; ++b) top = std::max (top, s[(size_t) b]);
+        const float g = (float) std::clamp (-a / std::max (1, n), -9.0, 9.0)
+                      - 0.5f * std::max (0.0f, top + (float) std::clamp (-a / std::max (1, n), -9.0, 9.0) - 3.0f);   // and some room for a boosted low end
+        for (auto& x : s) x += g;
+        return s;
+    }
+}
 }

@@ -3,7 +3,7 @@
 
 namespace
 {
-    const char* const kParamIds[] = { "amount", "smooth", "range", "from", "to", "keyMode", "keyShift", "keyZone", "phase", "follow", "oneCurve", "out", "bypass", "target" };
+    const char* const kParamIds[] = { "amount", "smooth", "range", "from", "to", "keyMode", "keyShift", "keyZone", "phase", "follow", "oneCurve", "out", "bypass", "target", "fullness" };
     juce::String fmtPoints (const std::vector<tp::Node>& v)
     {
         juce::StringArray s; for (auto& n : v) s.add (juce::String (n.bin, 2) + ":" + juce::String (n.db, 2));
@@ -75,6 +75,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout TransplantProcessor::createL
     l.add (std::make_unique<juce::AudioParameterBool> (id ("listen"), "Listen To Reference", false));
     l.add (std::make_unique<juce::AudioParameterBool> (id ("levelMatch"), "Level Match", true));
     l.add (std::make_unique<juce::AudioParameterChoice> (id ("target"), "Match To", juce::StringArray { "Reference", "EDM Balance" }, 0));
+    l.add (std::make_unique<F> (id ("fullness"), "Fullness", juce::NormalisableRange<float> (0.0f, 1.0f, 0.01f), 0.0f, pct));
+    {   // HEAR ON: what you hear, never what you export
+        juce::StringArray places; for (auto* n : tp::place::names) places.add (n);
+        l.add (std::make_unique<juce::AudioParameterChoice> (id ("hearOn"), "Hear On", places, 0));
+    }
     return l;
 }
 
@@ -96,7 +101,7 @@ std::unique_ptr<TransplantProcessor::Program> TransplantProcessor::flatProgram (
     return p;
 }
 
-void TransplantProcessor::prepareToPlay (double sampleRate, int)
+void TransplantProcessor::prepareToPlay (double sampleRate, int blockSize)
 {
     const juce::ScopedLock sl (programLock);
     rate.store (sampleRate);
@@ -114,6 +119,9 @@ void TransplantProcessor::prepareToPlay (double sampleRate, int)
     for (int c = 0; c < 2; ++c) { kwY[c].prepare (sampleRate); kwR[c].prepare (sampleRate); }
     for (int i = 0; i < kMaxViews; ++i) { yMeter[i].prepare (sampleRate); rMeter[i].prepare (sampleRate); }
     liveY.prepare (sampleRate); liveR.prepare (sampleRate); meterView = -2;
+    hearConv.prepare ({ sampleRate, (juce::uint32) juce::jmax (1, blockSize), 2 }); hearConv.reset(); hearDry.setSize (2, juce::jmax (1, blockSize) * 2);
+    hearLoaded = -1; hearMix.reset (sampleRate, 0.03); hearMix.setCurrentAndTargetValue (0.0f);
+    hearJob = true; notify();
     const bool linear = apvts.getRawParameterValue ("phase")->load() < 0.5f;
     if (preparedRate.load() != sampleRate || live_.load() == nullptr)
     {
@@ -269,6 +277,7 @@ void TransplantProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
         dryPos = (dryPos + 1) % dryLen;
     }
     liveWrite.store (w);
+    applyHearOn (buffer, n);
     if (idxNow >= 0 && idxNow < kMaxViews)
     {
         if (measureY) yMeter[idxNow].add (yP, n);
@@ -368,6 +377,52 @@ void TransplantProcessor::decodeListen()
     refAudioState = 2;
 }
 
+//============================================================================== HEAR ON
+// the system's curve as a minimum-phase filter (no latency), made on the thread
+void TransplantProcessor::loadHearOn()
+{
+    const int want = (int) apvts.getRawParameterValue ("hearOn")->load();
+    const double fs = rate.load();
+    if (fs <= 0 || want == hearLoaded.load()) return;
+    if (want > tp::place::off && want < tp::place::count)
+    {
+        auto spec = tp::place::curve (want);
+        const auto h = tp::designIR (spec, fs, 4096, false);
+        juce::AudioBuffer<float> ir (1, (int) h.size());
+        for (int i = 0; i < (int) h.size(); ++i) ir.setSample (0, i, h[(size_t) i]);
+        hearConv.loadImpulseResponse (std::move (ir), fs, juce::dsp::Convolution::Stereo::no, juce::dsp::Convolution::Trim::no, juce::dsp::Convolution::Normalise::no);
+    }
+    hearLoaded.store (want);
+}
+
+void TransplantProcessor::applyHearOn (juce::AudioBuffer<float>& buffer, int n)
+{
+    const int want = (int) apvts.getRawParameterValue ("hearOn")->load();
+    if (want != hearLoaded.load()) { hearJob = true; notify(); }
+    // never in a bounce: offline rendering always hears the studio
+    const int on = isNonRealtime() ? 0 : hearLoaded.load();
+    hearMix.setTargetValue (on > tp::place::off ? 1.0f : 0.0f);
+    if (on <= tp::place::off && ! hearMix.isSmoothing()) { if (hearMix.getCurrentValue() <= 0.0f) { hearActive = false; return; } }
+    if (buffer.getNumChannels() < 2) return;
+    hearActive = true;
+    hearDry.makeCopyOf (buffer, true);
+    auto* l = buffer.getWritePointer (0); auto* r = buffer.getWritePointer (1);
+    const float mono = on > 0 && on < tp::place::count ? (float) tp::place::mono[on] : 0.0f;
+    for (int i = 0; i < n; ++i) { const float m = 0.5f * (l[i] + r[i]), s = 0.5f * (l[i] - r[i]) * (1.0f - mono); l[i] = m + s; r[i] = m - s; }
+    juce::dsp::AudioBlock<float> blk (buffer.getArrayOfWritePointers(), 2, (size_t) n);
+    hearConv.process (juce::dsp::ProcessContextReplacing<float> (blk));
+    for (int i = 0; i < n; ++i)
+    {
+        const float x = hearMix.getNextValue();
+        for (int c = 0; c < 2; ++c)
+        {
+            auto* d = buffer.getWritePointer (c);
+            const float v = x * d[i] + (1 - x) * hearDry.getSample (c, i);
+            d[i] = v > 0.95f || v < -0.95f ? std::tanh (v) : v;   // a monitor, not a master: no harsh overs
+        }
+    }
+}
+
 //============================================================================== the thread
 void TransplantProcessor::run()
 {
@@ -395,6 +450,7 @@ void TransplantProcessor::run()
             else { const juce::ScopedLock sl (modelLock); busy = "NOTHING LEARNED: PRESS LEARN, THEN PLAY YOUR TRACK"; }
         }
         if (listenJob.exchange (false)) decodeListen();
+        if (hearJob.exchange (false)) loadHearOn();
         if (dirty.exchange (false)) rebuild();
         // free old filters once the audio thread has moved on
         {
@@ -526,6 +582,7 @@ void TransplantProcessor::rebuild()
     };
     std::vector<const tp::Section*> mineSecs;
     if (me.valid()) { for (auto& sec : me.sections) mineSecs.push_back (&sec); mineSecs.push_back (&me.whole); }
+    float loudest = -120; for (auto* sec : mineSecs) loudest = juce::jmax (loudest, sec->loud);
     for (auto* sec : mineSecs)
     {
         View v; v.name = sec == &me.whole ? juce::String ("WHOLE TRACK") : juce::String (sec->name());
@@ -576,6 +633,17 @@ void TransplantProcessor::rebuild()
             v.curve = ed.bypass ? tp::Spec {} : tp::limitBand (tp::limitRange (tp::curveThrough (v.nodes), range), from, to);
             v.matchDb = juce::jlimit (-30.0f, 30.0f, v.matchDb + (float) tp::eqLoudnessChange (sec->pow, v.curve));
         }
+        // FULLNESS: give back what the ear loses at this section's level, against the loudest section (plus 6 dB, so the drop gets some too)
+        if (! ed.bypass && v.match[6] > 0.001f)
+        {
+            const auto fc = tp::fullnessCurve (juce::jmax (0.0, (double) (loudest - sec->loud)) + 6.0);
+            for (int b = 0; b < tp::kBins; ++b) v.full[(size_t) b] = fc[(size_t) b] * v.match[6];
+            if (v.hasRef && ! edm)
+            {
+                tp::Spec both = v.curve; for (int b = 0; b < tp::kBins; ++b) both[(size_t) b] += v.full[(size_t) b];
+                v.matchDb = juce::jlimit (-30.0f, 30.0f, v.matchDb + (float) (tp::eqLoudnessChange (sec->pow, both) - tp::eqLoudnessChange (sec->pow, v.curve)));
+            }
+        }
         s.views.push_back (v);
     }
     s.version = ++version;
@@ -601,12 +669,14 @@ void TransplantProcessor::buildProgram (bool)
             const auto& v = s.views[i];
             if (i + 1 < s.views.size()) { p->t0.push_back (v.t0); p->t1.push_back (v.t1); }
             p->vt0.push_back (i + 1 < s.views.size() ? v.t0 : 0.0); p->rt0.push_back (v.refT0); p->rt1.push_back (v.refT1); p->mdb.push_back (v.matchDb); p->outDb.push_back (v.match[5]);
-            p->curves.push_back (v.curve);
+            tp::Spec eq = v.curve;   // the match curve plus FULLNESS
+            for (int b = 0; b < tp::kBins; ++b) eq[(size_t) b] = juce::jlimit (-30.0f, 30.0f, eq[(size_t) b] + v.full[(size_t) b]);
+            p->curves.push_back (eq);
             bool reused = false;
             if (prev != nullptr && prev->linear == linear)
                 for (size_t j = 0; j < prev->curves.size() && ! reused; ++j)
-                    if (prev->curves[j] == v.curve) { p->filters.push_back (prev->filters[j]); reused = true; }
-            if (! reused) p->filters.push_back (conv.makeFilter (tp::designIR (v.curve, fs, L, linear)));
+                    if (prev->curves[j] == eq) { p->filters.push_back (prev->filters[j]); reused = true; }
+            if (! reused) p->filters.push_back (conv.makeFilter (tp::designIR (eq, fs, L, linear)));
             if (threadShouldExit()) return;
         }
         p->whole = (int) s.views.size() - 1;
@@ -705,7 +775,7 @@ bool TransplantProcessor::sectionBypassed (const juce::String& view) const
 
 const char* TransplantProcessor::matchId (int k)
 {
-    static const char* const ids[kMatchN] = { "amount", "smooth", "range", "from", "to", "out" };
+    static const char* const ids[kMatchN] = { "amount", "smooth", "range", "from", "to", "out", "fullness" };
     return ids[juce::jlimit (0, kMatchN - 1, k)];
 }
 float TransplantProcessor::matchValue (const juce::String& view, int k) const
@@ -781,7 +851,7 @@ void TransplantProcessor::loadPreset (int index)
     };
     if (index < 0 || index >= (int) presets.size()) return;
     undo.beginNewTransaction();
-    for (auto* id : { "amount", "smooth", "range", "from", "to", "keyZone", "phase", "out" })
+    for (auto* id : { "amount", "smooth", "range", "from", "to", "keyZone", "phase", "out", "fullness" })
         if (auto* p = apvts.getParameter (id)) p->setValueNotifyingHost (p->getDefaultValue());
     for (auto& v : presets[(size_t) index])
         if (auto* p = apvts.getParameter (v.id)) p->setValueNotifyingHost (p->convertTo0to1 (v.v));
@@ -842,6 +912,7 @@ void TransplantProcessor::getStateInformation (juce::MemoryBlock& dest)
 
 void TransplantProcessor::setStateInformation (const void* d, int size)
 {
+    struct StudioAgain { juce::AudioProcessorValueTreeState& s; ~StudioAgain() { if (auto* h = s.getParameter ("hearOn")) h->setValueNotifyingHost (0.0f); } } studioAgain { apvts };
     auto xml = getXmlFromBinary (d, size);
     if (xml == nullptr) return;
     auto root = juce::ValueTree::fromXml (*xml);
